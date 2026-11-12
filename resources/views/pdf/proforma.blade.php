@@ -47,7 +47,6 @@
     </td>
     <td style="text-align:right">
         <h1>PROFORMA</h1>
-        <div class="tag">Alquiler decoración mediterránea</div>
         <div style="margin-top:8px"><b>{{ $order->number }}</b><br>
             <span class="muted">Fecha:</span> {{ now()->format('d/m/Y') }}<br>
             @if ($order->expires_at && $order->status->isExpirable())<span class="muted">Válida hasta:</span> {{ $order->expires_at->format('d/m/Y') }}@endif
