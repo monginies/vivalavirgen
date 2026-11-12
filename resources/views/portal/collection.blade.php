@@ -2,7 +2,7 @@
 @section('title', $title)
 @section('full')
 <section class="pt-section pt-coll-head">
-    <div class="pt-kicker">{{ $category ? 'Colección · '.now()->year : 'Búsqueda' }}</div>
+    <div class="pt-kicker">{{ $category ? 'Colección' : 'Búsqueda' }}</div>
     <h1>{{ $title }}</h1>
     <p class="muted">{{ $category?->description ?: ($category ? 'Descubre las piezas de esta colección. Entra en cada artículo para ver sus fotos, medidas y características.' : 'Resultados para «'.request('q').'».') }}</p>
     <div class="pt-meta">

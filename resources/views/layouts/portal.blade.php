@@ -18,7 +18,7 @@
     <a class="pt-brand" href="{{ route('portal.home') }}">
         <img class="pt-logo" src="{{ asset('img/logo-320.png') }}" alt="Viva la Virgen">
         <span class="pt-word">Viva la Virgen</span>
-        <span class="pt-tag">Alquiler decoración mediterránea · {{ now()->year }}</span>
+        <span class="pt-tag">Alquiler decoración mediterránea</span>
     </a>
     <nav class="pt-nav">
         @if ($me)
