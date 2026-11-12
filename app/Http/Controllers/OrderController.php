@@ -217,9 +217,9 @@ class OrderController extends Controller
     {
         $v = $request->validate([
             'client_id' => ['required', Rule::exists('clients', 'id')->whereNull('deleted_at')],
-            'event_date' => ['nullable', 'date'],
-            'start_date' => ['required', 'date'],
-            'end_date' => ['required', 'date', 'after_or_equal:start_date'],
+            'event_date' => ['nullable', 'date', 'required_without_all:start_date,end_date'],
+            'start_date' => ['nullable', 'date', 'required_without:event_date'],
+            'end_date' => ['nullable', 'date', 'required_without:event_date', 'after_or_equal:start_date'],
             'venue_id' => ['nullable', Rule::exists('venues', 'id')],
             'destination_address' => ['nullable', 'string', 'max:255'],
             'destination_city' => ['nullable', 'string', 'max:255'],
@@ -237,6 +237,9 @@ class OrderController extends Controller
         ], [
             'lines.required' => 'Añade al menos un artículo.',
             'end_date.after_or_equal' => 'La recogida no puede ser anterior a la entrega.',
+            'event_date.required_without_all' => 'Indica la fecha del evento o las fechas de entrega y recogida.',
+            'start_date.required_without' => 'Indica la fecha de entrega (o la del evento).',
+            'end_date.required_without' => 'Indica la fecha de recogida (o la del evento).',
             'destination_postal_code.regex' => 'El código postal tiene 5 cifras.',
         ]);
 
@@ -257,12 +260,18 @@ class OrderController extends Controller
             throw ValidationException::withMessages(['lines' => 'Añade al menos un artículo con cantidad.']);
         }
 
+        // Evento en fin de semana: reserva mínima de viernes a domingo
+        [$start, $end] = Order::weekendBlock($v['event_date'] ?? null, $v['start_date'] ?? null, $v['end_date'] ?? null);
+        if (! empty($v['event_date']) && ($v['event_date'] < $start || $v['event_date'] > $end)) {
+            throw ValidationException::withMessages(['event_date' => 'La fecha del evento tiene que estar entre la entrega y la recogida.']);
+        }
+
         $manual = $request->boolean('transport_manual');
         $data = [
             'client_id' => $v['client_id'],
             'event_date' => $v['event_date'] ?? null,
-            'start_date' => $v['start_date'],
-            'end_date' => $v['end_date'],
+            'start_date' => $start,
+            'end_date' => $end,
             'venue_id' => $v['venue_id'] ?? null,
             'destination_address' => $v['destination_address'] ?? null,
             'destination_city' => $v['destination_city'] ?? null,

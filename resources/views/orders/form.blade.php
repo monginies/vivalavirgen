@@ -29,10 +29,11 @@
                 </select>
                 @error('client_id')<div class="err">{{ $message }}</div>@enderror
             </div>
-            @include('partials.field', ['name' => 'event_date', 'label' => 'Fecha del evento', 'value' => $order->event_date?->toDateString(), 'type' => 'date'])
-            @include('partials.field', ['name' => 'start_date', 'label' => 'Entrega (desde)', 'value' => $order->start_date?->toDateString(), 'type' => 'date', 'required' => true,
+            @include('partials.field', ['name' => 'event_date', 'label' => 'Fecha del evento', 'value' => $order->event_date?->toDateString(), 'type' => 'date',
+                'hint' => 'Si es viernes, sábado o domingo, el material se reserva de viernes a domingo.'])
+            @include('partials.field', ['name' => 'start_date', 'label' => 'Entrega (desde)', 'value' => $order->start_date?->toDateString(), 'type' => 'date',
                 'hint' => 'Desde este día el material queda reservado.'])
-            @include('partials.field', ['name' => 'end_date', 'label' => 'Recogida (hasta)', 'value' => $order->end_date?->toDateString(), 'type' => 'date', 'required' => true,
+            @include('partials.field', ['name' => 'end_date', 'label' => 'Recogida (hasta)', 'value' => $order->end_date?->toDateString(), 'type' => 'date',
                 'hint' => 'Último día reservado. Si el material vuelve tarde, sigue bloqueado hasta que se da entrada.'])
         </div>
     </div>
@@ -210,6 +211,24 @@
         hint.textContent = o.dataset.km ? 'Km guardados en la ficha de la finca.' : 'Esta finca no tiene km guardados: pulsa «Calcular km» o escríbelos.';
         recalc();
     });
+
+    // Fecha del evento → entrega y recogida (fin de semana: de viernes a domingo)
+    (() => {
+        const ev = document.getElementById('f-event_date'), st = document.getElementById('f-start_date'), en = document.getElementById('f-end_date');
+        let auto = {start: '', end: ''};
+        const ymd = d => d.toISOString().slice(0, 10);
+        ev.addEventListener('change', () => {
+            if (!ev.value) return;
+            const d = new Date(ev.value + 'T12:00:00Z'), dow = d.getUTCDay(); // 0 domingo, 5 viernes, 6 sábado
+            let s = new Date(d), e = new Date(d);
+            if ([5, 6, 0].includes(dow)) {
+                s.setUTCDate(d.getUTCDate() - (dow === 0 ? 2 : dow - 5));
+                e = new Date(s); e.setUTCDate(s.getUTCDate() + 2);
+            }
+            if (!st.value || st.value === auto.start || st.value > ymd(s)) st.value = auto.start = ymd(s);
+            if (!en.value || en.value === auto.end || en.value < ymd(e)) en.value = auto.end = ymd(e);
+        });
+    })();
 
     const cpInput = document.getElementById('f-destination_postal_code');
     cpInput.addEventListener('input', async () => {

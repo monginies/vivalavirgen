@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Enums\OrderStatus;
+use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -87,6 +88,33 @@ class Order extends Model
         $n = $last ? (int) substr($last, strlen($prefix)) : 0;
 
         return $prefix.str_pad($n + 1, 4, '0', STR_PAD_LEFT);
+    }
+
+    /**
+     * Si el evento cae en fin de semana (viernes, sábado o domingo), el material
+     * queda reservado como mínimo de viernes a domingo. Las fechas que ya cubran
+     * más días se respetan.
+     *
+     * @return array{0: string, 1: string} [entrega, recogida] en Y-m-d
+     */
+    public static function weekendBlock(?string $event, ?string $start, ?string $end): array
+    {
+        if ($event) {
+            $e = CarbonImmutable::parse($event);
+            if (in_array($e->dayOfWeek, [CarbonImmutable::FRIDAY, CarbonImmutable::SATURDAY, CarbonImmutable::SUNDAY], true)) {
+                $friday = $e->dayOfWeek === CarbonImmutable::FRIDAY ? $e : $e->previous(CarbonImmutable::FRIDAY);
+                $sunday = $friday->addDays(2);
+                $start = $start ? min(CarbonImmutable::parse($start), $friday) : $friday;
+                $end = $end ? max(CarbonImmutable::parse($end), $sunday) : $sunday;
+            }
+            $start ??= $e;
+            $end ??= $e;
+        }
+
+        return [
+            $start ? CarbonImmutable::parse($start)->toDateString() : null,
+            $end ? CarbonImmutable::parse($end)->toDateString() : null,
+        ];
     }
 
     /** Transporte: 2 trayectos × km × €/km × camiones, con mínimo. Sin km, 0. */

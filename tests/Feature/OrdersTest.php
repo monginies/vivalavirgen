@@ -207,4 +207,33 @@ class OrdersTest extends TestCase
         Setting::flushCache();
         $this->assertEquals(0.8, Setting::number('transport_price_per_km'));
     }
+
+    public function test_weekend_event_blocks_friday_to_sunday(): void
+    {
+        // Sábado 5/12/2026 → viernes 4 a domingo 6
+        $this->assertSame(['2026-12-04', '2026-12-06'], Order::weekendBlock('2026-12-05', null, null));
+        // Domingo y viernes también
+        $this->assertSame(['2026-12-04', '2026-12-06'], Order::weekendBlock('2026-12-06', '2026-12-06', '2026-12-06'));
+        $this->assertSame(['2026-12-04', '2026-12-06'], Order::weekendBlock('2026-12-04', null, null));
+        // Fechas más amplias se respetan
+        $this->assertSame(['2026-12-03', '2026-12-07'], Order::weekendBlock('2026-12-05', '2026-12-03', '2026-12-07'));
+        // Entre semana no cambia nada
+        $this->assertSame(['2026-12-09', '2026-12-09'], Order::weekendBlock('2026-12-09', null, null));
+
+        $this->actingAs($this->user)->post(route('orders.store'), [
+            'client_id' => $this->client->id, 'event_date' => '2026-12-05',
+            'start_date' => '2026-12-05', 'end_date' => '2026-12-05', 'trucks' => 1,
+            'lines' => [['article_id' => $this->chair->id, 'quantity' => 10]],
+        ])->assertSessionHasNoErrors();
+        $o = Order::firstOrFail();
+        $this->assertSame(['2026-12-04', '2026-12-06'], [$o->start_date->toDateString(), $o->end_date->toDateString()]);
+        // El domingo las sillas siguen ocupadas
+        $this->assertSame(0, $this->free('2026-12-06', '2026-12-06'));
+
+        $this->actingAs($this->user)->post(route('orders.store'), [
+            'client_id' => $this->client->id, 'event_date' => '2026-12-16',
+            'start_date' => '2026-12-10', 'end_date' => '2026-12-11', 'trucks' => 1,
+            'lines' => [['article_id' => $this->chair->id, 'quantity' => 1]],
+        ])->assertSessionHasErrors('event_date');
+    }
 }

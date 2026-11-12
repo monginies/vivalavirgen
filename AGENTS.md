@@ -41,6 +41,8 @@ App interna de **Viva la Virgen** para gestionar el material que alquila para ev
 
 **Km del transporte:** botón «Calcular km» en el pedido (`app/Services/Distance.php`): geocodifica el destino y calcula la ruta en coche desde la dirección de la base (Ajustes) con OpenRouteService. La clave va en `.env` como `ORS_API_KEY`; sin ella el botón no aparece y los km se escriben a mano. Si el pedido tiene **código postal**, el destino se sitúa con la tabla `postal_codes` (GeoNames, toda España; se carga con `php artisan postal-codes:import`) y la dirección se busca a menos de 10 km de ese CP; si no aparece, se usa el centro del CP. Sin CP, la búsqueda se limita a 300 km de la base. Resultados en caché 30 días.
 
+**Fin de semana:** si la fecha del evento es viernes, sábado o domingo, el pedido reserva como mínimo de viernes a domingo (`Order::weekendBlock`, aplicado al guardar y en el formulario). Las fechas más amplias se respetan.
+
 **Importes:** el precio de alquiler es por evento. Transporte = 2 trayectos × km × €/km × camiones, con mínimo (`Order::calculateTransport`); se puede fijar a mano. La fianza va aparte, sin IVA.
 
 Las referencias y códigos se calculan contando también los registros borrados (`withTrashed`), así que nunca se reutilizan. `Article::addUnits()` crea las unidades dentro de una transacción con bloqueo.
