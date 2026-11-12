@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Portal;
 
 use App\Http\Controllers\Controller;
+use App\Support\Proforma;
 use Illuminate\Http\Request;
 
 class AccountController extends Controller
@@ -23,5 +24,12 @@ class AccountController extends Controller
             ->with('lines.article.mainPhoto', 'venue')->firstOrFail();
 
         return view('portal.account.order', compact('order'));
+    }
+
+    public function proforma(Request $request, string $number)
+    {
+        $order = $request->user('client')->orders()->where('number', $number)->whereNotNull('proforma_sent_at')->firstOrFail();
+
+        return Proforma::pdf($order)->download(Proforma::filename($order));
     }
 }

@@ -21,6 +21,7 @@ class SettingController extends Controller
         $rules = collect(Setting::DEFINITIONS)->map(fn ($d) => match ($d['type']) {
             'number' => ['required', 'numeric', 'min:0', 'max:99999'],
             'image' => ['nullable', 'image', 'max:20480'],
+            'textarea' => ['nullable', 'string', 'max:5000'],
             default => ['nullable', 'string', 'max:255'],
         })->all();
         $data = $request->validate($rules);

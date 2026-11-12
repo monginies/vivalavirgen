@@ -8,12 +8,15 @@ use App\Models\Client;
 use App\Models\Order;
 use App\Models\Setting;
 use App\Models\Venue;
+use App\Notifications\ProformaSent;
 use App\Services\Availability;
 use App\Services\Distance;
+use App\Support\Proforma;
 use Illuminate\Database\QueryException;
 use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Notification;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
 
@@ -153,6 +156,41 @@ class OrderController extends Controller
         });
 
         return back()->with('status', "Pedido {$order->number}: {$target->label()}.");
+    }
+
+    /** PDF de la proforma (se abre en el navegador). */
+    public function proforma(Order $order)
+    {
+        return Proforma::pdf($order)->stream(Proforma::filename($order));
+    }
+
+    /** Envía la proforma por email al cliente y deja el pedido en «Proforma enviada». */
+    public function sendProforma(Request $request, Order $order)
+    {
+        abort_unless(in_array($order->status, [OrderStatus::Requested, OrderStatus::Accepted, OrderStatus::ProformaSent, OrderStatus::Paid], true), 403);
+        if ($order->isOverdue()) {
+            return back()->with('error', 'La pre-reserva ha caducado: reactívala o amplía el plazo antes de enviar la proforma.');
+        }
+        $data = $request->validate([
+            'email' => ['required', 'email'],
+            'note' => ['nullable', 'string', 'max:2000'],
+        ]);
+
+        try {
+            Notification::route('mail', $data['email'])->notify(new ProformaSent($order, $data['note'] ?? null));
+        } catch (\Throwable $e) {
+            report($e);
+
+            return back()->with('error', 'No se ha podido enviar el email: '.$e->getMessage());
+        }
+
+        $changes = ['proforma_sent_at' => now(), 'proforma_sent_to' => $data['email']];
+        if (in_array($order->status, [OrderStatus::Requested, OrderStatus::Accepted], true)) {
+            $changes['status'] = OrderStatus::ProformaSent;
+        }
+        $order->update($changes);
+
+        return back()->with('status', "Proforma enviada a {$data['email']}.");
     }
 
     /** Amplía el plazo de la pre-reserva. */

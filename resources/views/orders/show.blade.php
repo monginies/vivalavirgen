@@ -47,6 +47,28 @@
     </div>
 </div>
 
+@if (! in_array($order->status, [\App\Enums\OrderStatus::Cancelled, \App\Enums\OrderStatus::Expired], true))
+<div class="card">
+    <div class="head" style="margin-bottom:10px"><h2 style="margin:0">Proforma</h2>
+        <a class="btn sec sm" href="{{ route('orders.proforma', $order) }}" target="_blank">Ver PDF</a></div>
+    @if ($order->proforma_sent_at)
+        <p class="muted" style="margin-top:0">Enviada el {{ $order->proforma_sent_at->format('d/m/Y H:i') }} a {{ $order->proforma_sent_to }}.</p>
+    @endif
+    @if (in_array($order->status, [\App\Enums\OrderStatus::Requested, \App\Enums\OrderStatus::Accepted, \App\Enums\OrderStatus::ProformaSent, \App\Enums\OrderStatus::Paid], true))
+        <form method="post" action="{{ route('orders.proforma.send', $order) }}" class="grid" style="grid-template-columns:minmax(0,320px) 1fr auto;gap:10px;align-items:end">
+            @csrf
+            <div class="field" style="margin:0"><label for="f-pf-email">Enviar a</label><input id="f-pf-email" type="email" name="email" value="{{ old('email', $order->client->email) }}" required></div>
+            <div class="field" style="margin:0"><label for="f-pf-note">Mensaje (opcional)</label><input id="f-pf-note" type="text" name="note" value="{{ old('note') }}" placeholder="Ej.: Hemos incluido el montaje del viernes por la tarde."></div>
+            <button class="btn">{{ $order->proforma_sent_at ? 'Reenviar proforma' : 'Enviar proforma' }}</button>
+        </form>
+        @error('email')<div class="err">{{ $message }}</div>@enderror
+        @if (in_array($order->status, [\App\Enums\OrderStatus::Requested, \App\Enums\OrderStatus::Accepted], true))
+            <p class="hint">Al enviarla, el pedido pasa a «Proforma enviada».</p>
+        @endif
+    @endif
+</div>
+@endif
+
 <div class="grid g2">
     <div class="card">
         <h2>Fechas y destino</h2>

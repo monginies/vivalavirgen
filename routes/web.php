@@ -55,6 +55,7 @@ Route::name('portal.')->group(function () {
         Route::post('verificar/reenviar', [Portal\AuthController::class, 'resendVerification'])->name('verification.send');
         Route::get('mi-cuenta', [Portal\AccountController::class, 'index'])->name('account');
         Route::get('mi-cuenta/pedidos/{number}', [Portal\AccountController::class, 'order'])->name('orders.show');
+        Route::get('mi-cuenta/pedidos/{number}/proforma', [Portal\AccountController::class, 'proforma'])->name('orders.proforma');
         Route::post('pedido/solicitar', [Portal\CartController::class, 'checkout'])->name('checkout');
     });
 });
@@ -96,6 +97,8 @@ Route::prefix('app')->group(function () {
         Route::resource('orders', OrderController::class)->except('destroy');
         Route::post('orders/{order}/status', [OrderController::class, 'transition'])->name('orders.transition');
         Route::post('orders/{order}/extend', [OrderController::class, 'extend'])->name('orders.extend');
+        Route::get('orders/{order}/proforma', [OrderController::class, 'proforma'])->name('orders.proforma');
+        Route::post('orders/{order}/proforma', [OrderController::class, 'sendProforma'])->name('orders.proforma.send');
         Route::get('calendar', CalendarController::class)->name('calendar');
         Route::get('availability', AvailabilityController::class)->name('availability');
 

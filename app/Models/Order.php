@@ -15,7 +15,7 @@ class Order extends Model
         'number', 'client_id', 'status', 'source', 'event_date', 'venue_id', 'start_date', 'end_date',
         'destination_address', 'destination_city', 'destination_postal_code', 'distance_km', 'trucks',
         'transport_manual', 'transport_amount', 'discount_percent', 'deposit_amount',
-        'vat_rate', 'expires_at', 'notes', 'created_by',
+        'vat_rate', 'expires_at', 'proforma_sent_at', 'proforma_sent_to', 'notes', 'created_by',
     ];
 
     protected function casts(): array
@@ -26,6 +26,7 @@ class Order extends Model
             'start_date' => 'date',
             'end_date' => 'date',
             'expires_at' => 'datetime',
+            'proforma_sent_at' => 'datetime',
             'distance_km' => 'integer',
             'transport_manual' => 'boolean',
             'transport_amount' => 'decimal:2',
