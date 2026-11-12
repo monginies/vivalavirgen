@@ -14,6 +14,7 @@ App interna de **Viva la Virgen** para gestionar el material que alquila para ev
 
 - Laravel 13, PHP 8.4, MariaDB 10.11
 - Vistas Blade sin framework JS. El CSS es **CSS propio escrito a mano** en `public/css/app.css` (variables en `:root`). No hay que compilar nada: Vite y Tailwind están en `package.json` porque vienen con el esqueleto de Laravel, pero no se usan.
+- Identidad visual a partir del logo: verde salvia `#9a9b88`, crema `#fcfbf6`, botones en salvia oscuro `#5d604e`; títulos en Noto Serif (servida desde `public/fonts`, sin Google Fonts). Logo y favicon en `public/img`.
 - QR: `chillerlan/php-qrcode` (SVG)
 - Sesiones, caché y colas en base de datos. El correo está en modo `log` (no envía emails).
 

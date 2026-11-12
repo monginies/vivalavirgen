@@ -4,12 +4,15 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>@yield('title', 'Inicio') · {{ config('app.name') }}</title>
-    <link rel="stylesheet" href="{{ asset('css/app.css') }}?v=2">
+    <link rel="stylesheet" href="{{ asset('css/app.css') }}?v=3">
+    <link rel="icon" type="image/png" href="{{ asset('img/favicon-32.png') }}">
+    <link rel="apple-touch-icon" href="{{ asset('img/apple-touch-icon.png') }}">
+    <meta name="theme-color" content="#9a9b88">
 </head>
 <body>
 @auth
 <header class="topbar">
-    <a class="brand" href="{{ route('dashboard') }}">{{ config('app.name') }}</a>
+    <a class="brand" href="{{ route('dashboard') }}"><img src="{{ asset('img/logo-96.png') }}" alt=""><span>{{ config('app.name') }}</span></a>
     <nav>
         <a href="{{ route('dashboard') }}" @class(['on' => request()->routeIs('dashboard')])>Inicio</a>
         <a href="{{ route('orders.index') }}" @class(['on' => request()->routeIs('orders.*')])>Pedidos</a>

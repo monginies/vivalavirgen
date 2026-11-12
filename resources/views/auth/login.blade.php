@@ -2,8 +2,8 @@
 @section('title', 'Entrar')
 @section('content')
 <div class="login card">
-    <h1 style="margin-bottom:4px">{{ config('app.name') }}</h1>
-    <p class="muted" style="margin-top:0">Accede con tu cuenta</p>
+    <img class="logo" src="{{ asset('img/logo-320.png') }}" alt="{{ config('app.name') }} · Alquiler Decoración Mediterránea">
+    <p class="tagline">Gestión de inventario y pedidos</p>
     <form method="post" action="{{ route('login') }}">
         @csrf
         @include('partials.field', ['name' => 'email', 'label' => 'Email', 'type' => 'email', 'required' => true, 'attrs' => 'autofocus autocomplete=username'])
