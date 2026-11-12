@@ -325,3 +325,6 @@ body.portal h1{font-family:var(--serif);font-weight:400}
 @keyframes ptPulse{0%{box-shadow:0 0 0 0 #4a4c3d00}25%{box-shadow:0 0 6px 1px #4a4c3d40}60%{box-shadow:0 0 10px 3px #4a4c3d80}85%{box-shadow:0 0 14px 4px #3a3c30b3}100%{box-shadow:0 0 16px 5px #3a3c3000}}
 @media (max-width:900px){.pt-track{display:none}.pt-plan.needs-date{flex-wrap:wrap}}
 @media (prefers-reduced-motion:reduce){.pt-track span,.pt-plan.needs-date input[type=date]{animation:none}.pt-track span{opacity:1;left:100%}}
+
+.pt-logout{gap:6px}
+@media (max-width:640px){.pt-logout span{display:none}.pt-logout{padding:7px 9px}}

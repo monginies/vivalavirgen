@@ -3,7 +3,10 @@
 @section('content')
 <div class="head"><div><h1>Hola, {{ $client->contact_name ?: $client->name }}</h1><div class="sub">{{ $client->name }}@if ($client->tax_id) · {{ $client->tax_id }}@endif · {{ $client->email }}</div>
     @if ($client->isApproved() && $client->category)<div style="margin-top:10px">Tu nivel de cliente: @include('partials.tier', ['category' => $client->category, 'discount' => true])</div>@endif</div>
-    <a class="btn" href="{{ route('portal.home') }}">Ir al catálogo</a></div>
+    <div class="actions">
+        <a class="btn" href="{{ route('portal.home') }}">Ir al catálogo</a>
+        <form method="post" action="{{ route('portal.logout') }}" style="margin:0">@csrf<button class="btn sec">Cerrar sesión</button></form>
+    </div></div>
 <div class="card table-wrap">
     <h2>Mis pedidos</h2>
     <table>
