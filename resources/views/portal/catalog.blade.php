@@ -1,4 +1,5 @@
 @extends('layouts.portal')
+@push('jsonld'){!! \App\Support\JsonLd::script(\App\Support\JsonLd::business()) !!}@endpush
 @section('full')
 @php($heroImg = \App\Models\Setting::get('hero_image'))
 <section class="pt-hero @if ($heroImg) has-img @endif" @if ($heroImg) style="background-image:url('{{ asset('storage/'.$heroImg) }}')" @endif>

@@ -1,5 +1,20 @@
 @extends('layouts.portal')
-@section('title', $article->name)
+@section('title', $article->name.' · alquiler en Málaga')
+@section('description', \Illuminate\Support\Str::limit(trim(preg_replace('/\s+/', ' ', strip_tags((string) $article->description))) ?: $article->name.' en alquiler para bodas y eventos en Málaga'.($article->dimensions ? ' ('.$article->dimensions.')' : '').'. Colección '.$article->category->name.' de Viva la Virgen.', 158))
+@if ($article->photos->isNotEmpty())@section('og_image', $article->photos->first()->url())@endif
+@push('jsonld'){!! \App\Support\JsonLd::script(['@graph' => [
+    array_filter([
+        '@type' => 'Product',
+        'name' => $article->name,
+        'sku' => $article->reference,
+        'description' => trim(strip_tags((string) $article->description)) ?: null,
+        'category' => $article->category->name,
+        'image' => $article->photos->map->url()->values()->all() ?: null,
+        'brand' => ['@type' => 'Brand', 'name' => config('app.name')],
+        'url' => route('portal.article', $article->reference),
+    ]),
+    \App\Support\JsonLd::breadcrumbs([['Inicio', route('portal.home')], [$article->category->name, route('portal.collection', $article->category->slug())], [$article->name, route('portal.article', $article->reference)]]),
+]]) !!}@endpush
 @section('full')
 <div class="pt-section" style="padding-top:18px;padding-bottom:0"><a class="pt-back" href="{{ route('portal.collection', $article->category->slug()) }}">← {{ $article->category->name }}</a></div>
 <div class="pt-detail">

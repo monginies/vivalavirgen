@@ -1,5 +1,13 @@
 @extends('layouts.portal')
-@section('title', $title)
+@if ($category)
+    @section('title', $category->name.': alquiler para bodas y eventos en Málaga')
+    @section('description', \Illuminate\Support\Str::limit($category->description ?: 'Alquiler de '.mb_strtolower($category->name).' para bodas, comuniones y eventos en Málaga y provincia. Mira fotos y medidas de cada pieza y pide tu presupuesto en Viva la Virgen.', 158))
+    @if ($category->coverUrl())@section('og_image', $category->coverUrl())@endif
+    @push('jsonld'){!! \App\Support\JsonLd::script(\App\Support\JsonLd::breadcrumbs([['Inicio', route('portal.home')], [$category->name, route('portal.collection', $category->slug())]])) !!}@endpush
+@else
+    @section('title', $title)
+    @section('robots', 'noindex, follow')
+@endif
 @section('full')
 <section class="pt-section pt-coll-head">
     <div class="pt-kicker">{{ $category ? 'Colección' : 'Búsqueda' }}</div>

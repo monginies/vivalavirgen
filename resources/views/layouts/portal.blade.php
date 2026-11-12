@@ -3,8 +3,28 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>@hasSection('title')@yield('title') · @endif{{ config('app.name') }} · Alquiler de decoración mediterránea</title>
-    <meta name="description" content="Alquiler de mobiliario y decoración mediterránea para bodas y eventos en Málaga.">
+    @php
+        // Las secciones de Blade ya vienen escapadas: se imprimen con {!! !!}
+        $seoTitle = trim($__env->yieldContent('title'));
+        $seoTitle = $seoTitle !== '' ? $seoTitle.' · '.e(config('app.name')) : e(config('app.name').' · Alquiler de decoración mediterránea en Málaga');
+        $seoDesc = trim($__env->yieldContent('description')) ?: e('Alquiler de mobiliario y decoración mediterránea para bodas y eventos en Málaga y provincia: atriles, alfombras, bancos, salones, faroles y mucho más.');
+        $heroSeo = \App\Models\Setting::get('hero_image');
+        $seoImg = trim($__env->yieldContent('og_image')) ?: e($heroSeo ? asset('storage/'.$heroSeo) : asset('img/logo-320.png'));
+        $seoUrl = e(url()->current());
+    @endphp
+    <title>{!! $seoTitle !!}</title>
+    <meta name="description" content="{!! $seoDesc !!}">
+    @hasSection('robots')<meta name="robots" content="@yield('robots')">@endif
+    <link rel="canonical" href="{!! $seoUrl !!}">
+    <meta property="og:site_name" content="{{ config('app.name') }}">
+    <meta property="og:locale" content="es_ES">
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="{!! $seoTitle !!}">
+    <meta property="og:description" content="{!! $seoDesc !!}">
+    <meta property="og:url" content="{!! $seoUrl !!}">
+    <meta property="og:image" content="{!! $seoImg !!}">
+    <meta name="twitter:card" content="summary_large_image">
+    @stack('jsonld')
     <link rel="stylesheet" href="{{ asset('css/app.css') }}?v=35">
     <link rel="icon" type="image/png" href="{{ asset('img/favicon-32.png') }}">
     <link rel="apple-touch-icon" href="{{ asset('img/apple-touch-icon.png') }}">
