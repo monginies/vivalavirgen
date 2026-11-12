@@ -28,7 +28,7 @@ class Distance
     }
 
     /**
-     * @return array{km: string, label: string}
+     * @return array{km: string, exact: string, label: string} km redondeado hacia arriba a múltiplo de 5
      *
      * @throws RuntimeException con un mensaje para mostrar al usuario
      */
@@ -55,7 +55,14 @@ class Distance
             fn () => self::drivingKm($origin['coords'], $target['coords'])
         );
 
-        return ['km' => number_format($km, 1, '.', ''), 'label' => $target['label']];
+        // Siempre hacia arriba, al múltiplo de 5 (57,9 → 60; 52,1 → 55)
+        $rounded = (int) (ceil(round($km, 1) / 5) * 5);
+
+        return [
+            'km' => (string) $rounded,
+            'exact' => number_format($km, 1, '.', ''),
+            'label' => $target['label'].' · '.number_format($km, 1, ',', '.').' km reales, redondeado a '.$rounded,
+        ];
     }
 
     /** @return array{coords: array{0: float, 1: float}, label: string}|null */

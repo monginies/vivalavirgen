@@ -32,7 +32,7 @@ class DistanceTest extends TestCase
         $this->actingAs(User::factory()->make(['id' => 1]))
             ->getJson(route('orders.distance', ['address' => 'Finca X', 'city' => 'Marbella']))
             ->assertOk()
-            ->assertJson(['km' => '58.3', 'label' => 'Marbella, AN, España']);
+            ->assertJson(['km' => '60', 'exact' => '58.3', 'label' => 'Marbella, AN, España · 58,3 km reales, redondeado a 60']);
 
         Http::assertSent(fn ($r) => str_contains($r->url(), 'directions') && $r->header('Authorization') === ['test-key']);
     }
@@ -79,8 +79,8 @@ class DistanceTest extends TestCase
 
         // Dirección que no aparece: se usa el centro del CP
         $this->actingAs($user)->getJson(route('orders.distance', ['address' => 'Hacienda Inventada', 'postal_code' => '41001']))
-            ->assertOk()->assertJson(['km' => '207.1'])
-            ->assertJsonPath('label', 'CP 41001 · Sevilla (no se ha encontrado la dirección exacta; se toma el centro del código postal)');
+            ->assertOk()->assertJson(['km' => '210'])
+            ->assertJsonPath('label', 'CP 41001 · Sevilla (no se ha encontrado la dirección exacta; se toma el centro del código postal) · 207,1 km reales, redondeado a 210');
 
         $this->actingAs($user)->getJson(route('orders.distance', ['postal_code' => '99999']))
             ->assertStatus(422)->assertJsonPath('error', 'No conozco el código postal 99999. Revísalo o déjalo en blanco.');
