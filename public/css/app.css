@@ -298,7 +298,7 @@ body.portal h1{font-family:var(--serif);font-weight:400}
   .pt-pill{padding:7px 11px;font-size:13px}.pt-pill.dark{padding:8px 12px;font-size:13px}
   .pt-plan{padding:12px 16px}.pt-plan span{display:none}
   .pt-collections{grid-template-columns:1fr}.pt-coll{padding:20px 22px;aspect-ratio:4/3}
-  .pt-products[data-cols="2"],.pt-products[data-cols="3"],.pt-products[data-cols="4"]{--cols:2}
+  .pt-products[data-cols="2"],.pt-products[data-cols="3"],.pt-products[data-cols="4"]{--cols:1;max-width:none}
   .pt-products[data-cols="1"]{--cols:1}
   .pt-prod-body{padding:10px 10px 16px}.pt-prod-body h3{font-size:15px}
   .pt-toolbar{gap:12px;padding:14px 16px}.pt-catsel{min-width:100%}
