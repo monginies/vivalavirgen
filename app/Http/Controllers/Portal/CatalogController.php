@@ -7,6 +7,7 @@ use App\Models\Article;
 use App\Models\Category;
 use App\Services\Availability;
 use App\Support\Cart;
+use App\Support\Tracker;
 use Illuminate\Http\Request;
 
 class CatalogController extends Controller
@@ -61,6 +62,14 @@ class CatalogController extends Controller
             ->orderBy('name')
             ->paginate(24)
             ->withQueryString();
+
+        if (filled($request->q) && $articles->onFirstPage()) {
+            Tracker::record('search', [
+                'term' => mb_substr(mb_strtolower(trim((string) $request->q)), 0, 100),
+                'value' => $articles->total(),
+                'category_id' => $category?->id,
+            ]);
+        }
 
         return view('portal.collection', [
             'category' => $category,

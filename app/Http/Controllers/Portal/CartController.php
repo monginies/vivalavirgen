@@ -13,6 +13,7 @@ use App\Notifications\OrderReceived;
 use App\Services\Availability;
 use App\Services\Distance;
 use App\Support\Cart;
+use App\Support\Tracker;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Notification;
@@ -55,6 +56,7 @@ class CartController extends Controller
         abort_unless($article->active, 404);
         $qty = $request->validate(['quantity' => ['required', 'integer', 'min:1', 'max:10000']])['quantity'];
         Cart::add($article->id, $qty);
+        Tracker::record('cart_add', ['article_id' => $article->id, 'value' => $qty]);
 
         return back()->with('status', "Añadido al pedido: {$qty} × {$article->name}.");
     }
@@ -176,6 +178,7 @@ class CartController extends Controller
         });
 
         Cart::clear();
+        Tracker::record('checkout', ['value' => $order->id]);
         rescue(fn () => $client->notify(new OrderReceived($order)), report: true);
         rescue(fn () => Notification::route('mail', Setting::get('notify_email'))->notify(new NewWebOrder($order)), report: true);
 

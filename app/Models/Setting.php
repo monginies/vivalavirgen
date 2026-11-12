@@ -39,6 +39,8 @@ class Setting extends Model
         'hero_title' => ['label' => 'Web: frase de portada', 'unit' => null, 'default' => 'Momentos que se quedan', 'type' => 'text', 'hint' => 'Texto grande sobre la foto de la portada.'],
         'hero_image' => ['label' => 'Web: foto de portada', 'unit' => null, 'default' => null, 'type' => 'image',
             'hint' => 'Foto horizontal de un montaje, lo más grande posible (se reduce a 2400 px).'],
+        'google_site_verification' => ['label' => 'Google Search Console: código de verificación', 'unit' => null, 'default' => null, 'type' => 'text',
+            'hint' => 'El valor content="…" de la etiqueta HTML que da Search Console al añadir la web.'],
         'notify_email' => ['label' => 'Email para avisos de la web', 'unit' => null, 'default' => 'gestion@vivalavirgen.net', 'type' => 'text',
             'hint' => 'Aquí llegan los avisos de nuevos registros y pedidos hechos por los clientes.'],
         'base_address' => ['label' => 'Dirección de la base', 'unit' => null, 'default' => 'Calle Driza, 13, 29006 Málaga', 'type' => 'text',

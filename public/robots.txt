@@ -1,2 +1,9 @@
 User-agent: *
-Disallow:
+Disallow: /app/
+Disallow: /mi-cuenta
+Disallow: /pedido
+Disallow: /entrar
+Disallow: /crear-cuenta
+Disallow: /contrasena
+
+Sitemap: https://vivalavirgen.net/sitemap.xml

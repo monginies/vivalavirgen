@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Client;
 use App\Models\Setting;
 use App\Notifications\NewClientRegistered;
+use App\Support\Tracker;
 use Illuminate\Auth\Events\PasswordReset;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -101,6 +102,7 @@ class AuthController extends Controller
 
         Auth::guard('client')->login($client);
         $request->session()->regenerate();
+        Tracker::record('register', ['client_id' => $client->id]);
         rescue(fn () => $client->sendEmailVerificationNotification(), report: true);
 
         return redirect()->route('portal.account')->with('status', 'Cuenta creada. Te hemos enviado un email para confirmar tu dirección.');

@@ -13,10 +13,12 @@ use App\Http\Controllers\OrderController;
 use App\Http\Controllers\Portal;
 use App\Http\Controllers\PostalCodeController;
 use App\Http\Controllers\SettingController;
+use App\Http\Controllers\StatsController;
 use App\Http\Controllers\UnitController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\VenueController;
 use App\Http\Middleware\EnsureSuperadmin;
+use App\Http\Middleware\TrackPageView;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -24,11 +26,12 @@ use Illuminate\Support\Facades\Route;
 */
 
 // ---------- Web de clientes ----------
-Route::name('portal.')->group(function () {
+Route::name('portal.')->middleware(TrackPageView::class)->group(function () {
     Route::get('/', [Portal\CatalogController::class, 'index'])->name('home');
     Route::get('coleccion/{slug}', [Portal\CatalogController::class, 'collection'])->name('collection');
     Route::get('articulo/{reference}', [Portal\CatalogController::class, 'show'])->name('article');
     Route::view('privacidad', 'portal.privacy')->name('privacy');
+    Route::get('sitemap.xml', Portal\SitemapController::class)->name('sitemap');
 
     Route::get('pedido', [Portal\CartController::class, 'show'])->name('cart');
     Route::post('pedido', [Portal\CartController::class, 'update'])->name('cart.update');
@@ -107,6 +110,7 @@ Route::prefix('app')->group(function () {
             Route::get('settings', [SettingController::class, 'edit'])->name('settings.edit');
             Route::put('settings', [SettingController::class, 'update'])->name('settings.update');
             Route::resource('client-categories', ClientCategoryController::class)->except('show');
+            Route::get('stats', StatsController::class)->name('stats');
         });
     });
 });
