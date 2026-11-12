@@ -25,7 +25,7 @@ class Order extends Model
             'start_date' => 'date',
             'end_date' => 'date',
             'expires_at' => 'datetime',
-            'distance_km' => 'decimal:1',
+            'distance_km' => 'integer',
             'transport_manual' => 'boolean',
             'transport_amount' => 'decimal:2',
             'discount_percent' => 'decimal:2',

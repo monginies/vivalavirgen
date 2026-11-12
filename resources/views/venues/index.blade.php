@@ -18,7 +18,7 @@
                 <td><a href="{{ route('venues.edit', $v) }}">{{ $v->name }}</a>@unless ($v->active) <span class="badge grey">Inactiva</span>@endunless</td>
                 <td class="muted">{{ $v->address ?: '—' }}</td>
                 <td>{{ $v->place() ?: '—' }}</td>
-                <td class="num">{{ $v->distance_km !== null ? number_format($v->distance_km, 1, ',', '.') : '—' }}</td>
+                <td class="num">{{ $v->distance_km !== null ? number_format($v->distance_km, 0, ',', '.') : '—' }}</td>
                 <td class="num">{{ $v->orders_count ?: '—' }}</td>
                 <td class="actions" style="justify-content:flex-end"><a class="btn sec sm" href="{{ route('orders.create', ['venue' => $v->id]) }}">+ Pedido</a></td>
             </tr>

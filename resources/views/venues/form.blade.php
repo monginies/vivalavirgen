@@ -13,7 +13,7 @@
     <div class="field">
         <label for="f-distance_km">Distancia desde la base (km, solo ida)</label>
         <div style="display:flex;gap:8px;max-width:360px">
-            <input id="f-distance_km" type="number" name="distance_km" step="0.1" min="0" value="{{ old('distance_km', $venue->distance_km) }}">
+            <input id="f-distance_km" type="number" name="distance_km" step="1" min="0" value="{{ old('distance_km', $venue->distance_km) }}">
             @if ($mapsEnabled)<button type="button" class="btn sec" id="calc-km" style="white-space:nowrap">Calcular km</button>@endif
         </div>
         <div class="hint" id="km-hint">{{ $mapsEnabled ? 'Si lo dejas vacío se calcula al guardar. Puedes corregirlo a mano.' : 'Escríbelo a mano.' }}</div>

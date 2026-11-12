@@ -77,7 +77,7 @@ class VenueController extends Controller
             'address' => ['nullable', 'string', 'max:255'],
             'postal_code' => ['nullable', 'regex:/^\d{5}$/'],
             'city' => ['nullable', 'string', 'max:255'],
-            'distance_km' => ['nullable', 'numeric', 'min:0', 'max:5000'],
+            'distance_km' => ['nullable', 'integer', 'min:0', 'max:5000'],
             'contact' => ['nullable', 'string', 'max:255'],
             'notes' => ['nullable', 'string', 'max:5000'],
         ], ['postal_code.regex' => 'El código postal tiene 5 cifras.']);

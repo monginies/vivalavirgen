@@ -224,7 +224,7 @@ class OrderController extends Controller
             'destination_address' => ['nullable', 'string', 'max:255'],
             'destination_city' => ['nullable', 'string', 'max:255'],
             'destination_postal_code' => ['nullable', 'regex:/^\d{5}$/'],
-            'distance_km' => ['nullable', 'numeric', 'min:0', 'max:5000'],
+            'distance_km' => ['nullable', 'integer', 'min:0', 'max:5000'],
             'trucks' => ['required', 'integer', 'min:1', 'max:20'],
             'transport_amount' => ['nullable', 'numeric', 'min:0', 'max:99999'],
             'discount_percent' => ['nullable', 'numeric', 'min:0', 'max:100'],

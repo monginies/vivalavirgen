@@ -15,7 +15,7 @@ class Venue extends Model
 
     protected function casts(): array
     {
-        return ['distance_km' => 'decimal:1', 'active' => 'boolean'];
+        return ['distance_km' => 'integer', 'active' => 'boolean'];
     }
 
     public function orders(): HasMany

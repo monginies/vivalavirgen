@@ -56,7 +56,7 @@
             <dt>Recogida</dt><dd>{{ $order->end_date->format('d/m/Y') }}</dd>
             @if ($order->venue)<dt>Finca</dt><dd><a href="{{ route('venues.edit', $order->venue) }}">{{ $order->venue->name }}</a></dd>@endif
             <dt>Destino</dt><dd>{{ collect([$order->destination_address, trim($order->destination_postal_code.' '.$order->destination_city)])->filter()->join(', ') ?: '—' }}</dd>
-            <dt>Distancia</dt><dd>{{ $order->distance_km ? number_format($order->distance_km, 1, ',', '.').' km (ida)' : '—' }}</dd>
+            <dt>Distancia</dt><dd>{{ $order->distance_km ? number_format($order->distance_km, 0, ',', '.').' km (ida)' : '—' }}</dd>
             <dt>Camiones</dt><dd>{{ $order->trucks }}</dd>
         </dl>
     </div>

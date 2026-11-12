@@ -61,7 +61,7 @@ class Distance
         return [
             'km' => (string) $rounded,
             'exact' => number_format($km, 1, '.', ''),
-            'label' => $target['label'].' · '.number_format($km, 1, ',', '.').' km reales, redondeado a '.$rounded,
+            'label' => $target['label'].' · '.'redondeado a '.$rounded.' km',
         ];
     }
 

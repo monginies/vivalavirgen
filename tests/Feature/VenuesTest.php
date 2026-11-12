@@ -23,16 +23,16 @@ class VenuesTest extends TestCase
 
         $this->post(route('venues.store'), [
             'name' => 'Finca La Concepción', 'address' => 'Camino del Colmenar', 'postal_code' => '29014',
-            'city' => 'Málaga', 'distance_km' => 9.5, 'active' => 1,
+            'city' => 'Málaga', 'distance_km' => 10, 'active' => 1,
         ])->assertRedirect(route('venues.index'));
         $venue = Venue::firstOrFail();
-        $this->assertEquals(9.5, $venue->distance_km);
+        $this->assertSame(10, $venue->distance_km);
 
         $this->post(route('venues.store'), ['name' => 'X', 'postal_code' => '123'])->assertSessionHasErrors('postal_code');
 
         $this->get(route('venues.index'))->assertOk()->assertSee('Finca La Concepción');
         $this->get(route('orders.create', ['venue' => $venue->id]))->assertOk()
-            ->assertSee('value="Camino del Colmenar"', false)->assertSee('value="9.5"', false);
+            ->assertSee('value="Camino del Colmenar"', false)->assertSee('value="10"', false);
 
         $client = Client::create(['type' => 'individual', 'name' => 'Ana']);
         $cat = Category::create(['name' => 'Sillas', 'code' => 'SIL']);
@@ -42,7 +42,7 @@ class VenuesTest extends TestCase
         $this->post(route('orders.store'), [
             'client_id' => $client->id, 'venue_id' => $venue->id, 'start_date' => '2026-12-04', 'end_date' => '2026-12-06',
             'destination_address' => 'Camino del Colmenar', 'destination_postal_code' => '29014', 'destination_city' => 'Málaga',
-            'distance_km' => 9.5, 'trucks' => 1, 'lines' => [['article_id' => $art->id, 'quantity' => 2]],
+            'distance_km' => 10, 'trucks' => 1, 'lines' => [['article_id' => $art->id, 'quantity' => 2]],
         ])->assertSessionHasNoErrors();
         $order = Order::firstOrFail();
         $this->assertSame($venue->id, $order->venue_id);
