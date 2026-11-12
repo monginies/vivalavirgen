@@ -73,7 +73,7 @@ class AuthController extends Controller
             'tax_id' => ['required', 'string', 'max:20'],
             'contact_name' => ['required', 'string', 'max:255'],
             'phone' => ['required', 'string', 'max:30'],
-            'email' => ['required', 'email', 'max:255', Rule::unique('clients', 'email')],
+            'email' => ['required', 'email', 'max:255', Rule::unique('clients', 'email')->whereNull('deleted_at')],
             'address' => ['required', 'string', 'max:255'],
             'postal_code' => ['required', 'regex:/^\d{5}$/'],
             'city' => ['required', 'string', 'max:255'],

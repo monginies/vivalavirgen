@@ -94,7 +94,7 @@ class ClientController extends Controller
             'name' => ['required', 'string', 'max:255'],
             'tax_id' => ['nullable', 'string', 'max:20', Rule::unique('clients')->ignore($client)->whereNull('deleted_at')],
             'contact_name' => ['nullable', 'string', 'max:255'],
-            'email' => ['nullable', 'email', 'max:255', Rule::unique('clients')->ignore($client)],
+            'email' => ['nullable', 'email', 'max:255', Rule::unique('clients')->ignore($client)->whereNull('deleted_at')],
             'phone' => ['nullable', 'string', 'max:30'],
             'address' => ['nullable', 'string', 'max:255'],
             'postal_code' => ['nullable', 'string', 'max:10'],

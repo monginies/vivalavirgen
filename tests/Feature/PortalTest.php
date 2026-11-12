@@ -166,4 +166,17 @@ class PortalTest extends TestCase
         $this->post(route('portal.register'), $this->registerData(['website' => 'spam']))->assertSessionHasErrors('website');
         $this->assertSame(0, Client::count());
     }
+
+    public function test_deleted_client_does_not_block_email(): void
+    {
+        $old = Client::create(['type' => 'individual', 'name' => 'Antiguo', 'email' => 'lucia@example.com']);
+        $old->delete();
+
+        $this->post(route('portal.register'), $this->registerData())->assertSessionHasNoErrors();
+        $this->assertSame(1, Client::where('email', 'lucia@example.com')->count());
+
+        $staff = User::factory()->create();
+        $this->actingAs($staff)->post(route('clients.store'), ['type' => 'individual', 'name' => 'Duplicado', 'email' => 'lucia@example.com'])
+            ->assertSessionHasErrors('email');
+    }
 }
