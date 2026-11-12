@@ -1,6 +1,6 @@
 <form class="pt-toolbar" method="get" action="{{ route('portal.home') }}">
     <label class="pt-search" data-suggest="{{ route('portal.suggest') }}">
-        <span class="pt-search-box"><input type="search" name="q" value="{{ request('q') }}" placeholder="Buscar artículo, material o medida…" aria-label="Buscar artículo, material o medida"
+        <span class="pt-search-box"><input type="search" name="q" value="{{ request('q') }}" placeholder="Buscar artículo" aria-label="Buscar artículo, material o medida"
             autocomplete="off" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="pt-suggest">
             <button aria-label="Buscar"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg></button></span>
         <div class="pt-suggest" id="pt-suggest" role="listbox" hidden></div>
