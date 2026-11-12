@@ -14,7 +14,7 @@
         @forelse ($clients as $c)
             <tr>
                 <td><a href="{{ route('clients.show', $c) }}">{{ $c->name }}</a></td>
-                <td class="muted">{{ $c->typeLabel() }}@if ($c->category)<div style="font-size:12px">{{ $c->category->name }}</div>@endif</td>
+                <td class="muted">{{ $c->typeLabel() }}@if ($c->category)<div style="margin-top:3px">@include('partials.tier', ['category' => $c->category])</div>@endif</td>
                 <td>@if ($c->hasPortalAccess())@php([$wl, $wc] = $c->portalStatus())<span class="badge {{ $wc }}">{{ $wl }}</span>@endif</td>
                 <td class="mono">{{ $c->tax_id }}</td>
                 <td>{{ $c->contact_name }}@if ($c->phone)<div class="muted">{{ $c->phone }}</div>@endif</td>

@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\ClientCategory;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 
 class ClientCategoryController extends Controller
 {
@@ -47,6 +48,7 @@ class ClientCategoryController extends Controller
     {
         return $request->validate([
             'name' => ['required', 'string', 'max:100'],
+            'icon' => ['required', Rule::in(array_keys(ClientCategory::ICONS))],
             'discount_percent' => ['required', 'numeric', 'min:0', 'max:100'],
             'sort' => ['nullable', 'integer', 'min:0', 'max:999'],
         ]) + ['sort' => 0];

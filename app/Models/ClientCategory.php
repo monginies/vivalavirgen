@@ -8,7 +8,9 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 /** Tipo de cliente con su descuento sobre el precio base (particular, wedding planner…). */
 class ClientCategory extends Model
 {
-    protected $fillable = ['name', 'discount_percent', 'sort'];
+    public const ICONS = ['esparto' => 'Esparto (trenzado)', 'mimbre' => 'Mimbre (cesta)', 'ratan' => 'Ratán (butaca)', 'hoja' => 'Hoja'];
+
+    protected $fillable = ['name', 'icon', 'discount_percent', 'sort'];
 
     protected function casts(): array
     {

@@ -2,7 +2,7 @@
 @section('title', $client->name)
 @section('content')
 <div class="head">
-    <div><h1>{{ $client->name }}</h1><div class="sub">{{ $client->typeLabel() }}@if ($client->category) · {{ $client->category->name }} ({{ rtrim(rtrim(number_format($client->category->discount_percent, 2, ',', ''), '0'), ',') }} %)@endif @if ($client->tax_id) · <span class="mono">{{ $client->tax_id }}</span>@endif</div></div>
+    <div><h1>{{ $client->name }}</h1><div class="sub">{{ $client->typeLabel() }}@if ($client->category) · @include('partials.tier', ['category' => $client->category, 'discount' => true])@endif @if ($client->tax_id) · <span class="mono">{{ $client->tax_id }}</span>@endif</div></div>
     <a class="btn" href="{{ route('clients.edit', $client) }}">Editar</a>
 </div>
 <div class="grid g2">

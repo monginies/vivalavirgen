@@ -5,6 +5,15 @@
 <form class="card" method="post" action="{{ $category->exists ? route('client-categories.update', $category) : route('client-categories.store') }}" style="max-width:520px">
     @csrf @if ($category->exists) @method('put') @endif
     @include('partials.field', ['name' => 'name', 'label' => 'Nombre', 'value' => $category->name, 'required' => true])
+    <div class="field">
+        <label>Icono</label>
+        <div class="actions">
+            @foreach (\App\Models\ClientCategory::ICONS as $key => $label)
+                <label class="check"><input type="radio" name="icon" value="{{ $key }}" @checked(old('icon', $category->icon ?? 'esparto') === $key)>
+                    @include('partials.tier', ['category' => new \App\Models\ClientCategory(['name' => $label, 'icon' => $key, 'discount_percent' => 0])])</label>
+            @endforeach
+        </div>
+    </div>
     @include('partials.field', ['name' => 'discount_percent', 'label' => 'Descuento (%)', 'value' => $category->discount_percent, 'type' => 'number', 'step' => '0.01', 'min' => 0, 'required' => true])
     @include('partials.field', ['name' => 'sort', 'label' => 'Orden', 'value' => $category->sort, 'type' => 'number', 'step' => 1, 'min' => 0])
     <div class="actions"><button class="btn">Guardar</button><a class="btn sec" href="{{ route('client-categories.index') }}">Cancelar</a></div>

@@ -9,7 +9,7 @@
         <tbody>
         @forelse ($categories as $c)
             <tr>
-                <td><a href="{{ route('client-categories.edit', $c) }}">{{ $c->name }}</a></td>
+                <td><a href="{{ route('client-categories.edit', $c) }}" style="text-decoration:none">@include('partials.tier', ['category' => $c])</a></td>
                 <td class="num">{{ rtrim(rtrim(number_format($c->discount_percent, 2, ',', ''), '0'), ',') }} %</td>
                 <td class="num">{{ $c->clients_count }}</td>
             </tr>
