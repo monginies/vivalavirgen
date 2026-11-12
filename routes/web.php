@@ -1,0 +1,40 @@
+<?php
+
+use App\Http\Controllers\ArticleController;
+use App\Http\Controllers\Auth\LoginController;
+use App\Http\Controllers\CategoryController;
+use App\Http\Controllers\ClientController;
+use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\UnitController;
+use App\Http\Controllers\UserController;
+use App\Http\Middleware\EnsureSuperadmin;
+use Illuminate\Support\Facades\Route;
+
+Route::middleware('guest')->group(function () {
+    Route::get('login', [LoginController::class, 'show'])->name('login');
+    Route::post('login', [LoginController::class, 'login']);
+});
+
+Route::middleware('auth')->group(function () {
+    Route::post('logout', [LoginController::class, 'logout'])->name('logout');
+    Route::get('/', DashboardController::class)->name('dashboard');
+
+    Route::resource('categories', CategoryController::class)->except('show');
+
+    Route::resource('articles', ArticleController::class);
+    Route::post('articles/{article}/units', [ArticleController::class, 'addUnits'])->name('articles.units.store');
+    Route::get('articles/{article}/labels', [ArticleController::class, 'labels'])->name('articles.labels');
+
+    // URL corta que va impresa en cada etiqueta QR
+    Route::get('q/{token}', [UnitController::class, 'resolve'])->name('qr.resolve');
+    Route::get('units/{unit}', [UnitController::class, 'show'])->name('units.show');
+    Route::patch('units/{unit}', [UnitController::class, 'update'])->name('units.update');
+    Route::delete('units/{unit}', [UnitController::class, 'destroy'])->name('units.destroy');
+    Route::get('units/{unit}/qr.svg', [UnitController::class, 'qr'])->name('units.qr');
+
+    Route::resource('clients', ClientController::class);
+
+    Route::middleware(EnsureSuperadmin::class)->group(function () {
+        Route::resource('users', UserController::class)->except('show');
+    });
+});
