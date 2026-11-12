@@ -31,7 +31,7 @@
             ]],
         ];
         if (auth()->user()->is_superadmin) {
-            $menu[] = ['Gestión', 'settings', null, ['users.*', 'settings.*'], [
+            $menu[] = ['Administración', 'settings', null, ['users.*', 'settings.*'], [
                 ['Usuarios', 'users', 'users.index', ['users.*']],
                 ['Ajustes', 'settings', 'settings.edit', ['settings.*']],
             ]];
