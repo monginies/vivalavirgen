@@ -65,7 +65,8 @@ class PortalTest extends TestCase
         $this->post(route('portal.register'), $this->registerData())->assertRedirect(route('portal.account'));
         $client = Client::where('email', 'lucia@example.com')->firstOrFail();
         $this->assertSame('web', $client->source);
-        $this->assertSame('Wedding planner', $client->category->name);
+        $this->assertNull($client->client_category_id);
+        $this->assertStringContainsString('wedding planner', $client->notes);
         $this->assertNotNull($client->privacy_accepted_at);
         $this->assertFalse($client->isApproved());
         Notification::assertSentTo($client, ClientVerifyEmail::class);
@@ -86,7 +87,7 @@ class PortalTest extends TestCase
         // El equipo lo aprueba
         $staff = User::factory()->create();
         $this->actingAs($staff)->get(route('clients.show', $client))->assertOk()->assertSee('Aprobar acceso');
-        $this->actingAs($staff)->post(route('clients.approve', $client), ['client_category_id' => $client->client_category_id])->assertRedirect();
+        $this->actingAs($staff)->post(route('clients.approve', $client), ['client_category_id' => ClientCategory::where('name', 'Esparto')->value('id')])->assertRedirect();
         $this->assertTrue($client->fresh()->isApproved());
         Notification::assertSentTo($client, ClientApproved::class);
 
@@ -121,7 +122,7 @@ class PortalTest extends TestCase
 
     public function test_cannot_order_more_than_available_or_see_others_orders(): void
     {
-        $cat = ClientCategory::where('name', 'Particular')->first();
+        $cat = ClientCategory::where('name', 'Esparto')->first();
         $client = Client::create(['type' => 'individual', 'name' => 'Ana', 'email' => 'ana@example.com', 'client_category_id' => $cat->id]);
         $client->forceFill(['password' => 'secreta123', 'email_verified_at' => now(), 'approved_at' => now()])->save();
         $other = Client::create(['type' => 'individual', 'name' => 'Otro']);

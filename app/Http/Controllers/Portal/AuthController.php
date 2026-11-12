@@ -4,7 +4,6 @@ namespace App\Http\Controllers\Portal;
 
 use App\Http\Controllers\Controller;
 use App\Models\Client;
-use App\Models\ClientCategory;
 use App\Models\Setting;
 use App\Notifications\NewClientRegistered;
 use Illuminate\Auth\Events\PasswordReset;
@@ -90,7 +89,10 @@ class AuthController extends Controller
         ]);
 
         $client = new Client(collect($data)->only(['type', 'name', 'tax_id', 'contact_name', 'phone', 'email', 'address', 'postal_code', 'city', 'province'])->all());
-        $client->client_category_id = ClientCategory::where('name', $request->boolean('wedding_planner') ? 'Wedding planner' : ($data['type'] === 'company' ? 'Empresa' : 'Particular'))->value('id');
+        // Entra sin tipo (precio base); el equipo le asigna Esparto, Mimbre o Ratán al aprobarlo
+        if ($request->boolean('wedding_planner')) {
+            $client->notes = 'Al registrarse indicó que es wedding planner u organizador de eventos.';
+        }
         $client->password = $data['password'];
         $client->privacy_accepted_at = now();
         $client->source = 'web';
