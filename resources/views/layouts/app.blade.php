@@ -20,7 +20,7 @@
                 ['Pedidos', 'orders', 'orders.index', ['orders.*']],
                 ['Calendario', 'calendar', 'calendar', ['calendar']],
             ]],
-            ['Productos', 'articles', null, ['articles.*', 'units.*', 'categories.*', 'availability'], [
+            ['Artículos', 'articles', null, ['articles.*', 'units.*', 'categories.*', 'availability'], [
                 ['Artículos', 'articles', 'articles.index', ['articles.*', 'units.*']],
                 ['Categorías', 'categories', 'categories.index', ['categories.*']],
                 ['Disponibilidad', 'availability', 'availability', ['availability']],
