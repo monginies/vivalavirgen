@@ -77,6 +77,18 @@
 
     <div class="card">
         <h2>Destino y transporte</h2>
+        <div class="field">
+            <label for="f-venue_id">Finca / lugar habitual</label>
+            <select id="f-venue_id" name="venue_id">
+                <option value="">— Otra dirección (escribirla abajo) —</option>
+                @foreach ($venues as $v)
+                    <option value="{{ $v->id }}" data-address="{{ $v->address }}" data-city="{{ $v->city }}" data-cp="{{ $v->postal_code }}" data-km="{{ $v->distance_km }}"
+                        @selected(old('venue_id', $order->venue_id) == $v->id)>{{ $v->name }}{{ $v->place() ? ' · '.$v->place() : '' }}</option>
+                @endforeach
+            </select>
+            <div class="hint">Al elegir una finca se rellenan la dirección y los km. <a href="{{ route('venues.index') }}" target="_blank">Gestionar fincas</a></div>
+            @error('venue_id')<div class="err">{{ $message }}</div>@enderror
+        </div>
         <div class="grid g2">
             @include('partials.field', ['name' => 'destination_address', 'label' => 'Dirección / finca', 'value' => $order->destination_address])
             <div class="grid" style="grid-template-columns:120px 1fr;gap:10px">
@@ -185,6 +197,19 @@
         recalc();
     });
     document.getElementById('order-form').addEventListener('input', recalc);
+
+    document.getElementById('f-venue_id').addEventListener('change', e => {
+        const o = e.target.selectedOptions[0];
+        if (!o || !o.value) return;
+        document.getElementById('f-destination_address').value = o.dataset.address || '';
+        document.getElementById('f-destination_city').value = o.dataset.city || '';
+        document.getElementById('f-destination_postal_code').value = o.dataset.cp || '';
+        document.getElementById('f-distance_km').value = o.dataset.km || '';
+        const hint = document.getElementById('km-hint');
+        hint.className = 'hint';
+        hint.textContent = o.dataset.km ? 'Km guardados en la ficha de la finca.' : 'Esta finca no tiene km guardados: pulsa «Calcular km» o escríbelos.';
+        recalc();
+    });
 
     const cpInput = document.getElementById('f-destination_postal_code');
     cpInput.addEventListener('input', async () => {

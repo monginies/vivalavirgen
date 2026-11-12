@@ -30,6 +30,7 @@ App interna de **Viva la Virgen** para gestionar el material que alquila para ev
 | `User` | `users` | `is_superadmin`, `active` (un usuario inactivo no puede entrar) |
 | `Order` | `orders` | `number` `PED-2026-0001`; `status` = enum `OrderStatus`; fechas `start_date` (entrega) y `end_date` (recogida); destino, km, camiones, transporte, descuento, fianza, IVA; `expires_at` = fin de la pre-reserva |
 | `OrderLine` | `order_lines` | artículo, cantidad y precio por unidad sin IVA copiado al crear la línea |
+| `Venue` | `venues` | fincas y lugares de celebración habituales (dirección, CP, población, km desde la base, contacto, notas); al elegir una en el pedido se copian sus datos al pedido (`orders.venue_id` + campos de destino) |
 | `Setting` | `settings` | ajustes clave/valor editables por el superadmin; valores por defecto en `Setting::DEFINITIONS` |
 
 `UnitStatus` (`app/Enums/UnitStatus.php`): `available` Disponible · `rented` Alquilada · `maintenance` En reparación · `retired` De baja. Cada caso tiene `label()` y `color()` para la interfaz.
@@ -53,6 +54,7 @@ Las referencias y códigos se calculan contando también los registros borrados 
 - `q/{token}`: **URL corta impresa en cada etiqueta**; redirige a la ficha de la unidad. No cambiar su formato, porque invalidaría las etiquetas ya impresas.
 - `units/{unit}` ver, cambiar estado o borrar; `units/{unit}/qr.svg`
 - `orders`: CRUD sin borrado; `orders/{order}/status` cambia de estado (avanzar, cancelar, reactivar); `orders/{order}/extend` amplía la pre-reserva
+- `venues`: fincas habituales (CRUD sin ficha); `orders/create?venue=ID` abre un pedido con esa finca
 - `calendar` (vista mensual) y `availability` (libres entre dos fechas)
 - `users` y `settings`: solo superadmin (middleware `EnsureSuperadmin`)
 

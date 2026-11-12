@@ -11,7 +11,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 class Order extends Model
 {
     protected $fillable = [
-        'number', 'client_id', 'status', 'event_date', 'start_date', 'end_date',
+        'number', 'client_id', 'status', 'event_date', 'venue_id', 'start_date', 'end_date',
         'destination_address', 'destination_city', 'destination_postal_code', 'distance_km', 'trucks',
         'transport_manual', 'transport_amount', 'discount_percent', 'deposit_amount',
         'vat_rate', 'expires_at', 'notes', 'created_by',
@@ -37,6 +37,11 @@ class Order extends Model
     public function client(): BelongsTo
     {
         return $this->belongsTo(Client::class)->withTrashed();
+    }
+
+    public function venue(): BelongsTo
+    {
+        return $this->belongsTo(Venue::class)->withTrashed();
     }
 
     public function lines(): HasMany
@@ -124,6 +129,7 @@ class Order extends Model
 
     public function destination(): string
     {
-        return collect([$this->destination_address, trim($this->destination_postal_code.' '.$this->destination_city)])->filter()->join(', ');
+        return collect([$this->venue?->name, $this->destination_address, trim($this->destination_postal_code.' '.$this->destination_city)])
+            ->filter()->unique()->join(', ');
     }
 }

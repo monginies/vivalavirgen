@@ -7,6 +7,7 @@ use App\Models\Article;
 use App\Models\Client;
 use App\Models\Order;
 use App\Models\Setting;
+use App\Models\Venue;
 use App\Services\Availability;
 use App\Services\Distance;
 use Illuminate\Database\QueryException;
@@ -23,7 +24,7 @@ class OrderController extends Controller
         Order::expireOverdue();
 
         $orders = Order::query()
-            ->with(['client', 'lines'])
+            ->with(['client', 'lines', 'venue'])
             ->when($request->status, fn ($q, $s) => $q->where('status', $s))
             ->when($request->q, fn ($q, $term) => $q->where(fn ($q) => $q
                 ->where('number', 'like', "%{$term}%")
@@ -46,6 +47,12 @@ class OrderController extends Controller
             'discount_percent' => 0,
             'deposit_amount' => Setting::number('deposit_amount'),
         ]);
+        if ($venue = Venue::find($request->venue)) {
+            $order->fill([
+                'venue_id' => $venue->id, 'destination_address' => $venue->address, 'destination_city' => $venue->city,
+                'destination_postal_code' => $venue->postal_code, 'distance_km' => $venue->distance_km,
+            ]);
+        }
 
         return view('orders.form', $this->formData($order));
     }
@@ -79,7 +86,7 @@ class OrderController extends Controller
             Order::expireOverdue();
             $order->refresh();
         }
-        $order->load(['client', 'lines.article', 'creator']);
+        $order->load(['client', 'lines.article', 'creator', 'venue']);
 
         $availability = Availability::forArticles(
             $order->lines->pluck('article_id')->all(), $order->start_date, $order->end_date, $order->id
@@ -195,6 +202,7 @@ class OrderController extends Controller
         return [
             'order' => $order,
             'clients' => Client::orderBy('name')->get(['id', 'name']),
+            'venues' => Venue::where('active', true)->orWhere('id', $order->venue_id)->orderBy('name')->get(),
             'articles' => $articles,
             'mapsEnabled' => Distance::configured(),
             'settings' => [
@@ -212,6 +220,7 @@ class OrderController extends Controller
             'event_date' => ['nullable', 'date'],
             'start_date' => ['required', 'date'],
             'end_date' => ['required', 'date', 'after_or_equal:start_date'],
+            'venue_id' => ['nullable', Rule::exists('venues', 'id')],
             'destination_address' => ['nullable', 'string', 'max:255'],
             'destination_city' => ['nullable', 'string', 'max:255'],
             'destination_postal_code' => ['nullable', 'regex:/^\d{5}$/'],
@@ -254,6 +263,7 @@ class OrderController extends Controller
             'event_date' => $v['event_date'] ?? null,
             'start_date' => $v['start_date'],
             'end_date' => $v['end_date'],
+            'venue_id' => $v['venue_id'] ?? null,
             'destination_address' => $v['destination_address'] ?? null,
             'destination_city' => $v['destination_city'] ?? null,
             'destination_postal_code' => $v['destination_postal_code'] ?? null,

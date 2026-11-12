@@ -54,7 +54,8 @@
             <dt>Evento</dt><dd>{{ $order->event_date?->format('d/m/Y') ?? '—' }}</dd>
             <dt>Entrega</dt><dd>{{ $order->start_date->format('d/m/Y') }}</dd>
             <dt>Recogida</dt><dd>{{ $order->end_date->format('d/m/Y') }}</dd>
-            <dt>Destino</dt><dd>{{ $order->destination() ?: '—' }}</dd>
+            @if ($order->venue)<dt>Finca</dt><dd><a href="{{ route('venues.edit', $order->venue) }}">{{ $order->venue->name }}</a></dd>@endif
+            <dt>Destino</dt><dd>{{ collect([$order->destination_address, trim($order->destination_postal_code.' '.$order->destination_city)])->filter()->join(', ') ?: '—' }}</dd>
             <dt>Distancia</dt><dd>{{ $order->distance_km ? number_format($order->distance_km, 1, ',', '.').' km (ida)' : '—' }}</dd>
             <dt>Camiones</dt><dd>{{ $order->trucks }}</dd>
         </dl>

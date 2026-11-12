@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>@yield('title', 'Inicio') · {{ config('app.name') }}</title>
-    <link rel="stylesheet" href="{{ asset('css/app.css') }}?v=5">
+    <link rel="stylesheet" href="{{ asset('css/app.css') }}?v=6">
     <link rel="icon" type="image/png" href="{{ asset('img/favicon-32.png') }}">
     <link rel="apple-touch-icon" href="{{ asset('img/apple-touch-icon.png') }}">
     <meta name="theme-color" content="#9a9b88">
@@ -21,6 +21,7 @@
         <a href="{{ route('articles.index') }}" title="Artículos" @class(['on' => request()->routeIs('articles.*', 'units.*')])>@include('partials.icon', ['i' => 'articles'])<span>Artículos</span></a>
         <a href="{{ route('categories.index') }}" title="Categorías" @class(['on' => request()->routeIs('categories.*')])>@include('partials.icon', ['i' => 'categories'])<span>Categorías</span></a>
         <a href="{{ route('clients.index') }}" title="Clientes" @class(['on' => request()->routeIs('clients.*')])>@include('partials.icon', ['i' => 'clients'])<span>Clientes</span></a>
+        <a href="{{ route('venues.index') }}" title="Fincas" @class(['on' => request()->routeIs('venues.*')])>@include('partials.icon', ['i' => 'venues'])<span>Fincas</span></a>
         @if (auth()->user()->is_superadmin)
             <a href="{{ route('users.index') }}" title="Usuarios" @class(['on' => request()->routeIs('users.*')])>@include('partials.icon', ['i' => 'users'])<span>Usuarios</span></a>
             <a href="{{ route('settings.edit') }}" title="Ajustes" @class(['on' => request()->routeIs('settings.*')])>@include('partials.icon', ['i' => 'settings'])<span>Ajustes</span></a>

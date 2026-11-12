@@ -140,5 +140,5 @@ table.cal .ev.amber{background:#f5ead6;color:var(--amber)}
 .drop input{position:absolute;width:1px;height:1px;opacity:0}
 .drop b{color:var(--sage-deep)}
 
-@media (max-width:1100px) and (min-width:641px){.topbar nav a span{display:none}.topbar nav a{padding:8px 10px}}
+@media (max-width:1380px) and (min-width:641px){.topbar nav a span{display:none}.topbar nav a{padding:8px 10px}}
 @media (max-width:640px){.topbar .who button span{display:none}}

@@ -13,6 +13,7 @@ use App\Http\Controllers\PostalCodeController;
 use App\Http\Controllers\SettingController;
 use App\Http\Controllers\UnitController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\VenueController;
 use App\Http\Middleware\EnsureSuperadmin;
 use Illuminate\Support\Facades\Route;
 
@@ -42,6 +43,7 @@ Route::middleware('auth')->group(function () {
     Route::get('units/{unit}/qr.svg', [UnitController::class, 'qr'])->name('units.qr');
 
     Route::resource('clients', ClientController::class);
+    Route::resource('venues', VenueController::class)->except('show');
 
     Route::get('orders/distance', [OrderController::class, 'distance'])->name('orders.distance');
     Route::get('postal-codes/{code}', PostalCodeController::class)->name('postal-codes.show')->where('code', '[0-9]{5}');
