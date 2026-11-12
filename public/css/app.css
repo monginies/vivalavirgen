@@ -19,7 +19,7 @@ a:hover{color:var(--sage-darker);text-decoration-color:currentColor}
 .topbar .brand{display:flex;align-items:center;gap:10px;color:var(--ink);text-decoration:none;font-family:var(--serif);font-size:19px;white-space:nowrap}
 .topbar .brand img{width:44px;height:44px;display:block}
 .topbar nav{display:flex;gap:2px;flex-wrap:wrap;flex:1}
-.topbar nav a{display:inline-flex;align-items:center;gap:7px;color:var(--muted);text-decoration:none;padding:7px 11px;border-radius:8px;font-size:14px;font-weight:500}
+.topbar nav a{display:inline-flex;align-items:center;gap:6px;color:var(--muted);text-decoration:none;padding:7px 9px;border-radius:8px;font-size:14px;font-weight:500;white-space:nowrap}
 .topbar nav a .ico{flex:none;opacity:.85}
 .topbar nav a.on .ico{color:var(--sage-deep);opacity:1}
 .topbar nav a:hover{color:var(--ink);background:var(--bg)}
@@ -140,5 +140,6 @@ table.cal .ev.amber{background:#f5ead6;color:var(--amber)}
 .drop input{position:absolute;width:1px;height:1px;opacity:0}
 .drop b{color:var(--sage-deep)}
 
-@media (max-width:1380px) and (min-width:641px){.topbar nav a span{display:none}.topbar nav a{padding:8px 10px}}
+@media (max-width:1300px) and (min-width:641px){.topbar{gap:12px;padding-left:16px;padding-right:16px}.topbar nav{gap:0}.topbar nav a{gap:5px;padding:7px 7px;font-size:13px}.topbar nav a .ico{width:16px;height:16px}.topbar .who{gap:6px}}
+@media (max-width:1140px) and (min-width:641px){.topbar nav a span{display:none}.topbar nav a{padding:8px 10px}.topbar nav a .ico{width:18px;height:18px}}
 @media (max-width:640px){.topbar .who button span{display:none}}
