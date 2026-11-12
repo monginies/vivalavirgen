@@ -19,11 +19,6 @@ a:hover{color:var(--sage-darker);text-decoration-color:currentColor}
 .topbar .brand{display:flex;align-items:center;gap:10px;color:var(--ink);text-decoration:none;font-family:var(--serif);font-size:19px;white-space:nowrap}
 .topbar .brand img{width:44px;height:44px;display:block}
 .topbar nav{display:flex;gap:2px;flex-wrap:wrap;flex:1}
-.topbar nav a{display:inline-flex;align-items:center;gap:6px;color:var(--muted);text-decoration:none;padding:7px 9px;border-radius:8px;font-size:14px;font-weight:500;white-space:nowrap}
-.topbar nav a .ico{flex:none;opacity:.85}
-.topbar nav a.on .ico{color:var(--sage-deep);opacity:1}
-.topbar nav a:hover{color:var(--ink);background:var(--bg)}
-.topbar nav a.on{color:var(--ink);background:var(--sage-soft)}
 .topbar .who{display:flex;gap:10px;align-items:center;font-size:13px;color:var(--muted)}
 .topbar .who button{display:inline-flex;align-items:center;gap:6px;background:var(--card);border:1px solid var(--line);color:var(--ink);border-radius:8px;padding:5px 11px;cursor:pointer;font:inherit}
 .topbar .who button:hover{border-color:var(--sage)}
@@ -98,7 +93,7 @@ dl.props dt{color:var(--muted)}dl.props dd{margin:0}
 .login form{text-align:left;margin-top:18px}
 .login .tagline{color:var(--muted);margin:0;font-size:14px}
 
-@media (max-width:640px){.topbar{padding:8px 12px 0;gap:8px 10px}.topbar .brand span{display:none}.topbar .who{margin-left:auto}.topbar nav{order:3;flex-basis:100%;flex-wrap:nowrap;overflow-x:auto;padding-bottom:6px;-webkit-overflow-scrolling:touch}.topbar nav a{white-space:nowrap}.g4{grid-template-columns:repeat(2,1fr)}.filters input,.filters select{min-width:100%}h1{font-size:24px}main{padding-top:20px}}
+@media (max-width:640px){.topbar{padding:8px 12px 0;gap:8px 10px}.topbar .brand span{display:none}.topbar .who{margin-left:auto}.topbar nav{order:3;flex-basis:100%}.g4{grid-template-columns:repeat(2,1fr)}.filters input,.filters select{min-width:100%}h1{font-size:24px}main{padding-top:20px}}
 
 /* Etiquetas imprimibles */
 .labels{display:grid;grid-template-columns:repeat(auto-fill,minmax(62mm,1fr));gap:4mm}
@@ -140,6 +135,32 @@ table.cal .ev.amber{background:#f5ead6;color:var(--amber)}
 .drop input{position:absolute;width:1px;height:1px;opacity:0}
 .drop b{color:var(--sage-deep)}
 
-@media (max-width:1300px) and (min-width:641px){.topbar{gap:12px;padding-left:16px;padding-right:16px}.topbar nav{gap:0}.topbar nav a{gap:5px;padding:7px 7px;font-size:13px}.topbar nav a .ico{width:16px;height:16px}.topbar .who{gap:6px}}
-@media (max-width:1140px) and (min-width:641px){.topbar nav a span{display:none}.topbar nav a{padding:8px 10px}.topbar nav a .ico{width:18px;height:18px}}
 @media (max-width:640px){.topbar .who button span{display:none}}
+
+/* Menú jerárquico */
+.topbar{position:relative;z-index:20}
+.topbar nav{align-items:center}
+.topbar nav .top{display:inline-flex;align-items:center;gap:6px;color:var(--muted);text-decoration:none;padding:7px 10px;border-radius:8px;font-size:14px;font-weight:500;white-space:nowrap;cursor:pointer;list-style:none;user-select:none}
+.topbar nav summary.top::-webkit-details-marker{display:none}
+.topbar nav .top:hover,.topbar nav details[open]>.top{color:var(--ink);background:var(--bg)}
+.topbar nav .top.on,.topbar nav .menu.on>.top{color:var(--ink);background:var(--sage-soft)}
+.topbar nav .top .ico{opacity:.85}
+.topbar nav .top.on .ico,.topbar nav .menu.on>.top .ico{color:var(--sage-deep);opacity:1}
+.topbar nav .chev{opacity:.6;transition:transform .15s}
+.topbar nav details[open] .chev{transform:rotate(180deg)}
+.menu{position:relative}
+.menu .sub{position:absolute;top:calc(100% + 6px);left:0;min-width:210px;background:var(--card);border:1px solid var(--line);border-radius:12px;box-shadow:0 10px 30px #2e302822;padding:6px;display:flex;flex-direction:column;gap:2px;z-index:30}
+.menu .sub::before{content:"";position:absolute;left:0;right:0;top:-8px;height:8px}
+.menu .sub a{display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:8px;color:var(--ink);text-decoration:none;font-size:14px;white-space:nowrap}
+.menu .sub a .ico{color:var(--muted)}
+.menu .sub a:hover{background:var(--bg)}
+.menu .sub a.on{background:var(--sage-soft);font-weight:600}
+.menu .sub a.on .ico{color:var(--sage-deep)}
+@media (max-width:640px){
+  .topbar nav{overflow:visible;flex-wrap:wrap;gap:2px;padding-bottom:6px}
+  .topbar nav .top{padding:7px 8px;font-size:13px}
+  .topbar nav .top .ico{display:none}
+  .menu{position:static}
+  .menu .sub{left:12px;right:12px;top:auto;margin-top:6px}
+}
+@media (max-width:820px) and (min-width:641px){.topbar nav .top span{display:none}}
