@@ -46,8 +46,9 @@ class PostalCode extends Model
 
     public function label(): string
     {
-        $parts = [$this->place];
-        if ($this->municipality && Str::lower($this->municipality) !== Str::lower($this->place)) {
+        $same = fn ($a, $b) => Str::lower(Str::ascii((string) $a)) === Str::lower(Str::ascii((string) $b));
+        $parts = $this->municipality && $same($this->place, $this->municipality) ? [$this->municipality] : [$this->place];
+        if ($this->municipality && ! $same($this->municipality, $this->place)) {
             $parts[] = $this->municipality;
         }
         if ($this->province && Str::lower($this->province) !== Str::lower($this->municipality ?? '')) {
