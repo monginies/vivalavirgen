@@ -9,6 +9,7 @@ use App\Services\Availability;
 use App\Support\Cart;
 use App\Support\Tracker;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 
 class CatalogController extends Controller
 {
@@ -55,10 +56,7 @@ class CatalogController extends Controller
             ->where('active', true)
             ->with('mainPhoto', 'category')
             ->when($category, fn ($q) => $q->where('category_id', $category->id))
-            ->when($request->q, fn ($q, $term) => $q->where(fn ($q) => $q
-                ->where('name', 'like', "%{$term}%")
-                ->orWhere('description', 'like', "%{$term}%")
-                ->orWhere('dimensions', 'like', "%{$term}%")))
+            ->when($request->q, fn ($q, $term) => $q->search($term))
             ->orderBy('name')
             ->paginate(24)
             ->withQueryString();
@@ -76,6 +74,39 @@ class CatalogController extends Controller
             'title' => $title,
             'articles' => $articles,
             'availability' => $this->availability($articles->pluck('id')->all()),
+        ]);
+    }
+
+    /** Sugerencias mientras se escribe en el buscador. */
+    public function suggest(Request $request)
+    {
+        $term = mb_substr(trim((string) $request->query('q')), 0, 80);
+        if (mb_strlen($term) < 2) {
+            return response()->json(['articles' => [], 'categories' => []]);
+        }
+
+        $first = addcslashes(strtok($term, ' '), '%_\\');
+        $articles = Article::where('active', true)->search($term)
+            ->with('mainPhoto', 'category')
+            ->orderByRaw('CASE WHEN name LIKE ? THEN 0 WHEN name LIKE ? THEN 1 ELSE 2 END', [$first.'%', '% '.$first.'%'])
+            ->orderBy('name')->limit(6)->get();
+
+        $categories = Category::forPortal()->get()
+            ->filter(fn (Category $c) => str_contains(Str::lower(Str::ascii($c->name)), Str::lower(Str::ascii($term))))
+            ->take(3);
+
+        return response()->json([
+            'articles' => $articles->map(fn (Article $a) => [
+                'name' => $a->name,
+                'meta' => collect([$a->category?->name, $a->dimensions])->filter()->join(' · '),
+                'img' => $a->photoUrl(),
+                'url' => route('portal.article', $a->reference),
+            ])->values(),
+            'categories' => $categories->map(fn (Category $c) => [
+                'name' => $c->name,
+                'url' => route('portal.collection', $c->slug()),
+            ])->values(),
+            'all' => route('portal.home', ['q' => $term]),
         ]);
     }
 

@@ -71,4 +71,18 @@ class StatsTest extends TestCase
         $this->get('/sitemap.xml')->assertOk()->assertHeader('Content-Type', 'application/xml; charset=UTF-8')
             ->assertSee('/articulo/SIL-0001', false)->assertSee('/coleccion/sillas', false);
     }
+
+    public function test_search_suggestions(): void
+    {
+        $this->article();
+        Article::create(['category_id' => Category::first()->id, 'reference' => 'SIL-0002', 'name' => 'Banco de madera', 'description' => 'Banco largo para sillas', 'rental_price' => 9, 'active' => true]);
+
+        $this->getJson('/buscar/sugerencias?q=enea silla')->assertOk()
+            ->assertJsonCount(1, 'articles')->assertJsonPath('articles.0.name', 'Silla de enea');
+        $r = $this->getJson('/buscar/sugerencias?q=sil')->assertOk()->assertJsonCount(2, 'articles')
+            ->assertJsonPath('articles.0.name', 'Silla de enea')->assertJsonPath('categories.0.name', 'Sillas');
+        $this->getJson('/buscar/sugerencias?q=s')->assertOk()->assertJsonCount(0, 'articles');
+        $this->get('/?q=enea%20silla')->assertOk()->assertSee('Silla de enea');
+        $this->assertSame(0, WebEvent::where('path', '/buscar/sugerencias')->count());
+    }
 }

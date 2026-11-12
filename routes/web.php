@@ -30,6 +30,7 @@ Route::name('portal.')->middleware(TrackPageView::class)->group(function () {
     Route::get('/', [Portal\CatalogController::class, 'index'])->name('home');
     Route::get('coleccion/{slug}', [Portal\CatalogController::class, 'collection'])->name('collection');
     Route::get('articulo/{reference}', [Portal\CatalogController::class, 'show'])->name('article');
+    Route::get('buscar/sugerencias', [Portal\CatalogController::class, 'suggest'])->name('suggest')->middleware('throttle:120,1');
     Route::view('privacidad', 'portal.privacy')->name('privacy');
     Route::get('sitemap.xml', Portal\SitemapController::class)->name('sitemap');
 

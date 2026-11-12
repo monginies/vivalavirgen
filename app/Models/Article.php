@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Enums\UnitStatus;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -83,6 +84,22 @@ class Article extends Model
     public function mainPhoto(): HasOne
     {
         return $this->hasOne(ArticlePhoto::class)->ofMany(['position' => 'min', 'id' => 'min']);
+    }
+
+    /** Búsqueda de la web: todas las palabras deben aparecer (en cualquier orden) en el nombre, la descripción, las medidas, la referencia o la categoría. */
+    public function scopeSearch(Builder $query, ?string $term): Builder
+    {
+        $words = array_slice(array_filter(preg_split('/\s+/u', trim((string) $term))), 0, 6);
+        foreach ($words as $word) {
+            $like = '%'.addcslashes($word, '%_\\').'%';
+            $query->where(fn ($q) => $q->where('name', 'like', $like)
+                ->orWhere('description', 'like', $like)
+                ->orWhere('dimensions', 'like', $like)
+                ->orWhere('reference', 'like', $like)
+                ->orWhereHas('category', fn ($c) => $c->where('name', 'like', $like)));
+        }
+
+        return $query;
     }
 
     /** Miniatura de la foto principal (listados). */
