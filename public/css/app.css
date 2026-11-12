@@ -308,3 +308,8 @@ body.portal h1{font-family:var(--serif);font-weight:400}
 .tier-mimbre{background:#ead9bb;color:#6e4f22;border-color:#dbc39b}
 .tier-ratan{background:#d9c1a0;color:#4f3418;border-color:#c7a87f}
 .tier-hoja{background:#e6eedf;color:var(--green);border-color:#d0dec4}
+
+/* Planifica tu evento en una línea */
+.pt-plan>div{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+.pt-plan b{display:inline}
+.pt-arrow{font-style:normal;font-size:20px;line-height:1;color:var(--pt-terra);margin-left:2px}
