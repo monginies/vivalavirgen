@@ -116,24 +116,19 @@
     <td><div class="serif" style="font-size:15pt">Viva la Virgen</div><div class="muted">Anexo a la proforma {{ $order->number }}</div></td>
     <td style="text-align:right"><h1 style="font-size:16pt">PRECIOS DE REPOSICIÓN</h1><div class="tag">Material alquilado</div></td>
 </tr></table>
-<p>Si alguna pieza se devuelve rota, deteriorada o no se devuelve, se facturará a su precio de reposición por unidad, descontándolo de la fianza. Estos son los precios del material de este pedido:</p>
+<p>Si alguna pieza se devuelve rota, deteriorada o no se devuelve, se facturará a su precio de reposición por unidad, descontándolo de la fianza. Estos son los precios por unidad del material de este pedido:</p>
 <table class="lines">
-    <thead><tr><th style="width:70px">Ref.</th><th>Artículo</th><th class="num">Cant.</th><th class="num">Reposición ud.</th><th class="num">Valor total</th></tr></thead>
+    <thead><tr><th style="width:70px">Ref.</th><th>Artículo</th><th class="num">Precio de reposición por unidad</th></tr></thead>
     <tbody>
     @foreach ($order->lines as $l)
         <tr>
             <td class="muted">{{ $l->article->reference }}</td>
             <td>{{ $l->article->name }}@if ($l->article->dimensions)<br><span class="muted" style="font-size:8pt">{{ $l->article->dimensions }}</span>@endif</td>
-            <td class="num">{{ $l->quantity }}</td>
             <td class="num">{{ $eur($l->article->replacement_price) }}</td>
-            <td class="num">{{ $eur($l->quantity * $l->article->replacement_price) }}</td>
         </tr>
     @endforeach
     </tbody>
 </table>
-<table class="totals">
-    <tr class="grand"><td>VALOR TOTAL DEL MATERIAL</td><td class="num">{{ $eur($order->lines->sum(fn ($l) => $l->quantity * $l->article->replacement_price)) }}</td></tr>
-</table>
-<p class="terms">Precios sin IVA. El valor total es informativo: solo se factura la reposición de las piezas dañadas o no devueltas, tras revisar el material a su regreso.</p>
+<p class="terms">Precios por unidad, sin IVA. Solo se factura la reposición de las piezas dañadas o no devueltas, tras revisar el material a su regreso.</p>
 </body>
 </html>
