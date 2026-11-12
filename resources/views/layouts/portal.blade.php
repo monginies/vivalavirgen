@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>@hasSection('title')@yield('title') · @endif{{ config('app.name') }} · Alquiler de decoración mediterránea</title>
     <meta name="description" content="Alquiler de mobiliario y decoración mediterránea para bodas y eventos en Málaga.">
-    <link rel="stylesheet" href="{{ asset('css/app.css') }}?v=23">
+    <link rel="stylesheet" href="{{ asset('css/app.css') }}?v=24">
     <link rel="icon" type="image/png" href="{{ asset('img/favicon-32.png') }}">
     <link rel="apple-touch-icon" href="{{ asset('img/apple-touch-icon.png') }}">
     <meta name="theme-color" content="#9a9b88">
@@ -57,9 +57,9 @@
     </div>
 @endif
 @if (session('status') || session('error'))
-    <div class="pt-flashwrap">
-        @if (session('status'))<div class="flash ok">{{ session('status') }}</div>@endif
-        @if (session('error'))<div class="flash ko">{{ session('error') }}</div>@endif
+    <div class="pt-toasts" aria-live="polite">
+        @if (session('status'))<div class="pt-toast ok" data-ttl="5000">{{ session('status') }}<button type="button" aria-label="Cerrar">×</button></div>@endif
+        @if (session('error'))<div class="pt-toast ko" data-ttl="9000">{{ session('error') }}<button type="button" aria-label="Cerrar">×</button></div>@endif
     </div>
 @endif
 @yield('full')
@@ -85,6 +85,12 @@
 </footer>
 <a href="#" class="pt-top" aria-label="Volver arriba"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5"/><path d="m5 12 7-7 7 7"/></svg></a>
 <script>
+// Avisos flotantes: desaparecen solos (5 s los de confirmación) o al pulsar ×
+document.querySelectorAll('.pt-toast').forEach(t => {
+    const hide = () => { t.classList.add('out'); setTimeout(() => t.remove(), 400); };
+    const timer = setTimeout(hide, +t.dataset.ttl || 5000);
+    t.querySelector('button').addEventListener('click', () => { clearTimeout(timer); hide(); });
+});
 (() => {
     const top = document.querySelector('.pt-top');
     const onScroll = () => top.classList.toggle('show', scrollY > 600);

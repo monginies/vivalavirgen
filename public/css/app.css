@@ -328,3 +328,14 @@ body.portal h1{font-family:var(--serif);font-weight:400}
 
 .pt-logout{gap:6px}
 @media (max-width:640px){.pt-logout span{display:none}.pt-logout{padding:7px 9px}}
+
+/* Avisos flotantes en la web */
+.pt-toasts{position:fixed;top:172px;right:20px;z-index:60;display:flex;flex-direction:column;gap:10px;max-width:min(420px,calc(100vw - 32px))}
+.pt-toast{display:flex;align-items:flex-start;gap:12px;padding:14px 14px 14px 18px;border-radius:10px;font-size:14.5px;line-height:1.45;box-shadow:0 10px 30px #2e302833;animation:ptToastIn .35s ease-out}
+.pt-toast.ok{background:var(--pt-green);color:#fff}
+.pt-toast.ko{background:#f8e6e0;color:#7a2f1f;border:1px solid #efcdc2}
+.pt-toast button{margin-left:auto;background:none;border:0;color:inherit;font-size:20px;line-height:1;cursor:pointer;opacity:.75;padding:0 2px}
+.pt-toast button:hover{opacity:1}
+.pt-toast.out{opacity:0;transform:translateY(-8px);transition:opacity .35s,transform .35s}
+@keyframes ptToastIn{from{opacity:0;transform:translateY(-10px)}to{opacity:1;transform:none}}
+@media (max-width:640px){.pt-toasts{top:auto;bottom:16px;right:16px;left:16px;max-width:none}}
