@@ -161,16 +161,17 @@ class OrderController extends Controller
     {
         $address = trim((string) $request->input('address'));
         $city = trim((string) $request->input('city'));
+        $postalCode = trim((string) $request->input('postal_code'));
 
         try {
             if (! Distance::configured()) {
                 throw new \RuntimeException('Falta la clave de OpenRouteService en el servidor.');
             }
-            if ($address === '' && $city === '') {
+            if ($address === '' && $city === '' && $postalCode === '') {
                 throw new \RuntimeException('Escribe primero la dirección o la población del destino.');
             }
 
-            return response()->json(Distance::fromBase($address, $city));
+            return response()->json(Distance::fromBase($address, $city, $postalCode));
         } catch (ConnectionException) {
             return response()->json(['error' => 'El servicio de mapas no responde ahora mismo. Introduce los km a mano.'], 422);
         } catch (QueryException $e) {
@@ -213,6 +214,7 @@ class OrderController extends Controller
             'end_date' => ['required', 'date', 'after_or_equal:start_date'],
             'destination_address' => ['nullable', 'string', 'max:255'],
             'destination_city' => ['nullable', 'string', 'max:255'],
+            'destination_postal_code' => ['nullable', 'regex:/^\d{5}$/'],
             'distance_km' => ['nullable', 'numeric', 'min:0', 'max:5000'],
             'trucks' => ['required', 'integer', 'min:1', 'max:20'],
             'transport_amount' => ['nullable', 'numeric', 'min:0', 'max:99999'],
@@ -226,6 +228,7 @@ class OrderController extends Controller
         ], [
             'lines.required' => 'Añade al menos un artículo.',
             'end_date.after_or_equal' => 'La recogida no puede ser anterior a la entrega.',
+            'destination_postal_code.regex' => 'El código postal tiene 5 cifras.',
         ]);
 
         // Agrupar líneas por artículo e ignorar filas vacías
@@ -253,6 +256,7 @@ class OrderController extends Controller
             'end_date' => $v['end_date'],
             'destination_address' => $v['destination_address'] ?? null,
             'destination_city' => $v['destination_city'] ?? null,
+            'destination_postal_code' => $v['destination_postal_code'] ?? null,
             'distance_km' => $v['distance_km'] ?? null,
             'trucks' => $v['trucks'],
             'transport_manual' => $manual,

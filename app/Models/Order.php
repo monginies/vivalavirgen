@@ -12,7 +12,7 @@ class Order extends Model
 {
     protected $fillable = [
         'number', 'client_id', 'status', 'event_date', 'start_date', 'end_date',
-        'destination_address', 'destination_city', 'distance_km', 'trucks',
+        'destination_address', 'destination_city', 'destination_postal_code', 'distance_km', 'trucks',
         'transport_manual', 'transport_amount', 'discount_percent', 'deposit_amount',
         'vat_rate', 'expires_at', 'notes', 'created_by',
     ];
@@ -124,6 +124,6 @@ class Order extends Model
 
     public function destination(): string
     {
-        return collect([$this->destination_address, $this->destination_city])->filter()->join(', ');
+        return collect([$this->destination_address, trim($this->destination_postal_code.' '.$this->destination_city)])->filter()->join(', ');
     }
 }

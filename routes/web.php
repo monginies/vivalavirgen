@@ -8,6 +8,7 @@ use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\ClientController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\OrderController;
+use App\Http\Controllers\PostalCodeController;
 use App\Http\Controllers\SettingController;
 use App\Http\Controllers\UnitController;
 use App\Http\Controllers\UserController;
@@ -39,6 +40,7 @@ Route::middleware('auth')->group(function () {
     Route::resource('clients', ClientController::class);
 
     Route::get('orders/distance', [OrderController::class, 'distance'])->name('orders.distance');
+    Route::get('postal-codes/{code}', PostalCodeController::class)->name('postal-codes.show')->where('code', '[0-9]{5}');
     Route::resource('orders', OrderController::class)->except('destroy');
     Route::post('orders/{order}/status', [OrderController::class, 'transition'])->name('orders.transition');
     Route::post('orders/{order}/extend', [OrderController::class, 'extend'])->name('orders.extend');

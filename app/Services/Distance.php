@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Models\PostalCode;
 use App\Models\Setting;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
@@ -31,7 +32,7 @@ class Distance
      *
      * @throws RuntimeException con un mensaje para mostrar al usuario
      */
-    public static function fromBase(?string $address, ?string $city = null): array
+    public static function fromBase(?string $address, ?string $city = null, ?string $postalCode = null): array
     {
         if (! self::configured()) {
             throw new RuntimeException('Falta la clave de OpenRouteService en el servidor.');
@@ -41,7 +42,9 @@ class Distance
         if (! $origin) {
             throw new RuntimeException('No se encuentra la dirección de la base. Revísala en Ajustes.');
         }
-        $target = self::geocode((string) $address, $origin['coords'], $city);
+        $target = filled($postalCode)
+            ? self::locateByPostalCode((string) $address, $city, $postalCode)
+            : self::geocode((string) $address, $origin['coords'], $city);
         if (! $target) {
             throw new RuntimeException('No se encuentra esa dirección a menos de '.self::SEARCH_RADIUS_KM.' km de la base. Prueba a añadir la población o el código postal.');
         }
@@ -100,6 +103,44 @@ class Distance
 
             return $f ? self::point($f, $text) : null;
         });
+    }
+
+    /**
+     * Con código postal el destino se sitúa con la tabla de CP (sirve para toda España).
+     * Si además hay dirección, se busca a menos de 10 km de ese CP; si no aparece, se usa el centro del CP.
+     */
+    private static function locateByPostalCode(string $address, ?string $city, string $postalCode): array
+    {
+        $rows = PostalCode::lookup($postalCode);
+        if ($rows->isEmpty()) {
+            throw new RuntimeException("No conozco el código postal {$postalCode}. Revísalo o déjalo en blanco.");
+        }
+        $anchor = PostalCode::bestMatch($rows, $city);
+        $center = [$anchor->lon, $anchor->lat];
+        $text = self::normalize($address);
+
+        if ($text !== '') {
+            $found = Cache::remember('ors:cp:'.md5(mb_strtolower($text).$postalCode.$anchor->id), now()->addDays(30), function () use ($text, $anchor, $center) {
+                $f = self::search('/geocode/search', [
+                    'text' => $text.', '.($anchor->municipality ?? $anchor->place),
+                    'focus.point.lon' => $center[0], 'focus.point.lat' => $center[1],
+                    'boundary.circle.lon' => $center[0], 'boundary.circle.lat' => $center[1],
+                    'boundary.circle.radius' => 10,
+                ]);
+                $precise = $f && ! in_array($f['properties']['layer'] ?? null, self::AREA_LAYERS, true);
+
+                return $precise && self::sameName($f, $text) ? self::point($f, $text) : null;
+            });
+            if ($found) {
+                return $found;
+            }
+        }
+
+        return [
+            'coords' => $center,
+            'label' => "CP {$anchor->code} · {$anchor->label()}"
+                .($text !== '' ? ' (no se ha encontrado la dirección exacta; se toma el centro del código postal)' : ''),
+        ];
     }
 
     private const AREA_LAYERS = ['locality', 'localadmin', 'county', 'region', 'macroregion', 'borough', 'neighbourhood'];

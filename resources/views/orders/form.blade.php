@@ -79,7 +79,16 @@
         <h2>Destino y transporte</h2>
         <div class="grid g2">
             @include('partials.field', ['name' => 'destination_address', 'label' => 'Dirección / finca', 'value' => $order->destination_address])
-            @include('partials.field', ['name' => 'destination_city', 'label' => 'Población', 'value' => $order->destination_city])
+            <div class="grid" style="grid-template-columns:120px 1fr;gap:10px">
+                @include('partials.field', ['name' => 'destination_postal_code', 'label' => 'C. postal', 'value' => $order->destination_postal_code, 'attrs' => 'inputmode=numeric maxlength=5 pattern=[0-9]{5} autocomplete=off'])
+                <div class="field">
+                    <label for="f-destination_city">Población</label>
+                    <input id="f-destination_city" type="text" name="destination_city" list="cp-places" value="{{ old('destination_city', $order->destination_city) }}">
+                    <datalist id="cp-places"></datalist>
+                    <div class="hint" id="cp-hint">Con el código postal se sitúa el destino en cualquier provincia.</div>
+                    @error('destination_city')<div class="err">{{ $message }}</div>@enderror
+                </div>
+            </div>
             <div class="field">
                 <label for="f-distance_km">Distancia desde la base (km, solo ida)</label>
                 <div style="display:flex;gap:8px">
@@ -177,12 +186,30 @@
     });
     document.getElementById('order-form').addEventListener('input', recalc);
 
+    const cpInput = document.getElementById('f-destination_postal_code');
+    cpInput.addEventListener('input', async () => {
+        const cp = cpInput.value.replace(/\D/g, '');
+        const hint = document.getElementById('cp-hint');
+        if (cp.length !== 5) return;
+        try {
+            const data = await (await fetch(@json(url('postal-codes')) + '/' + cp, {headers: {Accept: 'application/json'}})).json();
+            if (!data.found) { hint.className = 'err'; hint.textContent = 'Código postal no encontrado.'; return; }
+            hint.className = 'hint';
+            hint.textContent = data.municipality + (data.province ? ' (' + data.province + ')' : '')
+                + (data.places.length > 1 ? ' · ' + data.places.length + ' localidades con este CP' : '');
+            document.getElementById('cp-places').innerHTML = data.places.map(p => '<option value="' + p.replace(/"/g, '&quot;') + '">').join('');
+            const city = document.getElementById('f-destination_city');
+            if (!city.value.trim()) city.value = data.places.length === 1 ? data.places[0] : data.municipality;
+        } catch (e) {}
+    });
+
     const calcBtn = document.getElementById('calc-km');
     if (calcBtn) calcBtn.addEventListener('click', async () => {
         const hint = document.getElementById('km-hint');
         const params = new URLSearchParams({
             address: document.getElementById('f-destination_address').value,
             city: document.getElementById('f-destination_city').value,
+            postal_code: document.getElementById('f-destination_postal_code').value,
         });
         calcBtn.disabled = true; hint.className = 'hint'; hint.textContent = 'Calculando…';
         try {
