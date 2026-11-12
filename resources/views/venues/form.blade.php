@@ -7,7 +7,7 @@
     @include('partials.field', ['name' => 'name', 'label' => 'Nombre', 'value' => $venue->name, 'required' => true, 'hint' => 'Ej.: Finca La Concepción, Hacienda Nadales…'])
     @include('partials.field', ['name' => 'address', 'label' => 'Dirección', 'value' => $venue->address])
     <div class="grid" style="grid-template-columns:140px 1fr;gap:10px">
-        @include('partials.field', ['name' => 'postal_code', 'label' => 'C. postal', 'value' => $venue->postal_code, 'attrs' => 'inputmode=numeric maxlength=5 autocomplete=off'])
+        @include('partials.field', ['name' => 'postal_code', 'label' => 'C. postal', 'value' => $venue->postal_code, 'attrs' => 'inputmode=numeric maxlength=5 autocomplete=off data-cp-city=f-city'])
         @include('partials.field', ['name' => 'city', 'label' => 'Población', 'value' => $venue->city])
     </div>
     <div class="field">

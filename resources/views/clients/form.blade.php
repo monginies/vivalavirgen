@@ -20,7 +20,7 @@
         @include('partials.field', ['name' => 'phone', 'label' => 'Teléfono', 'value' => $client->phone, 'type' => 'text', 'attrs' => 'inputmode=tel'])
         @include('partials.field', ['name' => 'email', 'label' => 'Email', 'value' => $client->email, 'type' => 'email'])
         @include('partials.field', ['name' => 'address', 'label' => 'Dirección', 'value' => $client->address])
-        @include('partials.field', ['name' => 'postal_code', 'label' => 'Código postal', 'value' => $client->postal_code])
+        @include('partials.field', ['name' => 'postal_code', 'label' => 'Código postal', 'value' => $client->postal_code, 'attrs' => 'inputmode=numeric maxlength=5 autocomplete=off data-cp-city=f-city'])
         @include('partials.field', ['name' => 'city', 'label' => 'Población', 'value' => $client->city])
         @include('partials.field', ['name' => 'province', 'label' => 'Provincia', 'value' => $client->province])
     </div>

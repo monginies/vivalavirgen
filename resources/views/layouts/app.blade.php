@@ -66,6 +66,34 @@
     @yield('content')
 </main>
 <script>
+// Código postal → población (campos con data-cp-city="id-del-campo-población")
+document.querySelectorAll('input[data-cp-city]').forEach(cp => {
+    const city = document.getElementById(cp.dataset.cpCity);
+    if (!city) return;
+    const list = document.createElement('datalist');
+    list.id = city.id + '-places';
+    city.setAttribute('list', list.id);
+    city.after(list);
+    const hint = document.createElement('div');
+    hint.className = 'hint';
+    cp.parentNode.appendChild(hint);
+    let auto = '';
+    cp.addEventListener('input', async () => {
+        const code = cp.value.replace(/\D/g, '');
+        if (code.length !== 5) { hint.textContent = ''; return; }
+        try {
+            const data = await (await fetch(@json(url('postal-codes')) + '/' + code, {headers: {Accept: 'application/json'}})).json();
+            if (!data.found) { hint.className = 'err'; hint.textContent = 'CP no encontrado'; return; }
+            hint.className = 'hint';
+            hint.textContent = data.province || '';
+            list.innerHTML = data.places.map(p => '<option value="' + p.replace(/"/g, '&quot;') + '">').join('');
+            if (!city.value.trim() || city.value === auto) {
+                city.value = auto = data.places.length === 1 ? data.places[0] : (data.municipality || data.places[0]);
+            }
+        } catch (e) {}
+    });
+});
+
 // Menú desplegable: se abre al pulsar (y al pasar el ratón en escritorio); solo uno abierto a la vez
 (() => {
     const menus = [...document.querySelectorAll('#mainnav details.menu')];

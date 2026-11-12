@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\PostalCode;
+use Illuminate\Support\Str;
 
 class PostalCodeController extends Controller
 {
@@ -16,7 +17,8 @@ class PostalCodeController extends Controller
             'found' => $rows->isNotEmpty(),
             'municipality' => $main?->municipality ?? $main?->place,
             'province' => $main?->province,
-            'places' => $rows->pluck('place')->unique()->values(),
+            'places' => $rows->map(fn ($r) => $r->municipality && Str::lower(Str::ascii($r->place)) === Str::lower(Str::ascii($r->municipality))
+                ? $r->municipality : $r->place)->unique()->values(),
         ]);
     }
 }
