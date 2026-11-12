@@ -38,7 +38,6 @@
     <div>
         <b>Planifica tu evento</b>
         <span>Indica la fecha de tu evento y verás las unidades disponibles de cada artículo.</span>
-        <i class="pt-arrow" aria-hidden="true">→</i>
     </div>
     <label>Fecha del evento <input type="date" name="event_date" min="{{ today()->toDateString() }}" value="{{ $cart['event_date'] }}" onchange="this.form.submit()"></label>
 </form>
