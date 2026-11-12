@@ -18,6 +18,7 @@ use App\Http\Controllers\UnitController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\VenueController;
 use App\Http\Middleware\EnsureSuperadmin;
+use App\Http\Middleware\NoIndex;
 use App\Http\Middleware\TrackPageView;
 use Illuminate\Support\Facades\Route;
 
@@ -65,7 +66,7 @@ Route::name('portal.')->middleware(TrackPageView::class)->group(function () {
 });
 
 // ---------- Backoffice ----------
-Route::prefix('app')->group(function () {
+Route::prefix('app')->middleware(NoIndex::class)->group(function () {
     Route::middleware('guest')->group(function () {
         Route::get('login', [LoginController::class, 'show'])->name('login');
         Route::post('login', [LoginController::class, 'login']);
