@@ -17,6 +17,7 @@ class ClientController extends Controller
             ->when($request->boolean('pendientes'), fn ($q) => $q->whereNotNull('password')->whereNotNull('email_verified_at')->whereNull('approved_at'))
             ->when($request->q, fn ($q, $term) => $q->where(fn ($q) => $q
                 ->where('name', 'like', "%{$term}%")
+                ->orWhere('trade_name', 'like', "%{$term}%")
                 ->orWhere('tax_id', 'like', "%{$term}%")
                 ->orWhere('email', 'like', "%{$term}%")
                 ->orWhere('phone', 'like', "%{$term}%")
@@ -92,6 +93,7 @@ class ClientController extends Controller
             'type' => ['required', Rule::in(array_keys(Client::TYPES))],
             'client_category_id' => ['nullable', Rule::exists('client_categories', 'id')],
             'name' => ['required', 'string', 'max:255'],
+            'trade_name' => ['nullable', 'string', 'max:255'],
             'tax_id' => ['nullable', 'string', 'max:20', Rule::unique('clients')->ignore($client)->whereNull('deleted_at')],
             'contact_name' => ['nullable', 'string', 'max:255'],
             'email' => ['nullable', 'email', 'max:255', Rule::unique('clients')->ignore($client)->whereNull('deleted_at')],

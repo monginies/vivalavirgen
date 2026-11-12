@@ -20,7 +20,7 @@ class Client extends Authenticatable implements MustVerifyEmail
     public const TYPES = ['company' => 'Empresa', 'individual' => 'Particular'];
 
     protected $fillable = [
-        'type', 'client_category_id', 'name', 'tax_id', 'contact_name', 'email', 'phone',
+        'type', 'client_category_id', 'name', 'trade_name', 'tax_id', 'contact_name', 'email', 'phone',
         'address', 'postal_code', 'city', 'province', 'notes',
     ];
 

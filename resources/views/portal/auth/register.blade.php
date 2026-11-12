@@ -17,6 +17,7 @@
         </div>
         <div class="grid g2">
             @include('partials.field', ['name' => 'name', 'label' => 'Nombre y apellidos / razón social', 'required' => true, 'attrs' => 'autocomplete=organization'])
+            @include('partials.field', ['name' => 'trade_name', 'label' => 'Nombre comercial', 'hint' => 'Si tu empresa usa un nombre distinto de la razón social.'])
             @include('partials.field', ['name' => 'tax_id', 'label' => 'NIF / CIF', 'required' => true, 'hint' => 'Lo necesitamos para la factura.'])
             @include('partials.field', ['name' => 'contact_name', 'label' => 'Persona de contacto', 'required' => true, 'attrs' => 'autocomplete=name'])
             @include('partials.field', ['name' => 'phone', 'label' => 'Teléfono', 'required' => true, 'attrs' => 'inputmode=tel autocomplete=tel'])

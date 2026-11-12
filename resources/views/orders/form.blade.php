@@ -24,7 +24,7 @@
                 <select id="f-client_id" name="client_id" required>
                     <option value="">Elige un cliente…</option>
                     @foreach ($clients as $c)
-                        <option value="{{ $c->id }}" data-discount="{{ $c->category?->discount_percent ?? 0 }}" @selected(old('client_id', $order->client_id) == $c->id)>{{ $c->name }}</option>
+                        <option value="{{ $c->id }}" data-discount="{{ $c->category?->discount_percent ?? 0 }}" @selected(old('client_id', $order->client_id) == $c->id)>{{ $c->name }}{{ $c->trade_name ? ' ('.$c->trade_name.')' : '' }}</option>
                     @endforeach
                 </select>
                 @error('client_id')<div class="err">{{ $message }}</div>@enderror

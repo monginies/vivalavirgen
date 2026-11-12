@@ -59,6 +59,7 @@
         <div class="label">Cliente</div>
         @php($c = $order->client)
         <b>{{ $c->name }}</b><br>
+        @if ($c->trade_name)<span class="muted">{{ $c->trade_name }}</span><br>@endif
         @if ($c->tax_id){{ $c->tax_id }}<br>@endif
         @if ($addr = collect([$c->address, trim($c->postal_code.' '.$c->city), $c->province])->filter()->join(', ')){{ $addr }}<br>@endif
         <span class="muted">{{ collect([$c->contact_name, $c->phone, $c->email])->filter()->join(' · ') }}</span>

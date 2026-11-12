@@ -24,6 +24,7 @@
     </div>
     <div class="grid g2">
         @include('partials.field', ['name' => 'name', 'label' => 'Nombre / razón social', 'value' => $client->name, 'required' => true])
+        @include('partials.field', ['name' => 'trade_name', 'label' => 'Nombre comercial', 'value' => $client->trade_name, 'hint' => 'Si es distinto de la razón social.'])
         @include('partials.field', ['name' => 'tax_id', 'label' => 'NIF / CIF', 'value' => $client->tax_id])
         @include('partials.field', ['name' => 'contact_name', 'label' => 'Persona de contacto', 'value' => $client->contact_name])
         @include('partials.field', ['name' => 'phone', 'label' => 'Teléfono', 'value' => $client->phone, 'type' => 'text', 'attrs' => 'inputmode=tel'])

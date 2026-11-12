@@ -3,7 +3,7 @@
 @section('content')
 <div class="head"><h1>Clientes</h1><a class="btn" href="{{ route('clients.create') }}">+ Nuevo cliente</a></div>
 <form class="filters" method="get">
-    <input type="search" name="q" value="{{ request('q') }}" placeholder="Buscar por nombre, NIF/CIF, email, teléfono…">
+    <input type="search" name="q" value="{{ request('q') }}" placeholder="Buscar por nombre, nombre comercial, NIF/CIF, email, teléfono…">
     <label class="check"><input type="checkbox" name="pendientes" value="1" @checked(request('pendientes')) onchange="this.form.submit()"> Solo pendientes de aprobar</label>
     <button class="btn sec">Buscar</button>
 </form>
@@ -13,7 +13,7 @@
         <tbody>
         @forelse ($clients as $c)
             <tr>
-                <td><a href="{{ route('clients.show', $c) }}">{{ $c->name }}</a></td>
+                <td><a href="{{ route('clients.show', $c) }}">{{ $c->name }}</a>@if ($c->trade_name)<div class="muted" style="font-size:13px">{{ $c->trade_name }}</div>@endif</td>
                 <td class="muted">{{ $c->typeLabel() }}@if ($c->category)<div style="margin-top:3px">@include('partials.tier', ['category' => $c->category])</div>@endif</td>
                 <td>@if ($c->hasPortalAccess())@php([$wl, $wc] = $c->portalStatus())<span class="badge {{ $wc }}">{{ $wl }}</span>@endif</td>
                 <td class="mono">{{ $c->tax_id }}</td>

@@ -70,6 +70,7 @@ class AuthController extends Controller
             'type' => ['required', Rule::in(array_keys(Client::TYPES))],
             'wedding_planner' => ['nullable', 'boolean'],
             'name' => ['required', 'string', 'max:255'],
+            'trade_name' => ['nullable', 'string', 'max:255'],
             'tax_id' => ['required', 'string', 'max:20'],
             'contact_name' => ['required', 'string', 'max:255'],
             'phone' => ['required', 'string', 'max:30'],
@@ -88,7 +89,7 @@ class AuthController extends Controller
             'password.confirmed' => 'Las contraseñas no coinciden.',
         ]);
 
-        $client = new Client(collect($data)->only(['type', 'name', 'tax_id', 'contact_name', 'phone', 'email', 'address', 'postal_code', 'city', 'province'])->all());
+        $client = new Client(collect($data)->only(['type', 'name', 'trade_name', 'tax_id', 'contact_name', 'phone', 'email', 'address', 'postal_code', 'city', 'province'])->all());
         // Entra sin tipo (precio base); el equipo le asigna Esparto, Mimbre o Ratán al aprobarlo
         if ($request->boolean('wedding_planner')) {
             $client->notes = 'Al registrarse indicó que es wedding planner u organizador de eventos.';
