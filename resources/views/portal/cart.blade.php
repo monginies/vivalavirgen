@@ -95,8 +95,9 @@
                 @if ($discount > 0)<dt>Tu descuento {{ rtrim(rtrim(number_format($discount, 2, ',', ''), '0'), ',') }} %</dt><dd id="s-disc">—</dd>@endif
                 <dt>Transporte</dt><dd id="s-tr">Indica el lugar</dd>
                 <dt>IVA {{ rtrim(rtrim(number_format($settings['vat'], 2, ',', ''), '0'), ',') }} %</dt><dd id="s-vat">—</dd>
-                <dt><b>Total</b></dt><dd><b id="s-total">—</b></dd>
+                <dt>Subtotal</dt><dd id="s-total">—</dd>
                 <dt>Fianza</dt><dd>{{ $money($settings['deposit']) }}<div class="hint" style="margin:0">Se devuelve tras revisar el material</div></dd>
+                <dt><b>Total</b></dt><dd><b id="s-due">—</b></dd>
             </dl>
             <p class="hint">Importe estimado. Te confirmaremos el precio final en la proforma.</p>
             @if ($short->isNotEmpty())<p class="err">Algún artículo no tiene unidades suficientes para tu fecha: ajusta las cantidades y pulsa «Actualizar cantidades».</p>@endif
@@ -122,7 +123,7 @@
 (() => {
     const form = document.getElementById('cart-form');
     if (!form) return;
-    const approved = @json((bool) $approved), discount = @json((float) $discount), vat = @json((float) $settings['vat']);
+    const approved = @json((bool) $approved), discount = @json((float) $discount), vat = @json((float) $settings['vat']), deposit = @json((float) $settings['deposit']);
     const eur = n => n.toLocaleString('es-ES', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + ' €';
     let transport = null;
 
@@ -140,6 +141,7 @@
         document.getElementById('s-tr').textContent = transport === null ? 'Indica el lugar' : eur(tr);
         document.getElementById('s-vat').textContent = eur(base * vat / 100);
         document.getElementById('s-total').textContent = eur(base * (1 + vat / 100));
+        document.getElementById('s-due').textContent = eur(base * (1 + vat / 100) + deposit);
     }
 
     // Transporte estimado según finca o dirección

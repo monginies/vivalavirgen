@@ -30,7 +30,7 @@ class OrderReceived extends Notification
         }
 
         return $mail
-            ->line('Total estimado: **'.Money::eur($o->total()).'** (IVA incluido) más '.Money::eur($o->deposit_amount).' de fianza.')
+            ->line('Subtotal estimado '.Money::eur($o->total()).' (IVA incluido) + fianza '.Money::eur($o->deposit_amount).' = **total '.Money::eur($o->amountDue()).'**.')
             ->line('Revisaremos el pedido y te enviaremos la proforma para confirmarlo.')
             ->action('Ver mi pedido', route('portal.orders.show', $o->number));
     }

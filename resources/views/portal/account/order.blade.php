@@ -27,8 +27,9 @@
             @if ($order->discount_percent > 0)<dt>Descuento</dt><dd>− {{ $money($order->discountAmount()) }}</dd>@endif
             <dt>Transporte</dt><dd>{{ $order->transport_amount > 0 ? $money($order->transport_amount) : 'Pendiente' }}</dd>
             <dt>IVA</dt><dd>{{ $money($order->vatAmount()) }}</dd>
-            <dt><b>Total</b></dt><dd><b>{{ $money($order->total()) }}</b></dd>
-            <dt>Fianza</dt><dd>{{ $money($order->deposit_amount) }}</dd>
+            <dt>Subtotal</dt><dd>{{ $money($order->total()) }} <span class="muted">IVA incl.</span></dd>
+            <dt>Fianza</dt><dd>{{ $money($order->deposit_amount) }} <span class="muted">se devuelve</span></dd>
+            <dt><b>Total a pagar</b></dt><dd><b>{{ $money($order->amountDue()) }}</b></dd>
         </dl>
     </div>
 </div>

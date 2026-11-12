@@ -156,6 +156,12 @@ class Order extends Model
         return round($this->taxableBase() + $this->vatAmount(), 2);
     }
 
+    /** Lo que paga el cliente: total con IVA más la fianza. */
+    public function amountDue(): float
+    {
+        return round($this->total() + $this->deposit_amount, 2);
+    }
+
     public function destination(): string
     {
         return collect([$this->venue?->name, $this->destination_address, trim($this->destination_postal_code.' '.$this->destination_city)])
