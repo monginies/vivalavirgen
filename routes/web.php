@@ -2,9 +2,13 @@
 
 use App\Http\Controllers\ArticleController;
 use App\Http\Controllers\Auth\LoginController;
+use App\Http\Controllers\AvailabilityController;
+use App\Http\Controllers\CalendarController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\ClientController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\OrderController;
+use App\Http\Controllers\SettingController;
 use App\Http\Controllers\UnitController;
 use App\Http\Controllers\UserController;
 use App\Http\Middleware\EnsureSuperadmin;
@@ -34,7 +38,15 @@ Route::middleware('auth')->group(function () {
 
     Route::resource('clients', ClientController::class);
 
+    Route::resource('orders', OrderController::class)->except('destroy');
+    Route::post('orders/{order}/status', [OrderController::class, 'transition'])->name('orders.transition');
+    Route::post('orders/{order}/extend', [OrderController::class, 'extend'])->name('orders.extend');
+    Route::get('calendar', CalendarController::class)->name('calendar');
+    Route::get('availability', AvailabilityController::class)->name('availability');
+
     Route::middleware(EnsureSuperadmin::class)->group(function () {
         Route::resource('users', UserController::class)->except('show');
+        Route::get('settings', [SettingController::class, 'edit'])->name('settings.edit');
+        Route::put('settings', [SettingController::class, 'update'])->name('settings.update');
     });
 });

@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Client extends Model
@@ -15,6 +16,11 @@ class Client extends Model
         'type', 'name', 'tax_id', 'contact_name', 'email', 'phone',
         'address', 'postal_code', 'city', 'province', 'notes',
     ];
+
+    public function orders(): HasMany
+    {
+        return $this->hasMany(Order::class);
+    }
 
     public function typeLabel(): string
     {

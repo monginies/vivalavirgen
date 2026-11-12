@@ -1,0 +1,210 @@
+<?php
+
+namespace Tests\Feature;
+
+use App\Enums\OrderStatus;
+use App\Enums\UnitStatus;
+use App\Models\Article;
+use App\Models\Category;
+use App\Models\Client;
+use App\Models\Order;
+use App\Models\Setting;
+use App\Models\User;
+use App\Services\Availability;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+use Tests\TestCase;
+
+class OrdersTest extends TestCase
+{
+    use RefreshDatabase;
+
+    private User $user;
+
+    private Client $client;
+
+    private Article $chair;
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+        Setting::flushCache();
+        $this->user = User::factory()->create(['is_superadmin' => true]);
+        $this->client = Client::create(['type' => 'individual', 'name' => 'Ana Pérez']);
+        $cat = Category::create(['name' => 'Sillas', 'code' => 'SIL']);
+        $this->chair = Article::create([
+            'category_id' => $cat->id, 'reference' => 'SIL-0001', 'name' => 'Silla Tiffany',
+            'rental_price' => 4.5, 'replacement_price' => 60, 'active' => true,
+        ]);
+        $this->chair->addUnits(10);
+    }
+
+    private function order(string $start, string $end, int $qty, array $attrs = []): Order
+    {
+        $o = Order::create($attrs + [
+            'number' => Order::nextNumber(), 'client_id' => $this->client->id,
+            'status' => OrderStatus::Requested, 'start_date' => $start, 'end_date' => $end,
+            'expires_at' => now()->addDays(3),
+        ]);
+        $o->lines()->create(['article_id' => $this->chair->id, 'quantity' => $qty, 'unit_price' => 4.5]);
+
+        return $o;
+    }
+
+    private function free(string $from, string $to): int
+    {
+        return Availability::forArticles([$this->chair->id], $from, $to)[$this->chair->id]['available'];
+    }
+
+    public function test_capacity_ignores_retired_and_maintenance_units(): void
+    {
+        $this->chair->units()->take(2)->get()->each->update(['status' => UnitStatus::Retired]);
+        $this->chair->units()->where('status', 'available')->first()->update(['status' => UnitStatus::Maintenance]);
+
+        $this->assertSame(7, $this->free('2026-12-04', '2026-12-06'));
+    }
+
+    public function test_overlapping_orders_reduce_availability_but_separate_dates_do_not(): void
+    {
+        $this->order('2026-12-04', '2026-12-06', 6);
+
+        $this->assertSame(4, $this->free('2026-12-05', '2026-12-05'));
+        $this->assertSame(10, $this->free('2026-12-07', '2026-12-08'));
+    }
+
+    public function test_reserved_is_peak_per_day_not_sum_over_range(): void
+    {
+        $this->order('2026-12-01', '2026-12-02', 6);
+        $this->order('2026-12-05', '2026-12-06', 7);
+
+        // En todo el intervalo nunca coinciden: el pico es 7
+        $this->assertSame(3, $this->free('2026-12-01', '2026-12-06'));
+    }
+
+    public function test_overdue_and_cancelled_orders_do_not_block(): void
+    {
+        $this->order('2026-12-04', '2026-12-06', 6, ['expires_at' => now()->subHour()]);
+        $this->order('2026-12-04', '2026-12-06', 3, ['status' => OrderStatus::Cancelled]);
+
+        $this->assertSame(10, $this->free('2026-12-04', '2026-12-06'));
+        $this->assertSame(1, Order::expireOverdue());
+    }
+
+    public function test_paid_orders_do_not_expire(): void
+    {
+        $this->order('2026-12-04', '2026-12-06', 6, ['status' => OrderStatus::Paid, 'expires_at' => null]);
+
+        $this->assertSame(0, Order::expireOverdue());
+        $this->assertSame(4, $this->free('2026-12-04', '2026-12-06'));
+    }
+
+    public function test_delivered_material_blocks_until_closed_even_after_return_date(): void
+    {
+        $o = $this->order('2026-11-01', '2026-11-03', 5, ['status' => OrderStatus::Delivered, 'expires_at' => null]);
+
+        $this->assertSame(5, $this->free('2026-12-20', '2026-12-21'));
+        $o->update(['status' => OrderStatus::Closed]);
+        $this->assertSame(10, $this->free('2026-12-20', '2026-12-21'));
+    }
+
+    public function test_create_order_prereserves_and_calculates_transport(): void
+    {
+        $res = $this->actingAs($this->user)->post(route('orders.store'), [
+            'client_id' => $this->client->id,
+            'start_date' => '2026-12-04', 'end_date' => '2026-12-06',
+            'distance_km' => 100, 'trucks' => 2,
+            'deposit_amount' => 150,
+            'lines' => [['article_id' => $this->chair->id, 'quantity' => 8, 'unit_price' => 4.5]],
+        ]);
+
+        $order = Order::firstOrFail();
+        $res->assertRedirect(route('orders.show', $order));
+        $this->assertSame(OrderStatus::Requested, $order->status);
+        $this->assertSame('PED-'.now()->year.'-0001', $order->number);
+        // 2 trayectos × 100 km × 0,60 €/km × 2 camiones = 240
+        $this->assertEquals(240, $order->transport_amount);
+        $this->assertTrue($order->expires_at->between(now()->addDays(3)->subMinute(), now()->addDays(3)->addMinute()));
+        // 36 € material + 240 transporte = 276 base, IVA 21 %
+        $this->assertEquals(276, $order->taxableBase());
+        $this->assertEquals(333.96, $order->total());
+
+        $this->actingAs($this->user)->get(route('orders.show', $order))->assertOk()->assertSee('PED-');
+    }
+
+    public function test_transport_minimum_applies(): void
+    {
+        $this->assertEquals(60, Order::calculateTransport(10, 1));
+        $this->assertEquals(0, Order::calculateTransport(null, 1));
+    }
+
+    public function test_cannot_book_more_than_available(): void
+    {
+        $this->order('2026-12-04', '2026-12-06', 6);
+
+        $this->actingAs($this->user)->post(route('orders.store'), [
+            'client_id' => $this->client->id,
+            'start_date' => '2026-12-05', 'end_date' => '2026-12-07', 'trucks' => 1,
+            'lines' => [['article_id' => $this->chair->id, 'quantity' => 5]],
+        ])->assertSessionHasErrors('lines');
+
+        $this->assertSame(1, Order::count());
+    }
+
+    public function test_editing_an_order_does_not_count_its_own_reservation(): void
+    {
+        $o = $this->order('2026-12-04', '2026-12-06', 8);
+
+        $this->actingAs($this->user)->put(route('orders.update', $o), [
+            'client_id' => $this->client->id,
+            'start_date' => '2026-12-04', 'end_date' => '2026-12-06', 'trucks' => 1,
+            'lines' => [['article_id' => $this->chair->id, 'quantity' => 10, 'unit_price' => 4]],
+        ])->assertSessionHasNoErrors();
+
+        $this->assertSame(10, $o->lines()->first()->quantity);
+    }
+
+    public function test_status_flow_and_reactivation(): void
+    {
+        $o = $this->order('2026-12-04', '2026-12-06', 4);
+        $go = fn ($s) => $this->actingAs($this->user)->from(route('orders.show', $o))->post(route('orders.transition', $o), ['status' => $s]);
+
+        $go('paid')->assertSessionHas('error'); // no se puede saltar pasos
+        $go('accepted');
+        $go('proforma_sent');
+        $go('paid');
+        $this->assertNull($o->fresh()->expires_at);
+        $this->assertSame(OrderStatus::Paid, $o->fresh()->status);
+
+        $expired = $this->order('2026-12-10', '2026-12-11', 2, ['status' => OrderStatus::Expired]);
+        $this->actingAs($this->user)->post(route('orders.transition', $expired), ['status' => 'requested']);
+        $this->assertSame(OrderStatus::Requested, $expired->fresh()->status);
+        $this->assertTrue($expired->fresh()->expires_at->isFuture());
+    }
+
+    public function test_pages_render(): void
+    {
+        $this->order('2026-12-04', '2026-12-06', 4);
+        $this->actingAs($this->user);
+
+        $this->get(route('orders.index'))->assertOk()->assertSee('Ana Pérez');
+        $this->get(route('orders.create'))->assertOk();
+        $this->get(route('calendar', ['month' => '2026-12']))->assertOk()->assertSee('Ana Pérez');
+        $this->get(route('availability', ['from' => '2026-12-04', 'to' => '2026-12-06']))->assertOk()->assertSee('Silla Tiffany');
+        $this->get(route('settings.edit'))->assertOk();
+        $this->get(route('dashboard'))->assertOk();
+        $this->get(route('clients.show', $this->client))->assertOk()->assertSee('PED-');
+    }
+
+    public function test_settings_are_superadmin_only_and_saved(): void
+    {
+        $staff = User::factory()->create(['is_superadmin' => false]);
+        $this->actingAs($staff)->get(route('settings.edit'))->assertForbidden();
+
+        $this->actingAs($this->user)->put(route('settings.update'), [
+            'transport_price_per_km' => '0.8', 'transport_minimum' => '50', 'deposit_amount' => '200',
+            'prereservation_days' => '3', 'vat_rate' => '21', 'base_address' => 'C/ Driza, 13',
+        ])->assertSessionHasNoErrors();
+
+        Setting::flushCache();
+        $this->assertEquals(0.8, Setting::number('transport_price_per_km'));
+    }
+}

@@ -18,7 +18,27 @@
     <div class="card">
         <h2>Notas</h2>
         <p>{!! $client->notes ? nl2br(e($client->notes)) : '<span class="muted">Sin notas.</span>' !!}</p>
-        <p class="muted" style="font-size:13px">Los presupuestos y alquileres del cliente aparecerán aquí en la siguiente fase.</p>
     </div>
+</div>
+<div class="card table-wrap">
+    <div class="head" style="margin-bottom:8px"><h2 style="margin:0">Pedidos</h2>
+        <a class="btn sm" href="{{ route('orders.create', ['client' => $client->id]) }}">+ Nuevo pedido</a></div>
+    @php($orders = $client->orders()->with('lines')->orderByDesc('start_date')->get())
+    <table>
+        <thead><tr><th>Número</th><th>Entrega</th><th>Recogida</th><th>Estado</th><th class="num">Total</th></tr></thead>
+        <tbody>
+        @forelse ($orders as $o)
+            <tr>
+                <td class="mono"><a href="{{ route('orders.show', $o) }}">{{ $o->number }}</a></td>
+                <td>{{ $o->start_date->format('d/m/Y') }}</td>
+                <td>{{ $o->end_date->format('d/m/Y') }}</td>
+                <td><span class="badge {{ $o->status->color() }}">{{ $o->status->label() }}</span></td>
+                <td class="num">{{ \App\Support\Money::eur($o->total()) }}</td>
+            </tr>
+        @empty
+            <tr><td colspan="5" class="empty">Este cliente aún no tiene pedidos.</td></tr>
+        @endforelse
+        </tbody>
+    </table>
 </div>
 @endsection

@@ -2,16 +2,20 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\OrderStatus;
 use App\Enums\UnitStatus;
 use App\Models\Article;
 use App\Models\Category;
 use App\Models\Client;
+use App\Models\Order;
 use App\Models\Unit;
 
 class DashboardController extends Controller
 {
     public function __invoke()
     {
+        Order::expireOverdue();
+
         $unitsByStatus = Unit::query()
             ->selectRaw('status, count(*) as total')
             ->groupBy('status')
@@ -24,6 +28,11 @@ class DashboardController extends Controller
             'units' => $unitsByStatus->sum(),
             'unitsByStatus' => collect(UnitStatus::cases())
                 ->mapWithKeys(fn ($s) => [$s->value => ['status' => $s, 'total' => $unitsByStatus[$s->value] ?? 0]]),
+            'upcomingOrders' => Order::with('client')
+                ->whereIn('status', OrderStatus::blocking())
+                ->where('end_date', '>=', today())
+                ->orderBy('start_date')->take(8)->get(),
+            'pendingOrders' => Order::whereIn('status', OrderStatus::expirable())->count(),
             'recentArticles' => Article::with('category')->withCount('units')->latest()->take(5)->get(),
         ]);
     }

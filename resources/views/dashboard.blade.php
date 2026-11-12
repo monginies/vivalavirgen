@@ -2,7 +2,8 @@
 @section('content')
 <div class="head"><h1>Inicio</h1>
     <div class="actions">
-        <a class="btn" href="{{ route('articles.create') }}">+ Artículo</a>
+        <a class="btn" href="{{ route('orders.create') }}">+ Pedido</a>
+        <a class="btn sec" href="{{ route('articles.create') }}">+ Artículo</a>
         <a class="btn sec" href="{{ route('clients.create') }}">+ Cliente</a>
     </div>
 </div>
@@ -11,6 +12,22 @@
     <div class="card" style="margin:0"><div class="stat">{{ $units }}</div><div class="stat-label">Unidades con QR</div></div>
     <a class="card" style="text-decoration:none;color:inherit;margin:0" href="{{ route('categories.index') }}"><div class="stat">{{ $categories }}</div><div class="stat-label">Categorías</div></a>
     <a class="card" style="text-decoration:none;color:inherit;margin:0" href="{{ route('clients.index') }}"><div class="stat">{{ $clients }}</div><div class="stat-label">Clientes</div></a>
+</div>
+<div class="card table-wrap">
+    <div class="head" style="margin-bottom:8px"><h2 style="margin:0">Próximos pedidos</h2>
+        @if ($pendingOrders)<a class="badge amber" href="{{ route('orders.index') }}">{{ $pendingOrders }} pre-reserva{{ $pendingOrders > 1 ? 's' : '' }} sin pagar</a>@endif</div>
+    <table>
+        @forelse ($upcomingOrders as $o)
+            <tr>
+                <td class="mono"><a href="{{ route('orders.show', $o) }}">{{ $o->number }}</a></td>
+                <td>{{ $o->client->name }}</td>
+                <td>{{ $o->start_date->format('d/m') }} – {{ $o->end_date->format('d/m') }}</td>
+                <td><span class="badge {{ $o->status->color() }}">{{ $o->status->label() }}</span></td>
+            </tr>
+        @empty
+            <tr><td class="empty">No hay pedidos próximos. <a href="{{ route('orders.create') }}">Crea el primero</a>.</td></tr>
+        @endforelse
+    </table>
 </div>
 <div class="grid g2">
     <div class="card">
