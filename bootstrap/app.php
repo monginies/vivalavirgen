@@ -12,7 +12,9 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
-        //
+        // Backoffice en /app, web de clientes en la raíz
+        $middleware->redirectGuestsTo(fn (Request $request) => $request->is('app', 'app/*') ? route('login') : route('portal.login'));
+        $middleware->redirectUsersTo(fn (Request $request) => $request->is('app', 'app/*') ? route('dashboard') : route('portal.home'));
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         $exceptions->shouldRenderJsonWhen(

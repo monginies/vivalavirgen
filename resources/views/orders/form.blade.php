@@ -24,7 +24,7 @@
                 <select id="f-client_id" name="client_id" required>
                     <option value="">Elige un cliente…</option>
                     @foreach ($clients as $c)
-                        <option value="{{ $c->id }}" @selected(old('client_id', $order->client_id) == $c->id)>{{ $c->name }}</option>
+                        <option value="{{ $c->id }}" data-discount="{{ $c->category?->discount_percent ?? 0 }}" @selected(old('client_id', $order->client_id) == $c->id)>{{ $c->name }}</option>
                     @endforeach
                 </select>
                 @error('client_id')<div class="err">{{ $message }}</div>@enderror
@@ -230,13 +230,19 @@
         });
     })();
 
+    // Al elegir cliente se propone el descuento de su tipo
+    document.getElementById('f-client_id').addEventListener('change', e => {
+        const d = e.target.selectedOptions[0]?.dataset.discount;
+        if (d !== undefined) { document.getElementById('f-discount_percent').value = parseFloat(d); recalc(); }
+    });
+
     const cpInput = document.getElementById('f-destination_postal_code');
     cpInput.addEventListener('input', async () => {
         const cp = cpInput.value.replace(/\D/g, '');
         const hint = document.getElementById('cp-hint');
         if (cp.length !== 5) return;
         try {
-            const data = await (await fetch(@json(url('postal-codes')) + '/' + cp, {headers: {Accept: 'application/json'}})).json();
+            const data = await (await fetch(@json(url('app/postal-codes')) + '/' + cp, {headers: {Accept: 'application/json'}})).json();
             if (!data.found) { hint.className = 'err'; hint.textContent = 'Código postal no encontrado.'; return; }
             hint.className = 'hint';
             hint.textContent = data.municipality + (data.province ? ' (' + data.province + ')' : '')

@@ -4,7 +4,7 @@
 @php($money = fn ($v) => \App\Support\Money::eur($v))
 <div class="head">
     <div>
-        <h1>Pedido <span class="mono">{{ $order->number }}</span> <span class="badge {{ $order->status->color() }}">{{ $order->status->label() }}</span></h1>
+        <h1>Pedido <span class="mono">{{ $order->number }}</span> <span class="badge {{ $order->status->color() }}">{{ $order->status->label() }}</span>@if ($order->source === 'web') <span class="badge blue">Web</span>@endif</h1>
         <div class="sub"><a href="{{ route('clients.show', $order->client) }}">{{ $order->client->name }}</a> · creado el {{ $order->created_at->format('d/m/Y') }}@if ($order->creator) por {{ $order->creator->name }}@endif</div>
     </div>
     @if ($order->status->isEditable())

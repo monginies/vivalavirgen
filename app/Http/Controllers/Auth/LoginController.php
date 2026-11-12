@@ -38,7 +38,9 @@ class LoginController extends Controller
         RateLimiter::clear($key);
         $request->session()->regenerate();
 
-        return redirect()->intended(route('dashboard'));
+        $to = $request->session()->pull('url.intended', route('dashboard'));
+
+        return redirect(str_starts_with((string) parse_url($to, PHP_URL_PATH), '/app') ? $to : route('dashboard'));
     }
 
     public function logout(Request $request)

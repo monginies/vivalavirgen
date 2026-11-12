@@ -24,7 +24,7 @@ App interna de **Viva la Virgen** para gestionar el material que alquila para ev
 |---|---|---|
 | `Category` | `categories` | `code` = prefijo de referencia (p. ej. `SIL`), único |
 | `Article` | `articles` | `reference` automática `SIL-0001` (`Article::nextReference`); `rental_price` sin IVA; `replacement_price` = coste de reposición por unidad; fotos en `article_photos`; soft deletes |
-| `ArticlePhoto` | `article_photos` | varias fotos por artículo; `position` 0 = principal (`Article::mainPhoto`, la de los listados). Se guardan en `storage/app/public/articles/{id}/` en dos tamaños JPEG (1600 px y miniatura 480 px, `App\\Support\\ImageResizer`); en la ficha se reducen antes en el navegador y se suben de una en una |
+| `ArticlePhoto` | `article_photos` | varias fotos por artículo; `position` 0 = principal (`Article::mainPhoto`, la de los listados). Se guardan en `storage/app/public/articles/{id}/` en dos tamaños JPEG (1600 px y miniatura 480 px, `App\Support\ImageResizer`); en la ficha se reducen antes en el navegador y se suben de una en una |
 | `Unit` | `units` | `code` legible `SIL-0001-003`; `qr_token` UUID; `status` = enum `UnitStatus`; soft deletes |
 | `Client` | `clients` | `type` = `company` / `individual`; `tax_id` = NIF/CIF; soft deletes |
 | `User` | `users` | `is_superadmin`, `active` (un usuario inactivo no puede entrar) |
@@ -47,10 +47,20 @@ App interna de **Viva la Virgen** para gestionar el material que alquila para ev
 
 Las referencias y códigos se calculan contando también los registros borrados (`withTrashed`), así que nunca se reutilizan. `Article::addUnits()` crea las unidades dentro de una transacción con bloqueo.
 
+## Dos zonas en la misma app
+
+- **Web de clientes** en la raíz (`vivalavirgen.net`): catálogo, carrito («Mi pedido»), registro, acceso y «Mi cuenta». Rutas con nombre `portal.*`, controladores en `app/Http/Controllers/Portal`, vistas en `resources/views/portal` con el layout `layouts/portal`.
+  - Los clientes entran con el guard **`client`** (modelo `Client`, contraseña en `clients.password`), separado del de los usuarios del backoffice (`web`).
+  - Alta libre con confirmación de email; **no pueden ver precios ni enviar pedidos hasta que el equipo los aprueba** (`clients.approved_at`) desde la ficha del cliente.
+  - Descuento según el **tipo de cliente** (`client_categories`), editable en Administración → Tipos de cliente.
+  - El carrito vive en la sesión (`App\Support\Cart`). Al solicitarlo se crea un `Order` con `source = web`, estado Solicitado y pre-reserva; se avisa por email al cliente y a `notify_email` (Ajustes).
+- **Backoffice** en `/app` (`Route::prefix(app)`). Los QR impresos apuntan a `/app/q/{token}`: no cambiar.
+- En el servidor, `public_html/index.php` carga `vlv-app/public/index.php`, y `css`, `img`, `fonts` y `storage` de `public_html` son enlaces a `vlv-app/public`.
+- Correo saliente: SMTP con `gestion@vivalavirgen.net` (credenciales en `.env`). Textos de los emails en `app/Notifications`.
+
 ## Rutas principales (`routes/web.php`)
 
-- `/login`, `/logout`
-- `/` panel
+- Backoffice: `/app/login`, `/app/logout`, `/app` panel
 - `categories`, `articles`, `clients`: recursos CRUD
 - `articles/{article}/units` (POST) añade unidades; `articles/{article}/labels` muestra las etiquetas QR para imprimir
 - `q/{token}`: **URL corta impresa en cada etiqueta**; redirige a la ficha de la unidad. No cambiar su formato, porque invalidaría las etiquetas ya impresas.

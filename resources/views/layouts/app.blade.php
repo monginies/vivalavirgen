@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>@yield('title', 'Inicio') · {{ config('app.name') }}</title>
-    <link rel="stylesheet" href="{{ asset('css/app.css') }}?v=8">
+    <link rel="stylesheet" href="{{ asset('css/app.css') }}?v=9">
     <link rel="icon" type="image/png" href="{{ asset('img/favicon-32.png') }}">
     <link rel="apple-touch-icon" href="{{ asset('img/apple-touch-icon.png') }}">
     <meta name="theme-color" content="#9a9b88">
@@ -31,8 +31,9 @@
             ]],
         ];
         if (auth()->user()->is_superadmin) {
-            $menu[] = ['Administración', 'settings', null, ['users.*', 'settings.*'], [
+            $menu[] = ['Administración', 'settings', null, ['users.*', 'settings.*', 'client-categories.*'], [
                 ['Usuarios', 'users', 'users.index', ['users.*']],
+                ['Tipos de cliente', 'clients', 'client-categories.index', ['client-categories.*']],
                 ['Ajustes', 'settings', 'settings.edit', ['settings.*']],
             ]];
         }
@@ -82,7 +83,7 @@ document.querySelectorAll('input[data-cp-city]').forEach(cp => {
         const code = cp.value.replace(/\D/g, '');
         if (code.length !== 5) { hint.textContent = ''; return; }
         try {
-            const data = await (await fetch(@json(url('postal-codes')) + '/' + code, {headers: {Accept: 'application/json'}})).json();
+            const data = await (await fetch(@json(url('app/postal-codes')) + '/' + code, {headers: {Accept: 'application/json'}})).json();
             if (!data.found) { hint.className = 'err'; hint.textContent = 'CP no encontrado'; return; }
             hint.className = 'hint';
             hint.textContent = data.province || '';

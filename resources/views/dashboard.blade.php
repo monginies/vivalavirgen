@@ -7,6 +7,9 @@
         <a class="btn sec" href="{{ route('clients.create') }}">+ Cliente</a>
     </div>
 </div>
+@if ($pendingClients)
+    <div class="flash ko"><b>{{ $pendingClients }}</b> cliente{{ $pendingClients > 1 ? 's' : '' }} de la web pendiente{{ $pendingClients > 1 ? 's' : '' }} de aprobar. <a href="{{ route('clients.index', ['pendientes' => 1]) }}">Revisar</a></div>
+@endif
 <div class="grid g4" style="margin-bottom:20px">
     <a class="card" style="text-decoration:none;color:inherit;margin:0" href="{{ route('articles.index') }}"><div class="stat">{{ $articles }}</div><div class="stat-label">Artículos</div></a>
     <div class="card" style="margin:0"><div class="stat">{{ $units }}</div><div class="stat-label">Unidades con QR</div></div>

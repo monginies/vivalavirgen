@@ -2,12 +2,18 @@
 
 namespace Tests\Feature;
 
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
 class ExampleTest extends TestCase
 {
-    public function test_guests_are_sent_to_login(): void
+    use RefreshDatabase;
+
+    public function test_public_catalog_and_backoffice_login(): void
     {
-        $this->get('/')->assertRedirect(route('login'));
+        $this->get('/')->assertOk()->assertSee('Viva la Virgen');
+        $this->get('/app')->assertRedirect(route('login'));
+        $this->get('/app/orders')->assertRedirect('/app/login');
+        $this->get('/mi-cuenta')->assertRedirect(route('portal.login'));
     }
 }

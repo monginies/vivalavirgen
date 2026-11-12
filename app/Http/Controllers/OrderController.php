@@ -47,6 +47,9 @@ class OrderController extends Controller
             'discount_percent' => 0,
             'deposit_amount' => Setting::number('deposit_amount'),
         ]);
+        if ($client = Client::with('category')->find($request->client)) {
+            $order->discount_percent = $client->discountPercent();
+        }
         if ($venue = Venue::find($request->venue)) {
             $order->fill([
                 'venue_id' => $venue->id, 'destination_address' => $venue->address, 'destination_city' => $venue->city,
@@ -201,7 +204,7 @@ class OrderController extends Controller
 
         return [
             'order' => $order,
-            'clients' => Client::orderBy('name')->get(['id', 'name']),
+            'clients' => Client::with('category')->orderBy('name')->get(['id', 'name', 'client_category_id']),
             'venues' => Venue::where('active', true)->orWhere('id', $order->venue_id)->orderBy('name')->get(),
             'articles' => $articles,
             'mapsEnabled' => Distance::configured(),

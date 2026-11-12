@@ -12,7 +12,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 class Order extends Model
 {
     protected $fillable = [
-        'number', 'client_id', 'status', 'event_date', 'venue_id', 'start_date', 'end_date',
+        'number', 'client_id', 'status', 'source', 'event_date', 'venue_id', 'start_date', 'end_date',
         'destination_address', 'destination_city', 'destination_postal_code', 'distance_km', 'trucks',
         'transport_manual', 'transport_amount', 'discount_percent', 'deposit_amount',
         'vat_rate', 'expires_at', 'notes', 'created_by',

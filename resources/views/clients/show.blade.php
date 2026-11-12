@@ -2,7 +2,7 @@
 @section('title', $client->name)
 @section('content')
 <div class="head">
-    <div><h1>{{ $client->name }}</h1><div class="sub">{{ $client->typeLabel() }}@if ($client->tax_id) · <span class="mono">{{ $client->tax_id }}</span>@endif</div></div>
+    <div><h1>{{ $client->name }}</h1><div class="sub">{{ $client->typeLabel() }}@if ($client->category) · {{ $client->category->name }} ({{ rtrim(rtrim(number_format($client->category->discount_percent, 2, ',', ''), '0'), ',') }} %)@endif @if ($client->tax_id) · <span class="mono">{{ $client->tax_id }}</span>@endif</div></div>
     <a class="btn" href="{{ route('clients.edit', $client) }}">Editar</a>
 </div>
 <div class="grid g2">
@@ -20,6 +20,7 @@
         <p>{!! $client->notes ? nl2br(e($client->notes)) : '<span class="muted">Sin notas.</span>' !!}</p>
     </div>
 </div>
+@include('clients._portal')
 <div class="card table-wrap">
     <div class="head" style="margin-bottom:8px"><h2 style="margin:0">Pedidos</h2>
         <a class="btn sm" href="{{ route('orders.create', ['client' => $client->id]) }}">+ Nuevo pedido</a></div>

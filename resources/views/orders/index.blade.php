@@ -19,7 +19,7 @@
         <tbody>
         @forelse ($orders as $o)
             <tr>
-                <td class="mono"><a href="{{ route('orders.show', $o) }}">{{ $o->number }}</a></td>
+                <td class="mono"><a href="{{ route('orders.show', $o) }}">{{ $o->number }}</a>@if ($o->source === 'web') <span class="badge blue">Web</span>@endif</td>
                 <td>{{ $o->client->name }}</td>
                 <td>{{ $o->start_date->format('d/m/Y') }}</td>
                 <td>{{ $o->end_date->format('d/m/Y') }}</td>

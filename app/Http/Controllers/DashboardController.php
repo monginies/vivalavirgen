@@ -32,6 +32,7 @@ class DashboardController extends Controller
                 ->whereIn('status', OrderStatus::blocking())
                 ->where('end_date', '>=', today())
                 ->orderBy('start_date')->take(8)->get(),
+            'pendingClients' => Client::whereNotNull('password')->whereNotNull('email_verified_at')->whereNull('approved_at')->count(),
             'pendingOrders' => Order::whereIn('status', OrderStatus::expirable())->count(),
             'recentArticles' => Article::with('category')->withCount('units')->latest()->take(5)->get(),
         ]);
