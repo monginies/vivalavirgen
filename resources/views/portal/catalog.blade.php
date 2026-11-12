@@ -9,14 +9,7 @@
     </div>
 </section>
 @include('portal._toolbar', ['current' => null])
-<section class="pt-section" id="colecciones">
-    <div class="pt-section-head">
-        <div class="pt-kicker">Colecciones</div>
-        <h2>Explora por categoría</h2>
-        <p class="muted">{{ $categories->count() }} {{ $categories->count() === 1 ? 'categoría' : 'categorías' }} · {{ $total }} artículos</p>
-    </div>
-</section>
-<div class="pt-collections">
+<div class="pt-collections" id="colecciones">
     @forelse ($categories as $c)
         @php($cover = $c->coverUrl())
         <a class="pt-coll" href="{{ route('portal.collection', $c->slug()) }}" @if ($cover) style="background-image:url('{{ $cover }}')" @endif>
