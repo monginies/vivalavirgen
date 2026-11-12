@@ -37,7 +37,7 @@
     @csrf
     <div>
         <b>Planifica tu evento</b>
-        <span>Indica la fecha y verás las unidades libres de cada pieza.@if ($p = \App\Support\Cart::period()) Reservamos del {{ \Carbon\Carbon::parse($p[0])->format('d/m') }} al {{ \Carbon\Carbon::parse($p[1])->format('d/m') }}.@endif</span>
+        <span>Indica la fecha de tu evento y verás las unidades disponibles de cada artículo.</span>
     </div>
     <label>Fecha del evento <input type="date" name="event_date" min="{{ today()->toDateString() }}" value="{{ $cart['event_date'] }}" onchange="this.form.submit()"></label>
 </form>
