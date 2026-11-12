@@ -23,7 +23,8 @@ App interna de **Viva la Virgen** para gestionar el material que alquila para ev
 | Modelo | Tabla | Notas |
 |---|---|---|
 | `Category` | `categories` | `code` = prefijo de referencia (p. ej. `SIL`), único |
-| `Article` | `articles` | `reference` automática `SIL-0001` (`Article::nextReference`); `rental_price` sin IVA; `replacement_price` = coste de reposición por unidad; foto en el disco `public`; soft deletes |
+| `Article` | `articles` | `reference` automática `SIL-0001` (`Article::nextReference`); `rental_price` sin IVA; `replacement_price` = coste de reposición por unidad; fotos en `article_photos`; soft deletes |
+| `ArticlePhoto` | `article_photos` | varias fotos por artículo; `position` 0 = principal (`Article::mainPhoto`, la de los listados). Se guardan en `storage/app/public/articles/{id}/` en dos tamaños JPEG (1600 px y miniatura 480 px, `App\\Support\\ImageResizer`); en la ficha se reducen antes en el navegador y se suben de una en una |
 | `Unit` | `units` | `code` legible `SIL-0001-003`; `qr_token` UUID; `status` = enum `UnitStatus`; soft deletes |
 | `Client` | `clients` | `type` = `company` / `individual`; `tax_id` = NIF/CIF; soft deletes |
 | `User` | `users` | `is_superadmin`, `active` (un usuario inactivo no puede entrar) |

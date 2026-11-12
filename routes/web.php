@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\ArticleController;
+use App\Http\Controllers\ArticlePhotoController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\AvailabilityController;
 use App\Http\Controllers\CalendarController;
@@ -29,6 +30,9 @@ Route::middleware('auth')->group(function () {
     Route::resource('articles', ArticleController::class);
     Route::post('articles/{article}/units', [ArticleController::class, 'addUnits'])->name('articles.units.store');
     Route::get('articles/{article}/labels', [ArticleController::class, 'labels'])->name('articles.labels');
+    Route::post('articles/{article}/photos', [ArticlePhotoController::class, 'store'])->name('article-photos.store');
+    Route::delete('article-photos/{photo}', [ArticlePhotoController::class, 'destroy'])->name('article-photos.destroy');
+    Route::post('article-photos/{photo}/main', [ArticlePhotoController::class, 'main'])->name('article-photos.main');
 
     // URL corta que va impresa en cada etiqueta QR
     Route::get('q/{token}', [UnitController::class, 'resolve'])->name('qr.resolve');

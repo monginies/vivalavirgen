@@ -123,3 +123,17 @@ table.cal .ev.green{background:#e6eedf;color:var(--green)}
 table.cal .ev.blue{background:#e1e8ee;color:var(--blue)}
 table.cal .ev.amber{background:#f5ead6;color:var(--amber)}
 @media (max-width:640px){#lines,#lines tbody{display:block}#lines thead{display:none}#lines tr.line{display:grid;grid-template-columns:1fr 1fr auto;gap:6px;padding:10px 0;border-bottom:1px solid var(--line)}#lines tr.line td{border:0;padding:0}#lines tr.line td:first-child{grid-column:1/-1}#lines .l-total{display:none}}
+
+/* Fotos de artículos */
+.gallery{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px;margin-bottom:14px}
+.gallery:empty{display:none}
+.ph{position:relative;margin:0;border:1px solid var(--line);border-radius:10px;overflow:hidden;background:var(--sage-soft)}
+.ph img{display:block;width:100%;aspect-ratio:1;object-fit:cover}
+.ph .ph-main{position:absolute;top:8px;left:8px}
+.ph figcaption{position:absolute;right:6px;bottom:6px;display:flex;gap:4px}
+.ph figcaption form{margin:0}
+.ph figcaption .btn{padding:3px 9px;box-shadow:0 1px 3px #0002}
+.drop{display:flex;flex-direction:column;align-items:center;gap:2px;padding:22px;border:2px dashed var(--field);border-radius:12px;background:var(--bg);cursor:pointer;text-align:center;font-weight:400}
+.drop:hover,.drop.over{border-color:var(--sage-deep);background:var(--sage-soft)}
+.drop input{position:absolute;width:1px;height:1px;opacity:0}
+.drop b{color:var(--sage-deep)}

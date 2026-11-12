@@ -11,7 +11,7 @@
 </div>
 <div class="grid g2">
     <div class="card">
-        @if ($article->photoUrl())<img class="photo" src="{{ $article->photoUrl() }}" alt="" style="margin-bottom:14px;max-height:260px">@endif
+        @if ($main = $article->photos->first())<a href="{{ $main->url() }}" target="_blank"><img class="photo" src="{{ $main->url() }}" alt="" style="margin-bottom:14px;max-height:260px"></a>@endif
         <dl class="props">
             <dt>Precio alquiler</dt><dd>{{ number_format($article->rental_price, 2, ',', '.') }} € <span class="muted">sin IVA</span></dd>
             <dt>Reposición</dt><dd>{{ number_format($article->replacement_price, 2, ',', '.') }} € / ud.</dd>
@@ -37,6 +37,7 @@
         @error('count')<div class="err">{{ $message }}</div>@enderror
     </div>
 </div>
+@include('articles._photos')
 <div class="card table-wrap">
     <h2>Unidades</h2>
     <table>

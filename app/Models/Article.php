@@ -6,6 +6,7 @@ use App\Enums\UnitStatus;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
@@ -74,8 +75,19 @@ class Article extends Model
         });
     }
 
+    public function photos(): HasMany
+    {
+        return $this->hasMany(ArticlePhoto::class)->orderBy('position')->orderBy('id');
+    }
+
+    public function mainPhoto(): HasOne
+    {
+        return $this->hasOne(ArticlePhoto::class)->ofMany(['position' => 'min', 'id' => 'min']);
+    }
+
+    /** Miniatura de la foto principal (listados). */
     public function photoUrl(): ?string
     {
-        return $this->photo_path ? asset('storage/'.$this->photo_path) : null;
+        return $this->mainPhoto?->thumbUrl();
     }
 }

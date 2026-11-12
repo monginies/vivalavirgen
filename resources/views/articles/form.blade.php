@@ -25,16 +25,20 @@
         @include('partials.field', ['name' => 'rental_price', 'label' => 'Precio de alquiler (€, sin IVA)', 'value' => $article->rental_price ?? 0, 'type' => 'number', 'step' => '0.01', 'min' => 0, 'required' => true])
         @include('partials.field', ['name' => 'replacement_price', 'label' => 'Coste de reposición por unidad (€)', 'value' => $article->replacement_price ?? 0, 'type' => 'number', 'step' => '0.01', 'min' => 0, 'required' => true])
     </div>
-    <div class="field">
-        <label for="f-photo">Foto</label>
-        @if ($article->photoUrl())
-            <img class="thumb" style="width:90px;height:90px" src="{{ $article->photoUrl() }}" alt="">
-            <label class="check" style="margin:6px 0"><input type="checkbox" name="remove_photo" value="1"> Quitar foto actual</label>
-        @endif
-        <input id="f-photo" type="file" name="photo" accept="image/*">
-        <div class="hint">JPG/PNG/WebP, máx. 5 MB.</div>
-        @error('photo')<div class="err">{{ $message }}</div>@enderror
-    </div>
+    @if ($article->exists)
+        <div class="field">
+            <label>Fotos</label>
+            <div class="hint" style="margin:0">Las fotos se añaden, ordenan y eliminan en la <a href="{{ route('articles.show', $article) }}#photos-card">ficha del artículo</a>.</div>
+        </div>
+    @else
+        <div class="field">
+            <label for="f-photos">Fotos</label>
+            <input id="f-photos" type="file" name="photos[]" accept="image/*" multiple>
+            <div class="hint">Puedes elegir varias a la vez (hasta 20). La primera será la principal. Después podrás añadir más desde la ficha.</div>
+            @error('photos')<div class="err">{{ $message }}</div>@enderror
+            @error('photos.*')<div class="err">{{ $message }}</div>@enderror
+        </div>
+    @endif
     @include('partials.field', ['name' => 'notes', 'label' => 'Notas internas', 'value' => $article->notes, 'type' => 'textarea'])
     @unless ($article->exists)
         @include('partials.field', ['name' => 'initial_units', 'label' => 'Unidades iniciales', 'value' => 0, 'type' => 'number', 'step' => 1, 'min' => 0,

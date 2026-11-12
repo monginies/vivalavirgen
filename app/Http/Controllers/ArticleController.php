@@ -6,7 +6,6 @@ use App\Enums\UnitStatus;
 use App\Models\Article;
 use App\Models\Category;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
 
 class ArticleController extends Controller
@@ -14,7 +13,7 @@ class ArticleController extends Controller
     public function index(Request $request)
     {
         $articles = Article::query()
-            ->with('category')
+            ->with(['category', 'mainPhoto'])
             ->withCount([
                 'units',
                 'units as available_count' => fn ($q) => $q->where('status', UnitStatus::Available),
@@ -50,9 +49,14 @@ class ArticleController extends Controller
     {
         $data = $this->validated($request);
         $data['reference'] = Article::nextReference(Category::findOrFail($data['category_id']));
-        $data['photo_path'] = $this->storePhoto($request);
-
         $article = Article::create($data);
+        if ($request->hasFile('photos')) {
+            try {
+                ArticlePhotoController::attach($article, $request->file('photos'));
+            } catch (\RuntimeException $e) {
+                session()->flash('error', $e->getMessage());
+            }
+        }
         if ($units = (int) $request->input('initial_units')) {
             $article->addUnits($units);
         }
@@ -62,7 +66,7 @@ class ArticleController extends Controller
 
     public function show(Article $article)
     {
-        $article->load('category', 'units');
+        $article->load('category', 'units', 'photos');
 
         return view('articles.show', [
             'article' => $article,
@@ -82,13 +86,6 @@ class ArticleController extends Controller
     {
         $data = $this->validated($request, $article);
 
-        if ($request->hasFile('photo') || $request->boolean('remove_photo')) {
-            if ($article->photo_path) {
-                Storage::disk('public')->delete($article->photo_path);
-            }
-            $data['photo_path'] = $this->storePhoto($request);
-        }
-
         $article->update($data);
 
         return redirect()->route('articles.show', $article)->with('status', 'Artículo actualizado.');
@@ -97,6 +94,7 @@ class ArticleController extends Controller
     public function destroy(Article $article)
     {
         $article->units()->delete();
+        $article->photos()->get()->each->delete();
         $article->delete();
 
         return redirect()->route('articles.index')->with('status', 'Artículo eliminado.');
@@ -132,19 +130,13 @@ class ArticleController extends Controller
             'rental_price' => ['required', 'numeric', 'min:0', 'max:99999999'],
             'replacement_price' => ['required', 'numeric', 'min:0', 'max:99999999'],
             'notes' => ['nullable', 'string', 'max:5000'],
-            'photo' => ['nullable', 'image', 'max:5120'],
+            'photos' => $article ? ['prohibited'] : ['nullable', 'array', 'max:20'],
+            'photos.*' => ['file', 'mimes:jpg,jpeg,png,webp,gif', 'max:20480'],
             'initial_units' => $article ? ['prohibited'] : ['nullable', 'integer', 'min:0', 'max:500'],
         ]);
         $data['active'] = $request->boolean('active');
-        unset($data['photo'], $data['initial_units']);
+        unset($data['photos'], $data['initial_units']);
 
         return $data;
-    }
-
-    private function storePhoto(Request $request): ?string
-    {
-        return $request->hasFile('photo')
-            ? $request->file('photo')->store('articles', 'public')
-            : null;
     }
 }
