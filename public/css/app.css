@@ -191,7 +191,8 @@ body.portal .flash{max-width:1280px;margin:0 auto 12px}
 .pt-kicker.light{color:#fff;opacity:.9}
 /* Portada */
 .pt-hero{position:relative;min-height:min(78vh,760px);display:grid;place-items:center;text-align:center;background:linear-gradient(160deg,#a5a693,#6f7262);background-size:cover;background-position:center;color:#fff;overflow:hidden}
-.pt-hero::before{content:"";position:absolute;inset:0;background:linear-gradient(180deg,#0000 30%,#0000004d)}
+.pt-hero::before{content:"";position:absolute;inset:0;background:linear-gradient(180deg,#0000002e 0%,#00000040 45%,#00000066 100%)}
+.pt-hero .pt-kicker,.pt-hero-link{text-shadow:0 1px 10px #0009}
 .pt-hero-in{position:relative;z-index:1;padding:40px 20px}
 .pt-hero h1{font-family:var(--serif);font-weight:400;font-size:clamp(52px,10vw,150px);line-height:.95;margin:22px 0 40px;text-shadow:0 2px 30px #0004;max-width:12ch;margin-inline:auto}
 .pt-hero-link{color:#fff;text-decoration:none;font-size:13px;letter-spacing:.14em;text-transform:uppercase;font-weight:600;border-bottom:1px solid #fffa;padding-bottom:10px}
