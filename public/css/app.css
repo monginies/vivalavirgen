@@ -316,7 +316,7 @@ body.portal h1{font-family:var(--serif);font-weight:400}
 
 /* Llamada de atención hacia la fecha del evento (solo mientras no hay fecha) */
 .pt-plan.needs-date{flex-wrap:nowrap}
-.pt-track{flex:1;min-width:60px;height:2px;position:relative;align-self:center;margin:0 4px;background:repeating-linear-gradient(90deg,var(--sage) 0 5px,transparent 5px 11px)}
+.pt-track{flex:1;min-width:60px;height:3px;position:relative;align-self:center;margin:0 4px;background:radial-gradient(circle,var(--sage) 1.3px,transparent 1.6px) 0 50%/8px 3px repeat-x}
 .pt-track span{position:absolute;top:50%;left:0;width:9px;height:9px;margin:-5px 0 0 -7px;border-top:2.5px solid var(--pt-green);border-right:2.5px solid var(--pt-green);background:var(--sage-soft);opacity:0;transform:rotate(45deg);animation:ptTravel 2.4s ease-in-out infinite}
 .pt-track span:nth-child(2){animation-delay:.8s}
 .pt-track span:nth-child(3){animation-delay:1.6s}
