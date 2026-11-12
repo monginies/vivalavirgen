@@ -26,8 +26,17 @@ App interna de **Viva la Virgen** para gestionar el material que alquila para ev
 | `Unit` | `units` | `code` legible `SIL-0001-003`; `qr_token` UUID; `status` = enum `UnitStatus`; soft deletes |
 | `Client` | `clients` | `type` = `company` / `individual`; `tax_id` = NIF/CIF; soft deletes |
 | `User` | `users` | `is_superadmin`, `active` (un usuario inactivo no puede entrar) |
+| `Order` | `orders` | `number` `PED-2026-0001`; `status` = enum `OrderStatus`; fechas `start_date` (entrega) y `end_date` (recogida); destino, km, camiones, transporte, descuento, fianza, IVA; `expires_at` = fin de la pre-reserva |
+| `OrderLine` | `order_lines` | artículo, cantidad y precio por unidad sin IVA copiado al crear la línea |
+| `Setting` | `settings` | ajustes clave/valor editables por el superadmin; valores por defecto en `Setting::DEFINITIONS` |
 
 `UnitStatus` (`app/Enums/UnitStatus.php`): `available` Disponible · `rented` Alquilada · `maintenance` En reparación · `retired` De baja. Cada caso tiene `label()` y `color()` para la interfaz.
+
+`OrderStatus` (`app/Enums/OrderStatus.php`): Solicitado → Aceptado → Proforma enviada → Pagado → Entregado → Devuelto → Cerrado, más Cancelado y Caducado. Los tres primeros son pre-reserva y caducan en `expires_at` si no se pagan.
+
+**Disponibilidad** (`app/Services/Availability.php`): capacidad = unidades que no están de baja ni en reparación; reservado = pico diario de las cantidades de los pedidos que bloquean esas fechas. Un pedido entregado o devuelto bloquea hasta que se cierra. Las pre-reservas vencidas no cuentan aunque aún no se hayan marcado como caducadas. Al guardar un pedido se comprueba que haya unidades suficientes (`OrderController::assertAvailable`).
+
+**Importes:** el precio de alquiler es por evento. Transporte = 2 trayectos × km × €/km × camiones, con mínimo (`Order::calculateTransport`); se puede fijar a mano. La fianza va aparte, sin IVA.
 
 Las referencias y códigos se calculan contando también los registros borrados (`withTrashed`), así que nunca se reutilizan. `Article::addUnits()` crea las unidades dentro de una transacción con bloqueo.
 
@@ -39,7 +48,9 @@ Las referencias y códigos se calculan contando también los registros borrados 
 - `articles/{article}/units` (POST) añade unidades; `articles/{article}/labels` muestra las etiquetas QR para imprimir
 - `q/{token}`: **URL corta impresa en cada etiqueta**; redirige a la ficha de la unidad. No cambiar su formato, porque invalidaría las etiquetas ya impresas.
 - `units/{unit}` ver, cambiar estado o borrar; `units/{unit}/qr.svg`
-- `users`: solo superadmin (middleware `EnsureSuperadmin`)
+- `orders`: CRUD sin borrado; `orders/{order}/status` cambia de estado (avanzar, cancelar, reactivar); `orders/{order}/extend` amplía la pre-reserva
+- `calendar` (vista mensual) y `availability` (libres entre dos fechas)
+- `users` y `settings`: solo superadmin (middleware `EnsureSuperadmin`)
 
 Todo, menos el login, exige sesión iniciada.
 
@@ -54,11 +65,14 @@ Todo, menos el login, exige sesión iniciada.
 - Código en `/home/vivalavirgen/vlv-app`; `public_html/app` es un enlace a `vlv-app/public`
 - Base de datos `vivalavirgen_app` (usuario `vivalavirgen_app`); credenciales solo en `.env`, que no se versiona
 - **PHP:** con la cuenta `vivalavirgen`, `php` es la 8.4 (`~/bin/php`). Si se entra como root con `su`, el PHP por defecto es la 8.2 y Composer falla: usar `/opt/cpanel/ea-php84/root/usr/bin/php`.
+- Cron de la cuenta: `schedule:run` cada minuto; `orders:expire` se ejecuta cada 15 minutos (`routes/console.php`)
+- Copias de la base de datos antes de cada despliegue en `~/backups`
 - El servidor sube a GitHub con una deploy key propia (`~/.ssh/github_vlv`, configurada en `core.sshCommand`)
 
 ## Cómo trabajar
 
-- Se trabaja directamente en el servidor, sobre `main`. Tras cada cambio: commit con un mensaje en español que explique el porqué, y `git push`.
+- Cambios pequeños: directamente en `~/vlv-app`, sobre `main`. Tras cada cambio: commit con un mensaje en español que explique el porqué, y `git push`.
+- Cambios grandes: en la copia de desarrollo `~/vlv-dev` (git worktree en otra rama, con su propio `vendor/` y base de datos SQLite en `database/dev.sqlite`, nunca la de producción). Probar con `php artisan test` y luego, en `~/vlv-app`: copia de la base de datos, `git merge --ff-only <rama>`, `php artisan migrate --force`, `php artisan optimize:clear` y `git push`.
 - Migraciones nuevas: `php artisan migrate --force`. No editar migraciones ya ejecutadas en producción; crear una nueva.
 - Después de tocar configuración o rutas: `php artisan optimize:clear`.
 - Si se cambia `public/css/app.css`, subir el `?v=` del enlace en `resources/views/layouts/app.blade.php` para que los navegadores no usen la versión antigua en caché.
