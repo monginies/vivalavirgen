@@ -15,7 +15,6 @@
     <p class="muted">{{ $category?->description ?: ($category ? 'Descubre las piezas de esta colección. Entra en cada artículo para ver sus fotos, medidas y características.' : 'Resultados para «'.request('q').'».') }}</p>
     <div class="pt-meta">
         <span><b>{{ $articles->total() }}</b> {{ $articles->total() === 1 ? 'artículo' : 'artículos' }}</span>
-        <span class="pt-view" aria-label="Columnas">Vista <button type="button" data-cols="1">1</button><button type="button" data-cols="2">2</button><button type="button" data-cols="3">3</button></span>
     </div>
 </section>
 @include('portal._toolbar', ['current' => $category])
@@ -42,15 +41,4 @@
     @endforelse
 </div>
 <div class="pt-section">{{ $articles->links('partials.pagination') }}</div>
-@push('scripts')
-<script>
-(() => {
-    const grid = document.getElementById('products'), btns = document.querySelectorAll('.pt-view button');
-    const set = n => { grid.dataset.cols = n; btns.forEach(b => b.classList.toggle('on', b.dataset.cols == n)); try { localStorage.setItem('vlv-cols', n); } catch (e) {} };
-    let saved = null; try { saved = localStorage.getItem('vlv-cols'); } catch (e) {}
-    set(saved || (innerWidth < 640 ? 1 : 3));
-    btns.forEach(b => b.addEventListener('click', () => set(b.dataset.cols)));
-})();
-</script>
-@endpush
 @endsection
