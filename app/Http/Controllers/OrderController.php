@@ -8,6 +8,9 @@ use App\Models\Client;
 use App\Models\Order;
 use App\Models\Setting;
 use App\Services\Availability;
+use App\Services\Distance;
+use Illuminate\Database\QueryException;
+use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
@@ -153,6 +156,32 @@ class OrderController extends Controller
         return back()->with('status', "Pre-reserva ampliada hasta el {$order->expires_at->format('d/m/Y H:i')}.");
     }
 
+    /** Km por carretera desde la base (JSON para el botón del formulario). */
+    public function distance(Request $request)
+    {
+        $destination = collect([$request->string('address')->trim(), $request->string('city')->trim()])
+            ->filter(fn ($v) => $v->isNotEmpty())->join(', ');
+
+        try {
+            if (! Distance::configured()) {
+                throw new \RuntimeException('Falta la clave de OpenRouteService en el servidor.');
+            }
+            if ($destination === '') {
+                throw new \RuntimeException('Escribe primero la dirección o la población del destino.');
+            }
+
+            return response()->json(Distance::fromBase($destination));
+        } catch (ConnectionException) {
+            return response()->json(['error' => 'El servicio de mapas no responde ahora mismo. Introduce los km a mano.'], 422);
+        } catch (QueryException $e) {
+            report($e);
+
+            return response()->json(['error' => 'Error interno al calcular la distancia.'], 500);
+        } catch (\RuntimeException $e) {
+            return response()->json(['error' => $e->getMessage()], 422);
+        }
+    }
+
     private function formData(Order $order): array
     {
         $articles = Article::query()
@@ -166,6 +195,7 @@ class OrderController extends Controller
             'order' => $order,
             'clients' => Client::orderBy('name')->get(['id', 'name']),
             'articles' => $articles,
+            'mapsEnabled' => Distance::configured(),
             'settings' => [
                 'per_km' => Setting::number('transport_price_per_km'),
                 'minimum' => Setting::number('transport_minimum'),

@@ -38,6 +38,7 @@ Route::middleware('auth')->group(function () {
 
     Route::resource('clients', ClientController::class);
 
+    Route::get('orders/distance', [OrderController::class, 'distance'])->name('orders.distance');
     Route::resource('orders', OrderController::class)->except('destroy');
     Route::post('orders/{order}/status', [OrderController::class, 'transition'])->name('orders.transition');
     Route::post('orders/{order}/extend', [OrderController::class, 'extend'])->name('orders.extend');

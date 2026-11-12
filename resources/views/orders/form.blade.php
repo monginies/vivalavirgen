@@ -80,8 +80,17 @@
         <div class="grid g2">
             @include('partials.field', ['name' => 'destination_address', 'label' => 'Dirección / finca', 'value' => $order->destination_address])
             @include('partials.field', ['name' => 'destination_city', 'label' => 'Población', 'value' => $order->destination_city])
-            @include('partials.field', ['name' => 'distance_km', 'label' => 'Distancia desde la base (km, solo ida)', 'value' => $order->distance_km, 'type' => 'number', 'step' => '0.1', 'min' => 0,
-                'hint' => 'De momento se introduce a mano. Más adelante se calculará con el mapa.'])
+            <div class="field">
+                <label for="f-distance_km">Distancia desde la base (km, solo ida)</label>
+                <div style="display:flex;gap:8px">
+                    <input id="f-distance_km" type="number" name="distance_km" step="0.1" min="0" value="{{ old('distance_km', $order->distance_km) }}">
+                    @if ($mapsEnabled)
+                        <button type="button" class="btn sec" id="calc-km" style="white-space:nowrap">Calcular km</button>
+                    @endif
+                </div>
+                <div class="hint" id="km-hint">{{ $mapsEnabled ? 'Por carretera, con OpenRouteService. Puedes corregirlo a mano.' : 'Escríbelo a mano (el cálculo automático no está activado).' }}</div>
+                @error('distance_km')<div class="err">{{ $message }}</div>@enderror
+            </div>
             @include('partials.field', ['name' => 'trucks', 'label' => 'Camiones', 'value' => $order->trucks ?? 1, 'type' => 'number', 'step' => 1, 'min' => 1, 'required' => true])
         </div>
         <div class="field">
@@ -167,6 +176,28 @@
         recalc();
     });
     document.getElementById('order-form').addEventListener('input', recalc);
+
+    const calcBtn = document.getElementById('calc-km');
+    if (calcBtn) calcBtn.addEventListener('click', async () => {
+        const hint = document.getElementById('km-hint');
+        const params = new URLSearchParams({
+            address: document.getElementById('f-destination_address').value,
+            city: document.getElementById('f-destination_city').value,
+        });
+        calcBtn.disabled = true; hint.className = 'hint'; hint.textContent = 'Calculando…';
+        try {
+            const res = await fetch(@json(route('orders.distance')) + '?' + params, {headers: {Accept: 'application/json'}});
+            const data = await res.json();
+            if (!res.ok) throw new Error(data.error || 'No se ha podido calcular.');
+            document.getElementById('f-distance_km').value = data.km;
+            hint.textContent = 'Ruta hasta: ' + data.label + '. Comprueba que es el sitio correcto.';
+            recalc();
+        } catch (e) {
+            hint.className = 'err'; hint.textContent = e.message;
+        } finally {
+            calcBtn.disabled = false;
+        }
+    });
     recalc();
 })();
 </script>

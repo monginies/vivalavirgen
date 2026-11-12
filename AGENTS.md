@@ -37,6 +37,8 @@ App interna de **Viva la Virgen** para gestionar el material que alquila para ev
 
 **Disponibilidad** (`app/Services/Availability.php`): capacidad = unidades que no están de baja ni en reparación; reservado = pico diario de las cantidades de los pedidos que bloquean esas fechas. Un pedido entregado o devuelto bloquea hasta que se cierra. Las pre-reservas vencidas no cuentan aunque aún no se hayan marcado como caducadas. Al guardar un pedido se comprueba que haya unidades suficientes (`OrderController::assertAvailable`).
 
+**Km del transporte:** botón «Calcular km» en el pedido (`app/Services/Distance.php`): geocodifica el destino y calcula la ruta en coche desde la dirección de la base (Ajustes) con OpenRouteService. La clave va en `.env` como `ORS_API_KEY`; sin ella el botón no aparece y los km se escriben a mano. Resultados en caché 30 días.
+
 **Importes:** el precio de alquiler es por evento. Transporte = 2 trayectos × km × €/km × camiones, con mínimo (`Order::calculateTransport`); se puede fijar a mano. La fianza va aparte, sin IVA.
 
 Las referencias y códigos se calculan contando también los registros borrados (`withTrashed`), así que nunca se reutilizan. `Article::addUnits()` crea las unidades dentro de una transacción con bloqueo.
