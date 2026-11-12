@@ -5,10 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>@hasSection('title')@yield('title') · @endif{{ config('app.name') }} · Alquiler de decoración mediterránea</title>
     <meta name="description" content="Alquiler de mobiliario y decoración mediterránea para bodas y eventos en Málaga.">
-    <link rel="stylesheet" href="{{ asset('css/app.css') }}?v=11">
+    <link rel="stylesheet" href="{{ asset('css/app.css') }}?v=13">
     <link rel="icon" type="image/png" href="{{ asset('img/favicon-32.png') }}">
     <link rel="apple-touch-icon" href="{{ asset('img/apple-touch-icon.png') }}">
-    <meta name="theme-color" content="#ffffff">
+    <meta name="theme-color" content="#9a9b88">
 </head>
 <body class="portal">
 @php($me = auth('client')->user())
@@ -16,6 +16,7 @@
 @php($cart = \App\Support\Cart::get())
 <header class="pt-head">
     <a class="pt-brand" href="{{ route('portal.home') }}">
+        <img class="pt-logo" src="{{ asset('img/logo-320.png') }}" alt="Viva la Virgen">
         <span class="pt-word">Viva la Virgen</span>
         <span class="pt-tag">Alquiler decoración mediterránea · {{ now()->year }}</span>
     </a>
@@ -64,8 +65,7 @@
 <footer class="pt-foot">
     <div class="pt-foot-in">
         <div>
-            <div class="pt-word" style="color:#fff">Viva la Virgen</div>
-            <div class="pt-tag" style="color:#cfd2c3">Alquiler decoración mediterránea</div>
+            <img class="pt-foot-logo" src="{{ asset('img/logo-320.png') }}" alt="Viva la Virgen">
         </div>
         <div>C/ Driza, 13 · 29006 Málaga<br><a href="mailto:gestion@vivalavirgen.net">gestion@vivalavirgen.net</a></div>
         <div>
