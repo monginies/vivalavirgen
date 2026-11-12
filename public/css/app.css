@@ -313,3 +313,15 @@ body.portal h1{font-family:var(--serif);font-weight:400}
 .pt-plan>div{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
 .pt-plan b{display:inline}
 .pt-arrow{font-style:normal;font-size:20px;line-height:1;color:var(--pt-terra);margin-left:2px}
+
+/* Llamada de atención hacia la fecha del evento (solo mientras no hay fecha) */
+.pt-plan.needs-date{flex-wrap:nowrap}
+.pt-track{flex:1;min-width:60px;height:2px;position:relative;align-self:center;margin:0 4px;background:repeating-linear-gradient(90deg,var(--sage) 0 5px,transparent 5px 11px)}
+.pt-track span{position:absolute;top:50%;left:0;width:8px;height:8px;margin:-4px 0 0 -4px;border-radius:50%;background:var(--pt-green);opacity:0;animation:ptTravel 2.4s ease-in-out infinite}
+.pt-track span:nth-child(2){animation-delay:.8s}
+.pt-track span:nth-child(3){animation-delay:1.6s}
+@keyframes ptTravel{0%{left:0;opacity:0;transform:scale(.6)}15%{opacity:1;transform:scale(1)}80%{opacity:1}100%{left:100%;opacity:0;transform:scale(.6)}}
+.pt-plan.needs-date input[type=date]{border-color:var(--pt-green);animation:ptPulse 2.4s ease-out infinite}
+@keyframes ptPulse{0%{box-shadow:0 0 0 0 #5d604e59}70%{box-shadow:0 0 0 10px #5d604e00}100%{box-shadow:0 0 0 0 #5d604e00}}
+@media (max-width:900px){.pt-track{display:none}.pt-plan.needs-date{flex-wrap:wrap}}
+@media (prefers-reduced-motion:reduce){.pt-track span,.pt-plan.needs-date input[type=date]{animation:none}.pt-track span{opacity:1;left:100%}}
