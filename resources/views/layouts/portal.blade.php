@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>@hasSection('title')@yield('title') · @endif{{ config('app.name') }} · Alquiler de decoración mediterránea</title>
     <meta name="description" content="Alquiler de mobiliario y decoración mediterránea para bodas y eventos en Málaga.">
-    <link rel="stylesheet" href="{{ asset('css/app.css') }}?v=25">
+    <link rel="stylesheet" href="{{ asset('css/app.css') }}?v=27">
     <link rel="icon" type="image/png" href="{{ asset('img/favicon-32.png') }}">
     <link rel="apple-touch-icon" href="{{ asset('img/apple-touch-icon.png') }}">
     <meta name="theme-color" content="#9a9b88">
