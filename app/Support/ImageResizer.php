@@ -15,7 +15,7 @@ class ImageResizer
     public const THUMB = 480;
 
     /** @return array{path: string, thumb_path: string} */
-    public static function store(UploadedFile $file, string $dir): array
+    public static function store(UploadedFile $file, string $dir, int $large = self::LARGE): array
     {
         $data = @file_get_contents($file->getRealPath());
         $src = $data !== false ? @imagecreatefromstring($data) : false;
@@ -25,7 +25,7 @@ class ImageResizer
 
         $name = $dir.'/'.Str::uuid();
         $paths = ['path' => "{$name}.jpg", 'thumb_path' => "{$name}-t.jpg"];
-        Storage::disk('public')->put($paths['path'], self::jpeg($src, self::LARGE, 82));
+        Storage::disk('public')->put($paths['path'], self::jpeg($src, $large, 82));
         Storage::disk('public')->put($paths['thumb_path'], self::jpeg($src, self::THUMB, 78));
         imagedestroy($src);
 

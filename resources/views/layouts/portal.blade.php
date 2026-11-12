@@ -5,31 +5,42 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>@hasSection('title')@yield('title') · @endif{{ config('app.name') }} · Alquiler de decoración mediterránea</title>
     <meta name="description" content="Alquiler de mobiliario y decoración mediterránea para bodas y eventos en Málaga.">
-    <link rel="stylesheet" href="{{ asset('css/app.css') }}?v=9">
+    <link rel="stylesheet" href="{{ asset('css/app.css') }}?v=10">
     <link rel="icon" type="image/png" href="{{ asset('img/favicon-32.png') }}">
     <link rel="apple-touch-icon" href="{{ asset('img/apple-touch-icon.png') }}">
-    <meta name="theme-color" content="#9a9b88">
+    <meta name="theme-color" content="#ffffff">
 </head>
 <body class="portal">
 @php($me = auth('client')->user())
 @php($cartCount = \App\Support\Cart::count())
+@php($cart = \App\Support\Cart::get())
 <header class="pt-head">
-    <a class="pt-brand" href="{{ route('portal.home') }}"><img src="{{ asset('img/logo-96.png') }}" alt="Viva la Virgen"><span>Viva la Virgen<small>Alquiler de decoración mediterránea</small></span></a>
+    <a class="pt-brand" href="{{ route('portal.home') }}">
+        <span class="pt-word">Viva la Virgen</span>
+        <span class="pt-tag">Alquiler decoración mediterránea · {{ now()->year }}</span>
+    </a>
     <nav class="pt-nav">
-        <a href="{{ route('portal.home') }}" @class(['on' => request()->routeIs('portal.home', 'portal.article')])>Catálogo</a>
         @if ($me)
-            <a href="{{ route('portal.account') }}" @class(['on' => request()->routeIs('portal.account', 'portal.orders.*')])>Mi cuenta</a>
-            <form method="post" action="{{ route('portal.logout') }}">@csrf<button class="linklike">Salir</button></form>
+            <a class="pt-pill" href="{{ route('portal.account') }}">Mi cuenta</a>
         @else
-            <a href="{{ route('portal.login') }}" @class(['on' => request()->routeIs('portal.login')])>Entrar</a>
-            <a href="{{ route('portal.register') }}" @class(['on' => request()->routeIs('portal.register')])>Crear cuenta</a>
+            <a class="pt-pill" href="{{ route('portal.login') }}">Ingresar</a>
         @endif
-        <a class="pt-cart @if (request()->routeIs('portal.cart')) on @endif" href="{{ route('portal.cart') }}" title="Mi pedido">
-            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"/><path d="M3 6h18"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
-            <span>Mi pedido</span>@if ($cartCount)<b class="pt-count">{{ $cartCount }}</b>@endif
+        <a class="pt-pill dark" href="{{ route('portal.cart') }}">
+            <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"/><path d="M3 6h18"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
+            Pedido ({{ $cartCount }})
         </a>
     </nav>
 </header>
+@unless (request()->routeIs('portal.cart', 'portal.login', 'portal.register', 'portal.password.*', 'portal.privacy'))
+<form class="pt-plan" method="post" action="{{ route('portal.cart.date') }}">
+    @csrf
+    <div>
+        <b>Planifica tu evento</b>
+        <span>Indica la fecha y verás las unidades libres de cada pieza.@if ($p = \App\Support\Cart::period()) Reservamos del {{ \Carbon\Carbon::parse($p[0])->format('d/m') }} al {{ \Carbon\Carbon::parse($p[1])->format('d/m') }}.@endif</span>
+    </div>
+    <label>Fecha del evento <input type="date" name="event_date" min="{{ today()->toDateString() }}" value="{{ $cart['event_date'] }}" onchange="this.form.submit()"></label>
+</form>
+@endunless
 @if ($me && ! $me->isApproved())
     <div class="pt-banner">
         @if (! $me->hasVerifiedEmail())
@@ -40,20 +51,42 @@
         @endif
     </div>
 @endif
-<main class="pt-main">
-    @if (session('status'))<div class="flash ok">{{ session('status') }}</div>@endif
-    @if (session('error'))<div class="flash ko">{{ session('error') }}</div>@endif
-    @yield('content')
-</main>
-<footer class="pt-foot">
-    <img src="{{ asset('img/logo-96.png') }}" alt="" width="48" height="48">
-    <div>
-        <b>Viva la Virgen</b> · Alquiler de decoración mediterránea<br>
-        C/ Driza, 13 · 29006 Málaga · <a href="mailto:gestion@vivalavirgen.net">gestion@vivalavirgen.net</a>
+@if (session('status') || session('error'))
+    <div class="pt-flashwrap">
+        @if (session('status'))<div class="flash ok">{{ session('status') }}</div>@endif
+        @if (session('error'))<div class="flash ko">{{ session('error') }}</div>@endif
     </div>
-    <a href="{{ route('portal.privacy') }}">Política de privacidad</a>
+@endif
+@yield('full')
+@hasSection('content')
+<main class="pt-main">@yield('content')</main>
+@endif
+<footer class="pt-foot">
+    <div class="pt-foot-in">
+        <div>
+            <div class="pt-word" style="color:#fff">Viva la Virgen</div>
+            <div class="pt-tag" style="color:#cfd2c3">Alquiler decoración mediterránea</div>
+        </div>
+        <div>C/ Driza, 13 · 29006 Málaga<br><a href="mailto:gestion@vivalavirgen.net">gestion@vivalavirgen.net</a></div>
+        <div>
+            @if ($me)
+                <a href="{{ route('portal.account') }}">Mi cuenta</a> ·
+                <form method="post" action="{{ route('portal.logout') }}" style="display:inline">@csrf<button class="linklike" style="color:inherit">Salir</button></form>
+            @else
+                <a href="{{ route('portal.login') }}">Ingresar</a> · <a href="{{ route('portal.register') }}">Crear cuenta</a>
+            @endif
+            <br><a href="{{ route('portal.privacy') }}">Política de privacidad</a>
+        </div>
+    </div>
 </footer>
+<a href="#" class="pt-top" aria-label="Volver arriba"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5"/><path d="m5 12 7-7 7 7"/></svg></a>
 <script>
+(() => {
+    const top = document.querySelector('.pt-top');
+    const onScroll = () => top.classList.toggle('show', scrollY > 600);
+    addEventListener('scroll', onScroll, {passive: true}); onScroll();
+    top.addEventListener('click', e => { e.preventDefault(); scrollTo({top: 0, behavior: 'smooth'}); });
+})();
 // Código postal → población (campos con data-cp-city)
 document.querySelectorAll('input[data-cp-city]').forEach(cp => {
     const city = document.getElementById(cp.dataset.cpCity);

@@ -67,6 +67,17 @@ class CartController extends Controller
         return redirect()->route('portal.cart')->with('status', 'Pedido actualizado.');
     }
 
+    /** Fecha del evento desde la barra «Planifica tu evento». */
+    public function date(Request $request)
+    {
+        $v = $request->validate(['event_date' => ['nullable', 'date', 'after_or_equal:today']], [
+            'event_date.after_or_equal' => 'La fecha del evento no puede ser anterior a hoy.',
+        ]);
+        Cart::put(['event_date' => $v['event_date'] ?? null]);
+
+        return back()->with('status', $v['event_date'] ?? null ? 'Fecha guardada: ya ves las unidades libres para tu evento.' : 'Fecha quitada.');
+    }
+
     public function remove(Article $article)
     {
         Cart::setQuantity($article->id, 0);

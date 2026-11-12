@@ -26,11 +26,13 @@ use Illuminate\Support\Facades\Route;
 // ---------- Web de clientes ----------
 Route::name('portal.')->group(function () {
     Route::get('/', [Portal\CatalogController::class, 'index'])->name('home');
+    Route::get('coleccion/{slug}', [Portal\CatalogController::class, 'collection'])->name('collection');
     Route::get('articulo/{reference}', [Portal\CatalogController::class, 'show'])->name('article');
     Route::view('privacidad', 'portal.privacy')->name('privacy');
 
     Route::get('pedido', [Portal\CartController::class, 'show'])->name('cart');
     Route::post('pedido', [Portal\CartController::class, 'update'])->name('cart.update');
+    Route::post('pedido/fecha', [Portal\CartController::class, 'date'])->name('cart.date');
     Route::post('pedido/articulo/{article}', [Portal\CartController::class, 'add'])->name('cart.add');
     Route::delete('pedido/articulo/{article}', [Portal\CartController::class, 'remove'])->name('cart.remove');
     Route::get('pedido/transporte', [Portal\CartController::class, 'transport'])->name('cart.transport')->middleware('throttle:30,1');

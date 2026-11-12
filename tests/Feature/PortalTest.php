@@ -56,7 +56,10 @@ class PortalTest extends TestCase
         Notification::fake();
 
         // Catálogo público sin precios
-        $this->get('/')->assertOk()->assertSee('Silla Crossback')->assertSee('Entra para ver precios')->assertDontSee('10,00 €');
+        $this->get('/')->assertOk()->assertSee('Sillas')->assertSee(route('portal.collection', 'sillas'));
+        $this->get(route('portal.collection', 'sillas'))->assertOk()->assertSee('Silla Crossback')->assertSee('Ingresa para ver precios')->assertDontSee('10,00 €');
+        $this->get('/?q=crossback')->assertOk()->assertSee('Silla Crossback');
+        $this->get(route('portal.article', 'SIL-0001'))->assertOk()->assertSee('Añadir al pedido');
 
         // Registro
         $this->post(route('portal.register'), $this->registerData())->assertRedirect(route('portal.account'));
@@ -88,7 +91,9 @@ class PortalTest extends TestCase
         Notification::assertSentTo($client, ClientApproved::class);
 
         // Ya ve su precio con descuento (10 % de 10 €)
-        $this->actingAs($client->fresh(), 'client')->get('/')->assertSee('9,00 €');
+        $this->actingAs($client->fresh(), 'client')->get(route('portal.collection', 'sillas'))->assertSee('9,00 €');
+        $this->post(route('portal.cart.date'), ['event_date' => now()->addWeeks(3)->next('Saturday')->toDateString()])->assertRedirect();
+        $this->get(route('portal.collection', 'sillas'))->assertSee('libres');
 
         // Pedido desde el carrito, a una finca
         $venue = Venue::create(['name' => 'Finca Test', 'city' => 'Málaga', 'postal_code' => '29014', 'distance_km' => 30, 'active' => true]);
