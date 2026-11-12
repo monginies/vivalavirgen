@@ -14,7 +14,7 @@
         @php($cover = $c->coverUrl())
         <a class="pt-coll" href="{{ route('portal.collection', $c->slug()) }}">
             <span class="pt-coll-img">@if ($cover)<img src="{{ $cover }}" alt="" loading="{{ $loop->index < 2 ? 'eager' : 'lazy' }}">@endif</span>
-            <span class="pt-coll-foot"><span class="pt-coll-name">{{ $c->name }}</span><span class="pt-coll-cta">{{ $c->articles_count ? 'Ver artículos ↗' : 'Próximamente' }}</span></span>
+            <span class="pt-coll-foot"><span class="pt-coll-name">{{ $c->name }}</span><span class="pt-coll-cta">{{ $c->articles_count ? $c->articles_count.' '.($c->articles_count == 1 ? 'artículo' : 'artículos').' ↗' : 'Próximamente' }}</span></span>
         </a>
     @empty
         <p class="empty" style="grid-column:1/-1">Pronto publicaremos nuestro catálogo.</p>

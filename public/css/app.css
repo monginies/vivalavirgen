@@ -372,6 +372,6 @@ body.portal h1{font-family:var(--serif);font-weight:400}
 .pt-coll{aspect-ratio:4/3;padding:22px 26px}
 .pt-coll-foot{flex-direction:column;align-items:flex-start;gap:6px}
 .pt-coll-name{font-family:var(--serif);font-weight:400;text-transform:none;letter-spacing:0;font-size:clamp(22px,2.3vw,34px);line-height:1.1}
-.pt-coll-cta{font-size:11px}
+.pt-coll-cta{font-size:9.5px;letter-spacing:.14em;opacity:.9}
 @media (max-width:900px){.pt-collections{grid-template-columns:repeat(2,1fr)}.pt-coll-name{font-size:24px}}
 @media (max-width:560px){.pt-collections{grid-template-columns:1fr}.pt-coll{aspect-ratio:4/3;padding:20px 22px}.pt-coll-name{font-size:28px}.pt-coll-foot{flex-direction:row;justify-content:space-between;align-items:flex-end}}
