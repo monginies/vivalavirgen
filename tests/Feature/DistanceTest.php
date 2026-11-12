@@ -31,7 +31,7 @@ class DistanceTest extends TestCase
         $this->actingAs(User::factory()->make(['id' => 1]))
             ->getJson(route('orders.distance', ['address' => 'Finca X', 'city' => 'Marbella']))
             ->assertOk()
-            ->assertJson(['km' => 58.3, 'label' => 'Marbella, AN, España']);
+            ->assertJson(['km' => '58.3', 'label' => 'Marbella, AN, España']);
 
         Http::assertSent(fn ($r) => str_contains($r->url(), 'directions') && $r->header('Authorization') === ['test-key']);
     }
@@ -53,11 +53,11 @@ class DistanceTest extends TestCase
     {
         config(['services.openrouteservice.key' => 'k', 'cache.default' => 'array']);
         Http::fake(['api.openrouteservice.org/geocode/*' => Http::sequence()
-            ->push(['features' => [['geometry' => ['coordinates' => [-4.45, 36.69]], 'properties' => ['label' => 'Base']]]])
+            ->push(['features' => [['geometry' => ['coordinates' => [-4.45, 36.69]], 'properties' => ['label' => 'Calle Driza 13, Málaga']]]])
             ->push(['features' => []])]);
 
         $this->actingAs(User::factory()->make(['id' => 1]))
             ->getJson(route('orders.distance', ['address' => 'zzz']))
-            ->assertStatus(422)->assertJsonPath('error', 'No se encuentra esa dirección. Prueba a añadir la población o el código postal.');
+            ->assertStatus(422)->assertJsonPath('error', 'No se encuentra esa dirección a menos de 300 km de la base. Prueba a añadir la población o el código postal.');
     }
 }

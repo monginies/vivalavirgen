@@ -28,7 +28,7 @@ class Setting extends Model
         'prereservation_days' => ['label' => 'Duración de la pre-reserva', 'unit' => 'días', 'default' => '3', 'type' => 'number',
             'hint' => 'Si el pedido no se paga en este plazo, caduca y el material se libera.'],
         'vat_rate' => ['label' => 'IVA', 'unit' => '%', 'default' => '21', 'type' => 'number', 'hint' => null],
-        'base_address' => ['label' => 'Dirección de la base', 'unit' => null, 'default' => 'C/ Driza, 13, 29006 Málaga', 'type' => 'text',
+        'base_address' => ['label' => 'Dirección de la base', 'unit' => null, 'default' => 'Calle Driza, 13, 29006 Málaga', 'type' => 'text',
             'hint' => 'Punto de salida para calcular los km.'],
     ];
 

@@ -159,18 +159,18 @@ class OrderController extends Controller
     /** Km por carretera desde la base (JSON para el botón del formulario). */
     public function distance(Request $request)
     {
-        $destination = collect([$request->string('address')->trim(), $request->string('city')->trim()])
-            ->filter(fn ($v) => $v->isNotEmpty())->join(', ');
+        $address = trim((string) $request->input('address'));
+        $city = trim((string) $request->input('city'));
 
         try {
             if (! Distance::configured()) {
                 throw new \RuntimeException('Falta la clave de OpenRouteService en el servidor.');
             }
-            if ($destination === '') {
+            if ($address === '' && $city === '') {
                 throw new \RuntimeException('Escribe primero la dirección o la población del destino.');
             }
 
-            return response()->json(Distance::fromBase($destination));
+            return response()->json(Distance::fromBase($address, $city));
         } catch (ConnectionException) {
             return response()->json(['error' => 'El servicio de mapas no responde ahora mismo. Introduce los km a mano.'], 422);
         } catch (QueryException $e) {
