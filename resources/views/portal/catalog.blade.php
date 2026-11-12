@@ -13,7 +13,7 @@
     @forelse ($categories as $c)
         @php($cover = $c->coverUrl())
         <a class="pt-coll" href="{{ route('portal.collection', $c->slug()) }}" @if ($cover) style="background-image:url('{{ $cover }}')" @endif>
-            <span class="pt-coll-foot"><span class="pt-coll-name">{{ $c->name }}</span><span class="pt-coll-cta">Ver artículos ↗</span></span>
+            <span class="pt-coll-foot"><span class="pt-coll-name">{{ $c->name }}</span><span class="pt-coll-cta">{{ $c->articles_count ? 'Ver artículos ↗' : 'Próximamente' }}</span></span>
         </a>
     @empty
         <p class="empty" style="grid-column:1/-1">Pronto publicaremos nuestro catálogo.</p>

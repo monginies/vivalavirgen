@@ -76,6 +76,7 @@ class CategoryController extends Controller
             'cover' => ['nullable', 'image', 'max:20480'],
         ]);
         $data['sort'] = (int) ($data['sort'] ?? 0);
+        $data['visible'] = $request->boolean('visible');
         unset($data['cover']);
         $data['code'] = strtoupper($data['code']);
 

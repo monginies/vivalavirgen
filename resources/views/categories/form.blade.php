@@ -18,6 +18,8 @@
         <div class="hint">Foto horizontal de ambiente. Si no pones ninguna, se usa la foto principal de su primer artículo.</div>
         @error('cover')<div class="err">{{ $message }}</div>@enderror
     </div>
+    <div class="field"><label class="check"><input type="hidden" name="visible" value="0"><input type="checkbox" name="visible" value="1" @checked(old('visible', $category->exists ? $category->visible : true))> Mostrar en la web</label>
+        <div class="hint">Sale en la web aunque todavía no tenga artículos. Desmárcala para ocultarla (por ejemplo, la de pruebas).</div></div>
     @include('partials.field', ['name' => 'sort', 'label' => 'Orden en la web', 'value' => $category->sort ?? 0, 'type' => 'number', 'step' => 1, 'min' => 0, 'hint' => 'Las de número más bajo salen primero.'])
     <div class="actions">
         <button class="btn">Guardar</button>

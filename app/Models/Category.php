@@ -9,17 +9,22 @@ use Illuminate\Support\Str;
 
 class Category extends Model
 {
-    protected $fillable = ['name', 'code', 'description', 'cover_path', 'sort'];
+    protected $fillable = ['name', 'code', 'description', 'cover_path', 'sort', 'visible'];
 
     public function articles(): HasMany
     {
         return $this->hasMany(Article::class);
     }
 
-    /** Categorías visibles en la web: las que tienen algún artículo activo. */
+    protected function casts(): array
+    {
+        return ['visible' => 'boolean'];
+    }
+
+    /** Categorías que se muestran en la web (tengan o no artículos todavía). */
     public function scopeForPortal(Builder $query): Builder
     {
-        return $query->whereHas('articles', fn ($q) => $q->where('active', true))->orderBy('sort')->orderBy('name');
+        return $query->where('visible', true)->orderBy('sort')->orderBy('name');
     }
 
     public function slug(): string

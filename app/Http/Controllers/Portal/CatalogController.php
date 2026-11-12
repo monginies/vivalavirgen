@@ -24,7 +24,7 @@ class CatalogController extends Controller
         }
 
         return view('portal.catalog', [
-            'categories' => Category::forPortal()->get(),
+            'categories' => Category::forPortal()->withCount(['articles' => fn ($q) => $q->where('active', true)])->get(),
             'total' => Article::where('active', true)->count(),
         ]);
     }

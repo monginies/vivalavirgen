@@ -30,7 +30,7 @@
             </div>
         </article>
     @empty
-        <p class="empty" style="grid-column:1/-1">No hay artículos que coincidan.</p>
+        <p class="empty" style="grid-column:1/-1">{{ $category && ! request('q') ? 'Estamos preparando esta colección. Muy pronto podrás ver aquí sus piezas.' : 'No hay artículos que coincidan.' }}</p>
     @endforelse
 </div>
 <div class="pt-section">{{ $articles->links('partials.pagination') }}</div>

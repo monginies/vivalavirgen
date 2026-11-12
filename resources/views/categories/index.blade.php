@@ -9,7 +9,7 @@
         @forelse ($categories as $c)
             <tr>
                 <td class="mono">{{ $c->code }}</td>
-                <td><a href="{{ route('articles.index', ['category' => $c->id]) }}">{{ $c->name }}</a></td>
+                <td><a href="{{ route('articles.index', ['category' => $c->id]) }}">{{ $c->name }}</a>@unless ($c->visible) <span class="badge grey">Oculta en la web</span>@endunless</td>
                 <td class="muted">{{ Str::limit($c->description, 80) }}</td>
                 <td class="num">{{ $c->articles_count }}</td>
                 <td class="actions" style="justify-content:flex-end"><a class="btn sec sm" href="{{ route('categories.edit', $c) }}">Editar</a></td>
