@@ -230,6 +230,9 @@ class Distance
         if ($res->successful()) {
             return;
         }
+        if (str_contains((string) $res->body(), 'Quota') || $res->status() === 429) {
+            throw new RuntimeException('Se ha superado el límite de cálculos del servicio de mapas. Prueba más tarde o introduce los km a mano.');
+        }
         throw new RuntimeException(match ($res->status()) {
             401, 403 => 'La clave de OpenRouteService no es válida.',
             429 => 'Se ha superado el límite diario de cálculos. Introduce los km a mano.',
