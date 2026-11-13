@@ -42,7 +42,7 @@
         }
     @endphp
     @if (auth()->user()->isLogistics())
-        @php($menu = [['Expediciones', 'orders', 'expeditions.index', ['expeditions.*', 'scan.*']]])
+        @php($menu = [['Expediciones', 'orders', 'expeditions.index', ['expeditions.index', 'expeditions.show', 'scan.*']], ['Ayuda', 'orders', 'expeditions.help', ['expeditions.help']]])
     @endif
     <nav id="mainnav">
         @foreach ($menu as $item)

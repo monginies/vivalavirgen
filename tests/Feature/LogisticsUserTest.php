@@ -48,6 +48,7 @@ class LogisticsUserTest extends TestCase
         $as->get(route('expeditions.index'))->assertOk()->assertSee('PED-2026-0001')->assertSee('Dar salida')->assertDontSee('Clientes');
         $as->get(route('expeditions.show', $this->order))->assertOk()->assertSee('Silla Tiffany')->assertDontSee('4,50')->assertDontSee('ver pedido');
         $as->get(route('orders.expedition', $this->order))->assertOk();
+        $as->get(route('expeditions.help'))->assertOk()->assertSee('Dar salida (al cargar en la nave)');
         $as->get(route('scan.show', [$this->order, 'salida']))->assertOk();
         $as->postJson(route('scan.scan', [$this->order, 'salida']), ['code' => $this->chair->units->first()->code])->assertJson(['level' => 'ok']);
 

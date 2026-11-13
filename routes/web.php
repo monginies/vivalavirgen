@@ -78,6 +78,7 @@ Route::prefix('app')->middleware(NoIndex::class)->group(function () {
     Route::middleware(['auth', RestrictLogistics::class])->group(function () {
         Route::post('logout', [LoginController::class, 'logout'])->name('logout');
         Route::get('expediciones', [ExpeditionController::class, 'index'])->name('expeditions.index');
+        Route::view('expediciones/ayuda', 'expeditions.help')->name('expeditions.help');
         Route::get('expediciones/{order}', [ExpeditionController::class, 'show'])->name('expeditions.show');
         Route::get('/', DashboardController::class)->name('dashboard');
 

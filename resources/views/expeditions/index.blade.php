@@ -2,7 +2,7 @@
 @section('title', 'Expediciones')
 @section('content')
 @php($S = \App\Enums\OrderStatus::class)
-<div class="head"><h1>Expediciones</h1></div>
+<div class="head"><h1>Expediciones</h1><a class="btn sec" href="{{ route('expeditions.help') }}">Cómo dar salida y entrada</a></div>
 <form class="filters" method="get">
     <select name="status" onchange="this.form.submit()">
         <option value="">Todas</option>
