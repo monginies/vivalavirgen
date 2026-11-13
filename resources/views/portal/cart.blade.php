@@ -98,9 +98,8 @@
                 @if ($settings['withholding'] > 0)<dt>Retención IRPF {{ rtrim(rtrim(number_format($settings['withholding'], 2, ',', ''), '0'), ',') }} %</dt><dd id="s-wh">—</dd>@endif
                 <dt>Total</dt><dd id="s-total">—</dd>
                 <dt>Fianza</dt><dd>{{ $money($settings['deposit']) }}<div class="hint" style="margin:0">Se devuelve tras revisar el material</div></dd>
-                <dt><b>Total</b></dt><dd><b id="s-due">—</b></dd>
+                <dt><b>Total a pagar</b></dt><dd><b id="s-due">—</b></dd>
             </dl>
-            <p class="hint">Importe estimado. Te confirmaremos el precio final en la proforma.</p>
             @if ($short->isNotEmpty())<p class="err">Algún artículo no tiene unidades suficientes para tu fecha: ajusta las cantidades y pulsa «Actualizar cantidades».</p>@endif
             @if (! $period)<p class="hint">Indica la fecha del evento para poder enviarlo.</p>@endif
             <button class="btn" style="width:100%;justify-content:center" formaction="{{ route('portal.checkout') }}" @disabled($short->isNotEmpty() || ! $period)>Solicitar pedido</button>
