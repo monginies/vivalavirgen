@@ -51,6 +51,12 @@
                 <input type="hidden" name="status" value="{{ $next[0]->value }}"><button class="btn">{{ $next[1] }}</button>
             </form>
         @endif
+        @if ($order->status === $S::Requested)
+            {{-- App instalada: cancelar a la derecha de «Aceptar pedido» --}}
+            <form method="post" action="{{ route('orders.transition', $order) }}" class="app-inline" onsubmit="return confirm('¿Cancelar este pedido? El material quedará libre.')">@csrf
+                <input type="hidden" name="status" value="cancelled"><button class="btn danger">Cancelar pedido</button>
+            </form>
+        @endif
         @if ($order->status === $S::Expired)
             <form method="post" action="{{ route('orders.transition', $order) }}">@csrf
                 <input type="hidden" name="status" value="requested"><button class="btn">Reactivar pre-reserva</button>
@@ -86,7 +92,7 @@
             <p class="hint">Al enviarla, el pedido pasa a «Proforma enviada».</p>
         @endif
     @endif
-    @if ($order->status->canCancel())
+    @if ($order->status->canCancel() && $order->status !== \App\Enums\OrderStatus::Requested)
         <form method="post" action="{{ route('orders.transition', $order) }}" @class(['pf-cancel', 'app-only' => $order->status->isExpirable() && $order->expires_at]) style="margin-top:14px" onsubmit="return confirm('¿Cancelar este pedido? El material quedará libre.')">@csrf
             <input type="hidden" name="status" value="cancelled"><button class="btn danger">Cancelar pedido</button>
         </form>

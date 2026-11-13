@@ -431,4 +431,5 @@ body.portal h1{font-family:var(--serif);font-weight:400}
 
 /* Cancelar pedido: en la web junto a «Ampliar 3 días»; en la app instalada, bajo «Enviar proforma» */
 .app-only{display:none}
-@media (display-mode:standalone){.app-only{display:block}.cancel-web{display:none!important}}
+.app-inline{display:none}
+@media (display-mode:standalone){.app-only{display:block}.app-inline{display:inline-flex}.cancel-web{display:none!important}}

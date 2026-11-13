@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="robots" content="noindex">
     <title>Sin conexión · {{ config('app.name') }}</title>
-    <link rel="stylesheet" href="/css/app.css?v=44">
+    <link rel="stylesheet" href="/css/app.css?v=45">
 </head>
 <body style="display:flex;min-height:100vh;align-items:center;justify-content:center;text-align:center;padding:24px">
     <div>
