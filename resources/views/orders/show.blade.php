@@ -72,7 +72,7 @@
 @if (! in_array($order->status, [\App\Enums\OrderStatus::Cancelled, \App\Enums\OrderStatus::Expired], true))
 <div class="card" id="proforma">
     <div class="head" style="margin-bottom:10px"><h2 style="margin:0">Proforma</h2>
-        <a class="btn sec sm" href="{{ route('orders.proforma', $order) }}" target="_blank">Ver PDF</a></div>
+        <a class="btn sec sm web-only" href="{{ route('orders.proforma', $order) }}" target="_blank">Ver PDF</a></div>
     @if ($order->proforma_sent_at)
         <p class="muted" style="margin-top:0">Enviada el {{ $order->proforma_sent_at->format('d/m/Y H:i') }} a {{ $order->proforma_sent_to }}.</p>
     @endif
