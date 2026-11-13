@@ -27,31 +27,29 @@
     <div class="flash ko">La pre-reserva caducó y el material quedó libre. Puedes reactivarla si sigue habiendo disponibilidad.</div>
 @endif
 
+{{-- «Proforma enviada» se marca sola al enviarla desde la tarjeta Proforma: sin botón aparte --}}
+@php($S = \App\Enums\OrderStatus::class)
+@php($next = $order->status->next())
+@php($showNext = $next && $next[0] !== $S::ProformaSent)
+@if ($showNext || $order->status === $S::Expired || (! $next && ! $order->status->canCancel()))
 <div class="card">
     <div class="actions">
-        @if ($next = $order->status->next())
-            {{-- «Proforma enviada» se marca sola al enviarla desde la tarjeta Proforma: sin botón aparte --}}
-            @if ($next[0] !== \App\Enums\OrderStatus::ProformaSent)
+        @if ($showNext)
             <form method="post" action="{{ route('orders.transition', $order) }}">@csrf
                 <input type="hidden" name="status" value="{{ $next[0]->value }}"><button class="btn">{{ $next[1] }}</button>
             </form>
-            @endif
         @endif
-        @if ($order->status === \App\Enums\OrderStatus::Expired)
+        @if ($order->status === $S::Expired)
             <form method="post" action="{{ route('orders.transition', $order) }}">@csrf
                 <input type="hidden" name="status" value="requested"><button class="btn">Reactivar pre-reserva</button>
             </form>
         @endif
-        @if ($order->status->canCancel())
-            <form method="post" action="{{ route('orders.transition', $order) }}" onsubmit="return confirm('¿Cancelar este pedido? El material quedará libre.')">@csrf
-                <input type="hidden" name="status" value="cancelled"><button class="btn danger">Cancelar pedido</button>
-            </form>
-        @endif
-        @unless ($next || $order->status === \App\Enums\OrderStatus::Expired || $order->status->canCancel())
+        @unless ($next || $order->status === $S::Expired || $order->status->canCancel())
             <span class="muted">Pedido finalizado.</span>
         @endunless
     </div>
 </div>
+@endif
 
 @if (! in_array($order->status, [\App\Enums\OrderStatus::Cancelled, \App\Enums\OrderStatus::Expired], true))
 <div class="card" id="proforma">
@@ -73,6 +71,11 @@
             <p class="hint">Al enviarla, el pedido pasa a «Proforma enviada».</p>
         @endif
     @endif
+    @if ($order->status->canCancel())
+        <form method="post" action="{{ route('orders.transition', $order) }}" class="pf-cancel" style="margin-top:14px" onsubmit="return confirm('¿Cancelar este pedido? El material quedará libre.')">@csrf
+            <input type="hidden" name="status" value="cancelled"><button class="btn danger">Cancelar pedido</button>
+        </form>
+    @endif
 </div>
 @endif
 
@@ -82,7 +85,6 @@
     <div class="head" style="margin-bottom:10px"><h2 style="margin:0">Expedición</h2>
         @if ($shippable)<a class="btn sec sm" href="{{ route('expeditions.show', $order) }}">Ir a la expedición</a>
         @else<span class="muted">Pasará a Expediciones cuando el pedido esté pagado.</span>@endif</div>
-    @php($S = \App\Enums\OrderStatus::class)
     @if ($shippable)
         @php($outUnits = $order->units)
         @php($back = $outUnits->whereNotNull('return_status'))

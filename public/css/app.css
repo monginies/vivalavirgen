@@ -420,11 +420,11 @@ body.portal h1{font-family:var(--serif);font-weight:400}
 }
 
 /* Envío de la proforma: en pantallas estrechas, un campo debajo de otro */
-@media (max-width:640px){.pf-form{grid-template-columns:1fr!important}.pf-form .btn{justify-content:center}}
+@media (max-width:640px){.pf-form{grid-template-columns:1fr!important}.pf-form .btn,.pf-cancel .btn{justify-content:center;width:100%}}
 /* En la app instalada: sin mensaje y con el email fijo (el del cliente) */
 @media (display-mode:standalone){
   .pf-form{grid-template-columns:1fr!important}
   .pf-form .pf-note{display:none}
   .pf-form .pf-email input[readonly]{border:0;background:transparent;padding:0;font-weight:600;font-size:16px;color:var(--ink);pointer-events:none}
-  .pf-form .btn{justify-content:center}
+  .pf-form .btn,.pf-cancel .btn{justify-content:center;width:100%}
 }
