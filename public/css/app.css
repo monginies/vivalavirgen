@@ -379,3 +379,11 @@ body.portal h1{font-family:var(--serif);font-weight:400}
 .pt-coll-cta{font-size:9.5px;letter-spacing:.14em;opacity:.9}
 @media (max-width:900px){.pt-collections{grid-template-columns:repeat(2,1fr)}.pt-coll-name{font-size:24px}}
 @media (max-width:560px){.pt-collections{grid-template-columns:1fr}.pt-coll{aspect-ratio:4/3;padding:20px 22px}.pt-coll-name{font-size:28px}.pt-coll-foot{flex-direction:row;justify-content:space-between;align-items:flex-end}}
+
+/* Desglose de importes del pedido */
+.totals-tbl{width:100%;border-collapse:collapse}
+.totals-tbl td{border:0;padding:5px 0;vertical-align:baseline}
+.totals-tbl td.num{text-align:right;white-space:nowrap;font-variant-numeric:tabular-nums}
+.totals-tbl tr.sub td{border-top:1px solid var(--line);padding-top:9px;font-weight:600}
+.totals-tbl tr.sub + tr td{padding-top:6px}
+.totals-tbl tr.grand td{border-top:2px solid var(--ink);padding-top:10px;font-weight:700;font-size:17px}
