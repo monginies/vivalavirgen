@@ -6,41 +6,41 @@
 <style>
     @page { margin: 18mm 14mm 18mm 14mm; }
     * { font-family: "DejaVu Sans", sans-serif; }
-    body { font-size: 9pt; color: #2e3028; line-height: 1.4; }
+    body { font-size: 9pt; color: #222222; line-height: 1.4; }
     .serif { font-family: "DejaVu Serif", serif; }
-    .muted { color: #6c6d61; }
-    .head { width: 100%; border-bottom: 2px solid #9a9b88; padding-bottom: 8px; margin-bottom: 12px; }
+    .muted { color: #666666; }
+    .head { width: 100%; border-bottom: 2px solid #888888; padding-bottom: 8px; margin-bottom: 12px; }
     .head td { vertical-align: top; }
     .logo { width: 56px; height: 56px; }
     h1 { font-family: "DejaVu Serif", serif; font-weight: normal; font-size: 18pt; margin: 0; letter-spacing: 1px; }
-    .label { font-size: 6.8pt; letter-spacing: 1.2px; text-transform: uppercase; color: #6c6d61; margin-bottom: 2px; }
+    .label { font-size: 6.8pt; letter-spacing: 1.2px; text-transform: uppercase; color: #666666; margin-bottom: 2px; }
     .grid { width: 100%; border-collapse: separate; border-spacing: 6px; margin: 0 -6px 6px; }
-    .grid td { vertical-align: top; padding: 8px 10px; background: #f5f3ec; }
+    .grid td { vertical-align: top; padding: 8px 10px; background: #f0f0f0; }
     .big { font-size: 11pt; font-weight: bold; }
-    .notes { border: 1px solid #c9c6b6; padding: 8px 10px; margin-bottom: 12px; }
+    .notes { border: 1px solid #bbbbbb; padding: 8px 10px; margin-bottom: 12px; }
     table.lines { width: 100%; border-collapse: collapse; margin-bottom: 10px; }
-    table.lines th { font-size: 6.8pt; letter-spacing: 1px; text-transform: uppercase; color: #6c6d61; text-align: left; border-bottom: 1px solid #9a9b88; padding: 5px 4px; font-weight: normal; }
-    table.lines td { padding: 4px; border-bottom: 1px solid #e7e4d8; vertical-align: middle; }
+    table.lines th { font-size: 6.8pt; letter-spacing: 1px; text-transform: uppercase; color: #666666; text-align: left; border-bottom: 1px solid #888888; padding: 5px 4px; font-weight: normal; }
+    table.lines td { padding: 4px; border-bottom: 1px solid #dddddd; vertical-align: middle; }
     td.ref { white-space: nowrap; }
     table.lines th.c, table.lines td.c { text-align: center; width: 46px; }
     .num { text-align: right; white-space: nowrap; }
     .thumb { width: 38px; height: 38px; }
-    .noimg { width: 38px; height: 38px; background: #eeece4; }
-    .box { display: inline-block; width: 11px; height: 11px; border: 1.2px solid #2e3028; }
-    tr.bundle td { background: #f5f3ec; font-weight: bold; }
+    .noimg { width: 38px; height: 38px; background: #eeeeee; }
+    .box { display: inline-block; width: 11px; height: 11px; border: 1.2px solid #222222; }
+    tr.bundle td { background: #f0f0f0; font-weight: bold; }
     tr.part td.name { padding-left: 16px; }
     .sign { width: 100%; border-collapse: separate; border-spacing: 8px; margin: 6px -8px 0; page-break-inside: avoid; }
-    .sign td { width: 50%; vertical-align: top; border: 1px solid #9a9b88; padding: 8px 10px; }
+    .sign td { width: 50%; vertical-align: top; border: 1px solid #888888; padding: 8px 10px; }
     .field.tall { height: 40px; }
-    .field { border-bottom: 1px solid #c9c6b6; height: 18px; margin-bottom: 6px; font-size: 7.5pt; color: #6c6d61; }
-    .foot { position: fixed; bottom: -10mm; left: 0; right: 0; font-size: 7pt; color: #8a8b7c; text-align: center; }
+    .field { border-bottom: 1px solid #bbbbbb; height: 18px; margin-bottom: 6px; font-size: 7.5pt; color: #666666; }
+    .foot { position: fixed; bottom: -10mm; left: 0; right: 0; font-size: 7pt; color: #888888; text-align: center; }
 </style>
 </head>
 <body>
 <div class="foot">Viva la Virgen · Hoja de expedición {{ $order->number }} · Documento interno de logística, sin precios</div>
 
 <table class="head"><tr>
-    <td style="width:66px"><img class="logo" src="{{ public_path('img/logo-320.png') }}" alt=""></td>
+    <td style="width:66px">@if ($logo = \App\Support\Expedition::gray(public_path('img/logo-320.png'), 160))<img class="logo" src="{{ $logo }}" alt="">@endif</td>
     <td><div class="serif" style="font-size:13pt">Viva la Virgen</div><div class="muted">Logística · {{ now()->format('d/m/Y H:i') }}</div></td>
     <td style="text-align:right">
         <h1>HOJA DE EXPEDICIÓN</h1>

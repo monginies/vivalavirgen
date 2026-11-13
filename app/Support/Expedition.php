@@ -38,12 +38,38 @@ class Expedition
         return $rows;
     }
 
-    /** Ruta local de la miniatura (dompdf la lee del disco). */
+    /** Miniatura en escala de grises (la hoja se imprime en blanco y negro). */
     public static function thumb(Article $article): ?string
     {
         $path = $article->mainPhoto?->thumb_path;
 
-        return $path && Storage::disk('public')->exists($path) ? Storage::disk('public')->path($path) : null;
+        return $path && Storage::disk('public')->exists($path) ? self::gray(Storage::disk('public')->path($path)) : null;
+    }
+
+    /** Imagen reducida y en escala de grises, como data URI PNG; null si no se puede leer. */
+    public static function gray(string $file, int $max = 120): ?string
+    {
+        $data = @file_get_contents($file);
+        $src = $data !== false ? @imagecreatefromstring($data) : false;
+        if (! $src) {
+            return null;
+        }
+        $w = imagesx($src);
+        $h = imagesy($src);
+        $scale = min(1, $max / max($w, $h));
+        $dst = imagecreatetruecolor(max(1, (int) round($w * $scale)), max(1, (int) round($h * $scale)));
+        imagealphablending($dst, false);
+        imagesavealpha($dst, true);
+        imagefill($dst, 0, 0, imagecolorallocatealpha($dst, 255, 255, 255, 127));
+        imagecopyresampled($dst, $src, 0, 0, 0, 0, imagesx($dst), imagesy($dst), $w, $h);
+        imagefilter($dst, IMG_FILTER_GRAYSCALE);
+        ob_start();
+        imagepng($dst);
+        $png = ob_get_clean();
+        imagedestroy($src);
+        imagedestroy($dst);
+
+        return 'data:image/png;base64,'.base64_encode($png);
     }
 
     public static function pdf(Order $order): \Barryvdh\DomPDF\PDF
