@@ -97,7 +97,7 @@
                 <dt>IVA {{ rtrim(rtrim(number_format($settings['vat'], 2, ',', ''), '0'), ',') }} %</dt><dd id="s-vat">—</dd>
                 @if ($settings['withholding'] > 0)<dt>Retención IRPF {{ rtrim(rtrim(number_format($settings['withholding'], 2, ',', ''), '0'), ',') }} %</dt><dd id="s-wh">—</dd>@endif
                 <dt>Total</dt><dd id="s-total">—</dd>
-                <dt>Fianza</dt><dd>{{ $money($settings['deposit']) }}<div class="hint" style="margin:0">Se devuelve tras revisar el material</div></dd>
+                <dt>Fianza</dt><dd>{{ $money($settings['deposit']) }}</dd>
                 <dt><b>Total a pagar</b></dt><dd><b id="s-due">—</b></dd>
             </dl>
             @if ($short->isNotEmpty())<p class="err">Algún artículo no tiene unidades suficientes para tu fecha: ajusta las cantidades y pulsa «Actualizar cantidades».</p>@endif
