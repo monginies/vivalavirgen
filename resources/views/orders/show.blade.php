@@ -15,9 +15,15 @@
 @if ($order->status->isExpirable() && $order->expires_at)
     <div class="flash {{ $order->expires_at->diffInHours(now(), true) < 24 ? 'ko' : 'ok' }}">
         Pre-reserva hasta el <b>{{ $order->expires_at->format('d/m/Y H:i') }}</b>. Si no se paga antes, caduca y el material se libera.
-        <form method="post" action="{{ route('orders.extend', $order) }}" style="display:inline-flex;gap:6px;margin-left:8px">
+        <form method="post" action="{{ route('orders.extend', $order) }}" class="web-only" style="display:inline-flex;gap:6px;margin-left:8px">
             @csrf <input type="hidden" name="days" value="3"><button class="btn sec sm">Ampliar 3 días</button>
         </form>
+        {{-- App instalada: ampliar 1, 2 o 3 días --}}
+        <div class="app-inline" style="gap:6px;margin-top:8px;flex-wrap:wrap">
+            @foreach ([1, 2, 3] as $d)
+                <form method="post" action="{{ route('orders.extend', $order) }}">@csrf<input type="hidden" name="days" value="{{ $d }}"><button class="btn sec sm">+{{ $d }} {{ $d > 1 ? 'días' : 'día' }}</button></form>
+            @endforeach
+        </div>
         @if ($order->status === \App\Enums\OrderStatus::Requested)
             {{-- En la web, «Aceptar pedido» entre ampliar y cancelar; en la app instalada va en su tarjeta --}}
             <form method="post" action="{{ route('orders.transition', $order) }}" class="cancel-web" style="display:inline-flex;margin-left:6px">@csrf
