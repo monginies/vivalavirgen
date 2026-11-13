@@ -432,7 +432,9 @@ body.portal h1{font-family:var(--serif);font-weight:400}
 /* Cancelar pedido: en la web junto a «Ampliar 3 días»; en la app instalada, bajo «Enviar proforma» */
 .app-only{display:none}
 .app-inline{display:none}
-.app-email{display:none}
+.app-email,.app-tel{display:none}
 @media (display-mode:standalone){.app-only{display:block}.app-inline{display:inline-flex}.cancel-web,.web-only{display:none!important}
-  .app-email{display:inline;font-family:var(--sans);font-weight:500;font-size:15px;color:var(--muted);word-break:break-all}
+  .app-email{display:inline;font-family:var(--sans);font-weight:600;font-size:15px;color:var(--ink);word-break:break-all}
+  .has-app-email .web-text{display:none}
+  .app-tel{display:inline-flex!important;align-items:center;gap:6px;font-weight:600;white-space:nowrap;text-decoration:none;padding:8px 12px;border:1px solid var(--field);border-radius:999px;background:var(--card);color:var(--sage-deep)}
   .pf-form .pf-email.has-email{display:none}}

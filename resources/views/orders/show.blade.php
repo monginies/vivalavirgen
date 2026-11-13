@@ -72,7 +72,9 @@
 @if (! in_array($order->status, [\App\Enums\OrderStatus::Cancelled, \App\Enums\OrderStatus::Expired], true))
 <div class="card" id="proforma">
     @php($pfEmail = old('email', $order->client->email))
-    <div class="head" style="margin-bottom:10px"><h2 style="margin:0">Proforma @if ($pfEmail && in_array($order->status, [\App\Enums\OrderStatus::Accepted, \App\Enums\OrderStatus::ProformaSent, \App\Enums\OrderStatus::Paid], true))<span class="app-email"> · {{ $pfEmail }}</span>@endif</h2>
+    <div class="head" style="margin-bottom:10px">@php($showAppEmail = $pfEmail && in_array($order->status, [\App\Enums\OrderStatus::Accepted, \App\Enums\OrderStatus::ProformaSent, \App\Enums\OrderStatus::Paid], true))
+        <h2 @class(['has-app-email' => $showAppEmail]) style="margin:0"><span class="web-text">Proforma</span> @if ($showAppEmail)<span class="app-email">{{ $pfEmail }}</span>@endif</h2>
+        @if ($order->client->phone)<a class="app-tel" href="tel:{{ preg_replace('/[^0-9+]/', '', $order->client->phone) }}">@include('partials.icon', ['i' => 'phone']){{ $order->client->phone }}</a>@endif
         <a class="btn sec sm web-only" href="{{ route('orders.proforma', $order) }}" target="_blank">Ver PDF</a></div>
     @if ($order->proforma_sent_at)
         <p class="muted" style="margin-top:0">Enviada el {{ $order->proforma_sent_at->format('d/m/Y H:i') }} a {{ $order->proforma_sent_to }}.</p>
