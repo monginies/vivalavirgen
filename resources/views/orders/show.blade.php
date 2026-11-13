@@ -18,6 +18,12 @@
         <form method="post" action="{{ route('orders.extend', $order) }}" style="display:inline-flex;gap:6px;margin-left:8px">
             @csrf <input type="hidden" name="days" value="3"><button class="btn sec sm">Ampliar 3 días</button>
         </form>
+        @if ($order->status === \App\Enums\OrderStatus::Requested)
+            {{-- En la web, «Aceptar pedido» entre ampliar y cancelar; en la app instalada va en su tarjeta --}}
+            <form method="post" action="{{ route('orders.transition', $order) }}" class="cancel-web" style="display:inline-flex;margin-left:6px">@csrf
+                <input type="hidden" name="status" value="accepted"><button class="btn sm">Aceptar pedido</button>
+            </form>
+        @endif
         @if ($order->status->canCancel())
             {{-- En la web, a la derecha de «Ampliar 3 días»; en la app instalada va bajo «Enviar proforma» --}}
             <form method="post" action="{{ route('orders.transition', $order) }}" class="cancel-web" style="display:inline-flex;margin-left:6px" onsubmit="return confirm('¿Cancelar este pedido? El material quedará libre.')">@csrf
@@ -38,7 +44,7 @@
 @php($next = $order->status->next())
 @php($showNext = $next && $next[0] !== $S::ProformaSent)
 @if ($showNext || $order->status === $S::Expired || (! $next && ! $order->status->canCancel()))
-<div class="card">
+<div @class(['card', 'app-only' => $order->status === $S::Requested && $order->expires_at])>
     <div class="actions">
         @if ($showNext)
             <form method="post" action="{{ route('orders.transition', $order) }}">@csrf
