@@ -30,8 +30,8 @@ class OrderReceived extends Notification
         }
 
         return $mail
-            ->line('Total estimado '.Money::eur($o->total()).($o->withholding_rate > 0 ? ' (IVA incluido, retención descontada)' : ' (IVA incluido)').' + fianza '.Money::eur($o->deposit_amount).' = **total '.Money::eur($o->amountDue()).'**.')
-            ->line('Revisaremos el pedido y te enviaremos la proforma para confirmarlo.')
+            ->line('**Total a pagar = '.Money::eur($o->amountDue()).'**')
+            ->line('Estamos revisando su pedido, en breve le remitimos proforma para realizar el pago del mismo.')
             ->action('Ver mi pedido', route('portal.orders.show', $o->number));
     }
 }
