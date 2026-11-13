@@ -1,5 +1,4 @@
 <style>
-    .help { max-width: 760px; }
     .help h2 { margin-top: 4px; }
     .help ol, .help ul { padding-left: 22px; margin: 8px 0 0; }
     .help li { margin-bottom: 8px; }
