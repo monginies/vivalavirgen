@@ -3,9 +3,10 @@
 @section('content')
 <div class="head">
     <div><h1>{{ $article->name }}</h1><div class="sub"><span class="mono">{{ $article->reference }}</span> · {{ $article->category->name }}
+        @if ($article->is_bundle) · <span class="badge grey">Combinado</span>@endif
         @unless ($article->active) · <span class="badge grey">Inactivo</span>@endunless</div></div>
     <div class="actions">
-        <a class="btn sec" href="{{ route('articles.labels', $article) }}">Imprimir etiquetas QR</a>
+        @unless ($article->is_bundle)<a class="btn sec" href="{{ route('articles.labels', $article) }}">Imprimir etiquetas QR</a>@endunless
         <a class="btn" href="{{ route('articles.edit', $article) }}">Editar</a>
     </div>
 </div>
@@ -18,8 +19,33 @@
             @if ($article->dimensions)<dt>Medidas</dt><dd>{{ $article->dimensions }}</dd>@endif
             @if ($article->description)<dt>Descripción</dt><dd>{!! nl2br(e($article->description)) !!}</dd>@endif
             @if ($article->notes)<dt>Notas</dt><dd>{!! nl2br(e($article->notes)) !!}</dd>@endif
+            @if ($article->bundles->isNotEmpty())
+                <dt>Forma parte de</dt><dd>@foreach ($article->bundles as $b)<a href="{{ route('articles.show', $b) }}">{{ $b->name }}</a> ({{ $b->pivot->quantity }})@unless ($loop->last), @endunless @endforeach</dd>
+            @endif
         </dl>
     </div>
+    @if ($article->is_bundle)
+    <div class="card">
+        <h2>Piezas</h2>
+        @php($sum = $article->components->sum(fn ($c) => $c->rental_price * $c->pivot->quantity))
+        <table>
+            <thead><tr><th>Artículo</th><th class="num">Por combinado</th><th class="num">Libres hoy</th></tr></thead>
+            <tbody>
+            @forelse ($article->components as $c)
+                <tr>
+                    <td><span class="mono">{{ $c->reference }}</span> <a href="{{ route('articles.show', $c) }}">{{ $c->name }}</a>@if ($c->trashed()) <span class="badge grey">Eliminado</span>@elseif (! $c->active) <span class="badge grey">Inactivo</span>@endif</td>
+                    <td class="num">{{ $c->pivot->quantity }}</td>
+                    <td class="num">{{ max(0, $today[$c->id]['available'] ?? 0) }} / {{ $today[$c->id]['capacity'] ?? 0 }}</td>
+                </tr>
+            @empty
+                <tr><td colspan="3" class="empty">Aún no tiene piezas. <a href="{{ route('articles.edit', $article) }}">Añádelas</a> para poder alquilarlo.</td></tr>
+            @endforelse
+            </tbody>
+        </table>
+        <p class="muted" style="margin-top:12px">Se pueden montar hoy: <b>{{ max(0, $today[$article->id]['available'] ?? 0) }}</b>
+            @if ($article->components->isNotEmpty()) · Suma de las piezas sueltas: {{ number_format($sum, 2, ',', '.') }} € (precio del combinado: {{ number_format($article->rental_price, 2, ',', '.') }} €)@endif</p>
+    </div>
+    @else
     <div class="card">
         <h2>Stock</h2>
         <table>
@@ -36,8 +62,10 @@
         </form>
         @error('count')<div class="err">{{ $message }}</div>@enderror
     </div>
+    @endif
 </div>
 @include('articles._photos')
+@unless ($article->is_bundle)
 <div class="card table-wrap">
     <h2>Unidades</h2>
     <table>
@@ -57,4 +85,5 @@
         </tbody>
     </table>
 </div>
+@endunless
 @endsection

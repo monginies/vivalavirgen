@@ -5,8 +5,11 @@ namespace App\Http\Controllers;
 use App\Enums\UnitStatus;
 use App\Models\Article;
 use App\Models\Category;
+use App\Services\Availability;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\ValidationException;
 
 class ArticleController extends Controller
 {
@@ -26,8 +29,11 @@ class ArticleController extends Controller
             ->paginate(25)
             ->withQueryString();
 
+        $bundleIds = $articles->getCollection()->where('is_bundle', true)->pluck('id')->all();
+
         return view('articles.index', [
             'articles' => $articles,
+            'bundleCapacity' => $bundleIds ? Availability::forArticles($bundleIds, today(), today()) : collect(),
             'categories' => Category::orderBy('name')->get(),
         ]);
     }
@@ -40,16 +46,22 @@ class ArticleController extends Controller
         }
 
         return view('articles.form', [
-            'article' => new Article(['category_id' => $request->category, 'active' => true]),
+            'article' => new Article(['category_id' => $request->category, 'active' => true, 'is_bundle' => $request->boolean('bundle')]),
             'categories' => $categories,
+            'componentOptions' => $this->componentOptions(),
         ]);
     }
 
     public function store(Request $request)
     {
-        $data = $this->validated($request);
+        [$data, $components] = $this->validated($request);
         $data['reference'] = Article::nextReference(Category::findOrFail($data['category_id']));
-        $article = Article::create($data);
+        $article = DB::transaction(function () use ($data, $components) {
+            $article = Article::create($data);
+            $article->components()->sync($components);
+
+            return $article;
+        });
         if ($request->hasFile('photos')) {
             try {
                 ArticlePhotoController::attach($article, $request->file('photos'));
@@ -57,7 +69,7 @@ class ArticleController extends Controller
                 session()->flash('error', $e->getMessage());
             }
         }
-        if ($units = (int) $request->input('initial_units')) {
+        if (! $article->is_bundle && $units = (int) $request->input('initial_units')) {
             $article->addUnits($units);
         }
 
@@ -66,10 +78,13 @@ class ArticleController extends Controller
 
     public function show(Article $article)
     {
-        $article->load('category', 'units', 'photos');
+        $article->load('category', 'units', 'photos', 'components.category', 'bundles');
+
+        $partIds = $article->components->pluck('id')->all();
 
         return view('articles.show', [
             'article' => $article,
+            'today' => Availability::forArticles(array_merge([$article->id], $partIds), today(), today()),
             'statusCounts' => $article->units->countBy(fn ($u) => $u->status->value),
         ]);
     }
@@ -77,22 +92,29 @@ class ArticleController extends Controller
     public function edit(Article $article)
     {
         return view('articles.form', [
-            'article' => $article,
+            'article' => $article->load('components'),
             'categories' => Category::orderBy('name')->get(),
+            'componentOptions' => $this->componentOptions($article),
         ]);
     }
 
     public function update(Request $request, Article $article)
     {
-        $data = $this->validated($request, $article);
+        [$data, $components] = $this->validated($request, $article);
 
-        $article->update($data);
+        DB::transaction(function () use ($article, $data, $components) {
+            $article->update($data);
+            $article->components()->sync($components);
+        });
 
         return redirect()->route('articles.show', $article)->with('status', 'Artículo actualizado.');
     }
 
     public function destroy(Article $article)
     {
+        if ($names = $article->bundles()->pluck('name')->join(', ')) {
+            return back()->with('error', "No se puede eliminar: forma parte de estos combinados: {$names}. Quítalo antes de ellos.");
+        }
         $article->units()->delete();
         $article->photos()->get()->each->delete();
         $article->delete();
@@ -102,6 +124,7 @@ class ArticleController extends Controller
 
     public function addUnits(Request $request, Article $article)
     {
+        abort_if($article->is_bundle, 422, 'Un producto combinado no tiene unidades propias: se añaden a sus piezas.');
         $data = $request->validate([
             'count' => ['required', 'integer', 'min:1', 'max:500'],
             'acquired_at' => ['nullable', 'date'],
@@ -133,10 +156,50 @@ class ArticleController extends Controller
             'photos' => $article ? ['prohibited'] : ['nullable', 'array', 'max:20'],
             'photos.*' => ['file', 'mimes:jpg,jpeg,png,webp,gif', 'max:20480'],
             'initial_units' => $article ? ['prohibited'] : ['nullable', 'integer', 'min:0', 'max:500'],
+            'components' => ['nullable', 'array', 'max:50'],
+            'components.*.article_id' => ['nullable', Rule::exists('articles', 'id')->whereNull('deleted_at')],
+            'components.*.quantity' => ['nullable', 'integer', 'min:1', 'max:1000'],
         ]);
         $data['active'] = $request->boolean('active');
-        unset($data['photos'], $data['initial_units']);
+        $data['is_bundle'] = $request->boolean('is_bundle');
+        unset($data['photos'], $data['initial_units'], $data['components']);
 
-        return $data;
+        $components = [];
+        if ($data['is_bundle']) {
+            if ($article && $article->units()->exists()) {
+                throw ValidationException::withMessages(['is_bundle' => 'Este artículo tiene unidades propias: no puede ser un combinado. Crea un artículo nuevo para el combinado.']);
+            }
+            if ($article && $article->bundles()->exists()) {
+                throw ValidationException::withMessages(['is_bundle' => 'Este artículo forma parte de otro combinado: un combinado no puede contener otro.']);
+            }
+            foreach ($request->input('components', []) as $row) {
+                if (! empty($row['article_id']) && ! empty($row['quantity'])) {
+                    $id = (int) $row['article_id'];
+                    $components[$id] = ['quantity' => ($components[$id]['quantity'] ?? 0) + (int) $row['quantity']];
+                }
+            }
+            if (! $components) {
+                throw ValidationException::withMessages(['components' => 'Añade al menos una pieza al combinado.']);
+            }
+            if ($article && isset($components[$article->id])) {
+                throw ValidationException::withMessages(['components' => 'Un combinado no puede contenerse a sí mismo.']);
+            }
+            if (Article::whereIn('id', array_keys($components))->where('is_bundle', true)->exists()) {
+                throw ValidationException::withMessages(['components' => 'Las piezas tienen que ser artículos sueltos, no otros combinados.']);
+            }
+        }
+
+        return [$data, $components];
+    }
+
+    /** Artículos que pueden ser pieza de un combinado (sueltos, sin contar el propio). */
+    private function componentOptions(?Article $article = null)
+    {
+        return Article::query()
+            ->where('is_bundle', false)
+            ->when($article, fn ($q) => $q->whereKeyNot($article->id))
+            ->with('category')
+            ->orderBy('reference')
+            ->get(['id', 'reference', 'name', 'category_id', 'active']);
     }
 }

@@ -78,7 +78,8 @@
     @foreach ($order->lines as $l)
         <tr>
             <td class="muted">{{ $l->article->reference }}</td>
-            <td>{{ $l->article->name }}@if ($l->article->dimensions)<br><span class="muted" style="font-size:8pt">{{ $l->article->dimensions }}</span>@endif</td>
+            <td>{{ $l->article->name }}@if ($l->article->dimensions)<br><span class="muted" style="font-size:8pt">{{ $l->article->dimensions }}</span>@endif
+                @if ($inc = $l->article->componentsSummary())<br><span class="muted" style="font-size:8pt">Incluye: {{ $inc }}</span>@endif</td>
             <td class="num">{{ $l->quantity }}</td>
             <td class="num">{{ $eur($l->unit_price) }}</td>
             <td class="num">{{ $eur($l->total()) }}</td>

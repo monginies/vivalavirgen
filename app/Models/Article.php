@@ -6,6 +6,7 @@ use App\Enums\UnitStatus;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -17,7 +18,7 @@ class Article extends Model
     use SoftDeletes;
 
     protected $fillable = [
-        'category_id', 'reference', 'name', 'description', 'dimensions',
+        'category_id', 'is_bundle', 'reference', 'name', 'description', 'dimensions',
         'rental_price', 'replacement_price', 'photo_path', 'notes', 'active',
     ];
 
@@ -27,12 +28,37 @@ class Article extends Model
             'rental_price' => 'decimal:2',
             'replacement_price' => 'decimal:2',
             'active' => 'boolean',
+            'is_bundle' => 'boolean',
         ];
     }
 
     public function category(): BelongsTo
     {
         return $this->belongsTo(Category::class);
+    }
+
+    /** Piezas de un producto combinado (pivot `quantity` = piezas por combinado). */
+    public function components(): BelongsToMany
+    {
+        return $this->belongsToMany(Article::class, 'article_components', 'bundle_id', 'component_id')
+            ->withPivot('quantity')->orderBy('reference');
+    }
+
+    /** «2 × Butaca esparto, 1 × Mesa Bea» para un combinado; null si no lo es o no tiene piezas. */
+    public function componentsSummary(): ?string
+    {
+        if (! $this->is_bundle || $this->components->isEmpty()) {
+            return null;
+        }
+
+        return $this->components->map(fn (Article $c) => "{$c->pivot->quantity} × {$c->name}")->join(', ');
+    }
+
+    /** Combinados de los que forma parte este artículo. */
+    public function bundles(): BelongsToMany
+    {
+        return $this->belongsToMany(Article::class, 'article_components', 'component_id', 'bundle_id')
+            ->withPivot('quantity')->orderBy('reference');
     }
 
     public function units(): HasMany

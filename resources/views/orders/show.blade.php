@@ -107,7 +107,8 @@
         @foreach ($order->lines as $l)
             @php($av = $availability[$l->article_id])
             <tr>
-                <td><span class="mono">{{ $l->article->reference }}</span> · <a href="{{ route('articles.show', $l->article) }}">{{ $l->article->name }}</a></td>
+                <td><span class="mono">{{ $l->article->reference }}</span> · <a href="{{ route('articles.show', $l->article) }}">{{ $l->article->name }}</a>
+                    @if ($inc = $l->article->componentsSummary())<br><span class="muted" style="font-size:13px">Incluye: {{ $inc }}</span>@endif</td>
                 <td class="num">{{ $l->quantity }}</td>
                 <td class="num">{{ $money($l->unit_price) }}</td>
                 <td class="num">{{ $money($l->total()) }}</td>

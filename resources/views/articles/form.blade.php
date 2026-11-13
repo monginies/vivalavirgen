@@ -40,6 +40,45 @@
         </div>
     @endif
     @include('partials.field', ['name' => 'notes', 'label' => 'Notas internas', 'value' => $article->notes, 'type' => 'textarea'])
+    @php
+        $isBundle = (bool) old('is_bundle', $article->is_bundle);
+        $rows = old('components', $article->components->map(fn ($c) => ['article_id' => $c->id, 'quantity' => $c->pivot->quantity])->all());
+        if (! $rows) { $rows = [['article_id' => '', 'quantity' => 1]]; }
+    @endphp
+    <div class="field">
+        <label class="check"><input type="hidden" name="is_bundle" value="0"><input type="checkbox" name="is_bundle" value="1" id="f-is_bundle" @checked($isBundle)> Producto combinado (formado por varios artículos)</label>
+        <div class="hint">No tiene unidades propias. Al alquilarlo se reservan sus piezas, que dejan de estar disponibles sueltas en esas fechas. Su precio es el de esta ficha, no la suma de las piezas.</div>
+        @error('is_bundle')<div class="err">{{ $message }}</div>@enderror
+    </div>
+    <div class="field" id="bundle-parts" @if (! $isBundle) hidden @endif>
+        <label>Piezas del combinado</label>
+        @error('components')<div class="err">{{ $message }}</div>@enderror
+        @foreach (collect($errors->get('components.*'))->flatten() as $m)<div class="err">{{ $m }}</div>@endforeach
+        <table id="parts">
+            <thead><tr><th>Artículo</th><th class="num" style="width:110px">Cantidad</th><th style="width:40px"></th></tr></thead>
+            <tbody>
+            @foreach ($rows as $i => $row)
+                <tr class="part">
+                    <td>
+                        <select name="components[{{ $i }}][article_id]">
+                            <option value="">—</option>
+                            @foreach ($componentOptions->groupBy(fn ($a) => $a->category->name) as $cat => $group)
+                                <optgroup label="{{ $cat }}">
+                                @foreach ($group as $a)
+                                    <option value="{{ $a->id }}" @selected($row['article_id'] == $a->id)>{{ $a->reference }} · {{ $a->name }}@unless ($a->active) (inactivo)@endunless</option>
+                                @endforeach
+                                </optgroup>
+                            @endforeach
+                        </select>
+                    </td>
+                    <td><input type="number" name="components[{{ $i }}][quantity]" min="1" max="1000" step="1" value="{{ $row['quantity'] }}"></td>
+                    <td><button type="button" class="btn sec sm p-del" title="Quitar">×</button></td>
+                </tr>
+            @endforeach
+            </tbody>
+        </table>
+        <div class="actions" style="margin-top:8px"><button type="button" class="btn sec sm" id="add-part">+ Añadir pieza</button></div>
+    </div>
     @unless ($article->exists)
         @include('partials.field', ['name' => 'initial_units', 'label' => 'Unidades iniciales', 'value' => 0, 'type' => 'number', 'step' => 1, 'min' => 0,
             'hint' => 'Se crearán con su código y QR. Puedes añadir más después.'])
@@ -50,6 +89,30 @@
         <a class="btn sec" href="{{ $article->exists ? route('articles.show', $article) : route('articles.index') }}">Cancelar</a>
     </div>
 </form>
+<script>
+(() => {
+    const box = document.getElementById('f-is_bundle'), parts = document.getElementById('bundle-parts');
+    const units = document.getElementById('f-initial_units')?.closest('.field');
+    const sync = () => { parts.hidden = !box.checked; if (units) units.hidden = box.checked; };
+    box.addEventListener('change', sync); sync();
+    const tbody = document.querySelector('#parts tbody');
+    let next = tbody.rows.length;
+    document.getElementById('add-part').addEventListener('click', () => {
+        const tr = tbody.rows[0].cloneNode(true);
+        tr.querySelectorAll('select,input').forEach(el => {
+            el.name = el.name.replace(/components\[\d+\]/, 'components[' + next + ']');
+            el.value = el.tagName === 'INPUT' ? 1 : '';
+        });
+        next++;
+        tbody.appendChild(tr);
+    });
+    tbody.addEventListener('click', e => {
+        if (!e.target.classList.contains('p-del')) return;
+        if (tbody.rows.length > 1) e.target.closest('tr').remove();
+        else e.target.closest('tr').querySelectorAll('select,input').forEach(el => el.value = el.tagName === 'INPUT' ? 1 : '');
+    });
+})();
+</script>
 @if ($article->exists)
     <form method="post" action="{{ route('articles.destroy', $article) }}" onsubmit="return confirm('¿Eliminar el artículo y todas sus unidades?')">
         @csrf @method('delete')<button class="btn danger sm">Eliminar artículo</button>

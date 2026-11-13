@@ -41,7 +41,7 @@
         @foreach ($order->lines as $l)
             <tr>
                 <td style="width:56px">@if ($l->article->mainPhoto)<img class="thumb" src="{{ $l->article->mainPhoto->thumbUrl() }}" alt="">@endif</td>
-                <td>{{ $l->article->name }}</td>
+                <td>{{ $l->article->name }}@if ($inc = $l->article->componentsSummary())<br><span class="muted" style="font-size:13px">Incluye: {{ $inc }}</span>@endif</td>
                 <td class="num">{{ $l->quantity }}</td>
                 <td class="num">{{ $money($l->unit_price) }}</td>
                 <td class="num">{{ $money($l->total()) }}</td>

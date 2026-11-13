@@ -333,21 +333,7 @@ class OrderController extends Controller
 
     private function assertAvailable(array $lines, $from, $to, ?int $exceptOrderId = null): void
     {
-        $ids = array_column($lines, 'article_id');
-        DB::table('articles')->whereIn('id', $ids)->lockForUpdate()->get(['id']); // serializa pedidos simultáneos
-
-        $availability = Availability::forArticles($ids, $from, $to, $exceptOrderId);
-        $names = Article::withTrashed()->whereIn('id', $ids)->get()->keyBy('id');
-
-        $errors = [];
-        foreach ($lines as $line) {
-            $free = $availability[$line['article_id']]['available'];
-            if ($line['quantity'] > $free) {
-                $a = $names[$line['article_id']];
-                $errors[] = "{$a->reference} {$a->name}: pides {$line['quantity']} y solo hay ".max(0, $free).' disponibles en esas fechas.';
-            }
-        }
-        if ($errors) {
+        if ($errors = Availability::shortages($lines, $from, $to, $exceptOrderId)) {
             throw ValidationException::withMessages(['lines' => $errors]);
         }
     }

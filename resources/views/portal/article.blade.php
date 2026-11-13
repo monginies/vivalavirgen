@@ -37,6 +37,15 @@
         <div class="pt-kicker">Colección · {{ $article->category->name }}</div>
         <h1>{{ $article->name }}</h1>
         @if ($article->dimensions)<p class="pt-spec"><span>Medidas</span>{{ $article->dimensions }}</p>@endif
+        @if ($article->is_bundle && $article->components->isNotEmpty())
+            <div class="pt-spec"><span>Incluye</span>
+                <ul style="margin:4px 0 0;padding-left:18px">
+                @foreach ($article->components as $c)
+                    <li>{{ $c->pivot->quantity }} × @if ($c->active)<a href="{{ route('portal.article', $c->reference) }}">{{ $c->name }}</a>@else{{ $c->name }}@endif</li>
+                @endforeach
+                </ul>
+            </div>
+        @endif
         <div class="pt-info-price">@include('portal._price', ['article' => $article])</div>
         @if ($availability !== null)
             <p class="pt-spec"><span>Disponibles</span>{{ $availability }} para la fecha de tu evento</p>

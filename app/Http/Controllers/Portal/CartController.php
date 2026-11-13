@@ -141,12 +141,14 @@ class CartController extends Controller
         }
 
         $order = DB::transaction(function () use ($client, $cart, $lines, $period, $venue, $km) {
-            $ids = $lines->pluck('article.id')->all();
-            DB::table('articles')->whereIn('id', $ids)->lockForUpdate()->get(['id']);
-            $free = Availability::forArticles($ids, ...$period);
-            $short = $lines->filter(fn ($l) => $l['quantity'] > $free[$l['article']->id]['available']);
-            if ($short->isNotEmpty()) {
-                throw ValidationException::withMessages(['items' => $short->map(fn ($l) => "{$l['article']->name}: solo quedan ".max(0, $free[$l['article']->id]['available']).' libres para esas fechas.')->all()]);
+            $short = Availability::shortages(
+                $lines->map(fn ($l) => ['article_id' => $l['article']->id, 'quantity' => $l['quantity']]), ...$period
+            );
+            if ($short) {
+                // Sin referencias internas para el cliente
+                throw ValidationException::withMessages(['items' => array_map(
+                    fn ($m) => preg_replace('/^\S+-\d{4} /', '', str_replace(' (contando las piezas de los combinados)', ' (contando las piezas de los conjuntos)', $m)), $short
+                )]);
             }
 
             $order = Order::create([
