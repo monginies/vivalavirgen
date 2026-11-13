@@ -53,8 +53,8 @@
         }
         $live = fn ($statuses) => auth()->user()->isLogistics() ? 0 : \App\Models\Order::whereIn('status', $statuses)
             ->where(fn ($q) => $q->whereNull('expires_at')->orWhere('expires_at', '>', now()))->count();
-        $toApproveCount = $live([\App\Enums\OrderStatus::Requested]);
-        $toPayCount = $live([\App\Enums\OrderStatus::Accepted, \App\Enums\OrderStatus::ProformaSent]);
+        $toApproveCount = $live([\App\Enums\OrderStatus::Requested, \App\Enums\OrderStatus::Accepted]);
+        $toPayCount = $live([\App\Enums\OrderStatus::ProformaSent]);
     @endphp
     <nav id="mainnav">
         @foreach ($menu as $item)
@@ -63,7 +63,7 @@
                 <a class="top @if (request()->routeIs(...$active)) on @endif" href="{{ route($route) }}" title="{{ $label }}">@include('partials.icon', ['i' => $icon])<span>{{ $label }}</span></a>
             @else
                 <details class="menu @if (request()->routeIs(...$active)) on @endif">
-                    <summary class="top" title="{{ $label }}">@include('partials.icon', ['i' => $icon])<span>{{ $label }}</span>@if ($label === 'Pedidos' && $toApproveCount)<span class="badge amber" style="margin-left:4px;padding:0 7px" title="Pedidos pendientes de aprobar">{{ $toApproveCount }}</span>@endif @if ($label === 'Pedidos' && $toPayCount)<span class="badge red" style="margin-left:4px;padding:0 7px" title="Pedidos pendientes de pago">{{ $toPayCount }}</span>@endif<svg class="chev" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></summary>
+                    <summary class="top" title="{{ $label }}">@include('partials.icon', ['i' => $icon])<span>{{ $label }}</span>@if ($label === 'Pedidos' && $toApproveCount)<span class="badge amber" style="margin-left:4px;padding:0 7px" title="Pedidos pendientes de aprobar o de enviar la proforma">{{ $toApproveCount }}</span>@endif @if ($label === 'Pedidos' && $toPayCount)<span class="badge red" style="margin-left:4px;padding:0 7px" title="Pedidos con la proforma enviada, pendientes de pago">{{ $toPayCount }}</span>@endif<svg class="chev" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></summary>
                     <div class="sub">
                         @foreach ($item[4] as [$subLabel, $subIcon, $subRoute, $subActive])
                             <a href="{{ route($subRoute) }}" @class(['on' => request()->routeIs(...$subActive)])>@include('partials.icon', ['i' => $subIcon]){{ $subLabel }}</a>

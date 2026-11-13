@@ -28,10 +28,30 @@
         </table>
     </div>
 @endif
+@if ($toSend->isNotEmpty())
+    <div class="card table-wrap" style="border:2px solid var(--amber);background:#fdf6ea">
+        <div class="head" style="margin-bottom:4px">
+            <h2 style="margin:0;color:var(--amber)">{{ $toSend->count() }} {{ $toSend->count() > 1 ? 'pedidos aceptados' : 'pedido aceptado' }} con la proforma sin enviar</h2>
+        </div>
+        <p class="muted" style="margin:0 0 8px;font-size:14px">Envía la proforma para que el cliente pueda pagar antes de que caduque la pre-reserva.</p>
+        <table>
+            @foreach ($toSend as $o)
+                @php($urgent = $o->expires_at && $o->expires_at->diffInHours(now(), true) < 24)
+                <tr>
+                    <td class="mono"><a href="{{ route('orders.show', $o) }}">{{ $o->number }}</a></td>
+                    <td class="grow">{{ $o->client->name }}</td>
+                    <td class="num">{{ \App\Support\Money::eur($o->amountDue()) }}</td>
+                    <td>@if ($o->expires_at)<span class="badge {{ $urgent ? 'red' : 'amber' }}">Caduca {{ $o->expires_at->diffForHumans() }}</span>@endif</td>
+                    <td class="actions" style="justify-content:flex-end"><a class="btn sm" href="{{ route('orders.show', $o) }}#proforma">Enviar proforma</a></td>
+                </tr>
+            @endforeach
+        </table>
+    </div>
+@endif
 @if ($toPay->isNotEmpty())
     <div class="card table-wrap" style="border:2px solid var(--red);background:#fbefea">
         <div class="head" style="margin-bottom:4px">
-            <h2 style="margin:0;color:var(--red)">{{ $toPay->count() }} {{ $toPay->count() > 1 ? 'pedidos pendientes' : 'pedido pendiente' }} de pago</h2>
+            <h2 style="margin:0;color:var(--red)">{{ $toPay->count() }} {{ $toPay->count() > 1 ? 'pedidos' : 'pedido' }} con la proforma enviada, pendiente{{ $toPay->count() > 1 ? 's' : '' }} de pago</h2>
         </div>
         <p class="muted" style="margin:0 0 8px;font-size:14px">Si no se pagan antes de que caduque la pre-reserva, el pedido se cancela y el material queda libre.</p>
         <table>
