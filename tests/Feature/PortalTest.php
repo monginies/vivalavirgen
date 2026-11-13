@@ -18,6 +18,7 @@ use App\Notifications\NewClientRegistered;
 use App\Notifications\NewWebOrder;
 use App\Notifications\OrderReceived;
 use App\Support\Cart;
+use App\Support\Push;
 use Carbon\Carbon;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Notifications\AnonymousNotifiable;
@@ -30,6 +31,12 @@ class PortalTest extends TestCase
     use RefreshDatabase;
 
     private Article $chair;
+
+    protected function tearDown(): void
+    {
+        Push::$faked = null;
+        parent::tearDown();
+    }
 
     protected function setUp(): void
     {
@@ -72,10 +79,13 @@ class PortalTest extends TestCase
         Notification::assertSentTo($client, ClientVerifyEmail::class);
 
         // Confirmar email → aviso al equipo
+        Push::fake();
         $url = URL::temporarySignedRoute('portal.verification.verify', now()->addHour(), ['id' => $client->id, 'hash' => sha1($client->email)]);
         $this->get($url)->assertRedirect();
         $this->assertTrue($client->fresh()->hasVerifiedEmail());
         Notification::assertSentTo(new AnonymousNotifiable, NewClientRegistered::class);
+        $this->assertSame('Cliente nuevo pendiente de aprobar', Push::$faked[0]['title']);
+        $this->assertStringContainsString('Bodas Bonitas SL', Push::$faked[0]['body']);
 
         // Sin aprobar: puede preparar el pedido pero no enviarlo
         $this->post(route('portal.cart.add', $this->chair), ['quantity' => 5])->assertRedirect();
@@ -116,6 +126,7 @@ class PortalTest extends TestCase
         Notification::assertSentTo($client, OrderReceived::class);
         Notification::assertSentTo(new AnonymousNotifiable, NewWebOrder::class);
 
+        $this->assertStringStartsWith('Pedido nuevo: ', collect(Push::$faked)->last()['title']);
         $this->actingAs($client->fresh(), 'client')->get(route('portal.orders.show', $order->number))->assertOk()->assertSee('Silla Crossback');
         $this->actingAs($staff)->get(route('orders.index'))->assertSee('Web');
     }

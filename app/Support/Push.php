@@ -9,6 +9,14 @@ use Minishlink\WebPush\WebPush;
 /** Envío de notificaciones push (Web Push con claves VAPID del .env). */
 class Push
 {
+    /** En pruebas: Push::fake() guarda aquí lo que se habría enviado a oficina. */
+    public static ?array $faked = null;
+
+    public static function fake(): void
+    {
+        self::$faked = [];
+    }
+
     public static function configured(): bool
     {
         return filled(config('services.webpush.public')) && filled(config('services.webpush.private'));
@@ -17,6 +25,11 @@ class Push
     /** A todos los móviles activados por usuarios de oficina activos. Devuelve cuántos se enviaron. */
     public static function toOffice(string $title, string $body, string $url, ?string $tag = null): int
     {
+        if (self::$faked !== null) {
+            self::$faked[] = compact('title', 'body', 'url', 'tag');
+
+            return 1;
+        }
         $subs = PushSubscription::whereHas('user', fn ($q) => $q->where('active', true)->where('role', 'office'))->get();
 
         return self::send($subs, $title, $body, $url, $tag);

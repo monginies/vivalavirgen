@@ -8,7 +8,7 @@
             <button type="button" class="btn sec sm" id="push-off" hidden>Desactivar</button>
         </div>
     </div>
-    <p class="muted" id="push-msg" style="margin:0;font-size:14px">Recibe un aviso cuando entre un pedido nuevo desde la web y cuando una pre-reserva vaya a caducar en menos de 24 horas.</p>
+    <p class="muted" id="push-msg" style="margin:0;font-size:14px">Recibe un aviso cuando se registre un cliente nuevo, cuando entre un pedido nuevo desde la web y cuando una pre-reserva vaya a caducar en menos de 24 horas.</p>
 </div>
 <script>
 (() => {
@@ -31,7 +31,7 @@
         const sub = await reg.pushManager.getSubscription();
         on.hidden = !!sub; off.hidden = !sub; test.hidden = !sub;
         if (Notification.permission === 'denied') { on.hidden = true; msg.textContent = 'Los avisos están bloqueados para esta web. Actívalos en los ajustes del navegador o del móvil.'; }
-        else if (sub) msg.textContent = 'Avisos activados en este dispositivo: pedidos nuevos de la web y pre-reservas que caducan en menos de 24 horas.';
+        else if (sub) msg.textContent = 'Avisos activados en este dispositivo: clientes nuevos, pedidos nuevos de la web y pre-reservas que caducan en menos de 24 horas.';
     }
 
     on.addEventListener('click', async () => {

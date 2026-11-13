@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Client;
 use App\Models\Setting;
 use App\Notifications\NewClientRegistered;
+use App\Support\Push;
 use App\Support\Tracker;
 use Illuminate\Auth\Events\PasswordReset;
 use Illuminate\Http\Request;
@@ -116,6 +117,11 @@ class AuthController extends Controller
         if (! $client->hasVerifiedEmail()) {
             $client->markEmailAsVerified();
             rescue(fn () => Notification::route('mail', Setting::get('notify_email'))->notify(new NewClientRegistered($client)), report: true);
+            rescue(fn () => Push::toOffice(
+                'Cliente nuevo pendiente de aprobar',
+                collect([$client->name, $client->trade_name, $client->typeLabel(), $client->city])->filter()->join(' · '),
+                route('clients.show', $client), 'client-'.$client->id,
+            ), report: true);
         }
 
         return redirect()->route(auth('client')->check() ? 'portal.account' : 'portal.login')
