@@ -174,4 +174,11 @@
 @if ($order->notes)
     <div class="card"><h2>Notas</h2><p>{!! nl2br(e($order->notes)) !!}</p></div>
 @endif
+<script>
+// En la app instalada en el móvil, la tarjeta Expedición va al final del pedido
+if (matchMedia('(display-mode: standalone)').matches || navigator.standalone) {
+    const exp = document.getElementById('expedicion');
+    if (exp) exp.parentNode.appendChild(exp);
+}
+</script>
 @endsection
