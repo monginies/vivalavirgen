@@ -5,7 +5,7 @@
 <p style="margin:0 0 14px"><a href="{{ route('portal.account') }}">← Mis pedidos</a></p>
 <div class="head"><div><h1>Pedido <span class="mono">{{ $order->number }}</span> <span class="badge {{ $order->status->color() }}" style="vertical-align:middle">{{ $order->status->label() }}</span></h1>
     <div class="sub">Solicitado el {{ $order->created_at->format('d/m/Y') }}</div></div>
-    @if ($order->proforma_sent_at)<a class="btn web-only" href="{{ route('portal.orders.proforma', $order->number) }}">Descargar proforma (PDF)</a>@endif
+    @if ($order->proforma_sent_at)<a class="btn" href="{{ route('portal.orders.proforma', $order->number) }}">Descargar proforma (PDF)</a>@endif
 </div>
 @if ($order->status->isExpirable() && $order->expires_at)
     <div class="flash ok">Material pre-reservado hasta el {{ $order->expires_at->format('d/m/Y H:i') }}. En breve recibirás una proforma con los datos para realizar el pago.</div>
