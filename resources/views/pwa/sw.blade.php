@@ -1,9 +1,9 @@
-// Service worker de Viva la Virgen (generado por la app). Versión {{ $v = '10' }}
+// Service worker de Viva la Virgen (generado por la app). Versión {{ $v = '11' }}
 const CACHE = 'vlv-v{{ $v }}';
 const OFFLINE = '/offline';
 
 self.addEventListener('install', e => {
-    e.waitUntil(caches.open(CACHE).then(c => c.addAll([OFFLINE, '/css/app.css?v=46', '/img/logo-96.png'])).then(() => self.skipWaiting()));
+    e.waitUntil(caches.open(CACHE).then(c => c.addAll([OFFLINE, '/css/app.css?v=47', '/img/logo-96.png'])).then(() => self.skipWaiting()));
 });
 
 self.addEventListener('activate', e => {
