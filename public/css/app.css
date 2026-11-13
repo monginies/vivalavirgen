@@ -450,3 +450,5 @@ body.portal h1{font-family:var(--serif);font-weight:400}
 .filters .flbl{display:flex;gap:8px;align-items:center;font-weight:500;flex:1;min-width:200px}
 .filters .flbl input{min-width:0}
 @media (max-width:640px){.filters .flbl{min-width:100%}}
+.filters .check{flex:none;white-space:nowrap}
+.filters .check input{flex:none;min-width:0;width:18px}
