@@ -18,6 +18,12 @@
         <form method="post" action="{{ route('orders.extend', $order) }}" style="display:inline-flex;gap:6px;margin-left:8px">
             @csrf <input type="hidden" name="days" value="3"><button class="btn sec sm">Ampliar 3 días</button>
         </form>
+        @if ($order->status->canCancel())
+            {{-- En la web, a la derecha de «Ampliar 3 días»; en la app instalada va bajo «Enviar proforma» --}}
+            <form method="post" action="{{ route('orders.transition', $order) }}" class="cancel-web" style="display:inline-flex;margin-left:6px" onsubmit="return confirm('¿Cancelar este pedido? El material quedará libre.')">@csrf
+                <input type="hidden" name="status" value="cancelled"><button class="btn danger sm">Cancelar pedido</button>
+            </form>
+        @endif
     </div>
 @endif
 @if ($order->paid_at)
@@ -72,7 +78,7 @@
         @endif
     @endif
     @if ($order->status->canCancel())
-        <form method="post" action="{{ route('orders.transition', $order) }}" class="pf-cancel" style="margin-top:14px" onsubmit="return confirm('¿Cancelar este pedido? El material quedará libre.')">@csrf
+        <form method="post" action="{{ route('orders.transition', $order) }}" @class(['pf-cancel', 'app-only' => $order->status->isExpirable() && $order->expires_at]) style="margin-top:14px" onsubmit="return confirm('¿Cancelar este pedido? El material quedará libre.')">@csrf
             <input type="hidden" name="status" value="cancelled"><button class="btn danger">Cancelar pedido</button>
         </form>
     @endif

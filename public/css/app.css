@@ -428,3 +428,7 @@ body.portal h1{font-family:var(--serif);font-weight:400}
   .pf-form .pf-email input[readonly]{border:0;background:transparent;padding:0;font-weight:600;font-size:16px;color:var(--ink);pointer-events:none}
   .pf-form .btn,.pf-cancel .btn{justify-content:center;width:100%}
 }
+
+/* Cancelar pedido: en la web junto a «Ampliar 3 días»; en la app instalada, bajo «Enviar proforma» */
+.app-only{display:none}
+@media (display-mode:standalone){.app-only{display:block}.cancel-web{display:none!important}}
