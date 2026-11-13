@@ -53,6 +53,12 @@ class Order extends Model
         return $this->hasMany(OrderLine::class);
     }
 
+    /** Unidades físicas que han salido con este pedido (escaneo de QR). */
+    public function units(): HasMany
+    {
+        return $this->hasMany(OrderUnit::class)->orderBy('out_at');
+    }
+
     public function payer(): BelongsTo
     {
         return $this->belongsTo(User::class, 'paid_by');

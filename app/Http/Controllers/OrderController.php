@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Enums\OrderStatus;
+use App\Enums\UnitStatus;
 use App\Models\Article;
 use App\Models\Client;
 use App\Models\Order;
@@ -94,7 +95,7 @@ class OrderController extends Controller
             Order::expireOverdue();
             $order->refresh();
         }
-        $order->load(['client', 'lines.article', 'creator', 'payer', 'venue']);
+        $order->load(['client', 'lines.article', 'creator', 'payer', 'venue', 'units.unit.article']);
 
         $availability = Availability::forArticles(
             $order->lines->pluck('article_id')->all(), $order->start_date, $order->end_date, $order->id
@@ -150,6 +151,12 @@ class OrderController extends Controller
                     $order->start_date, $order->end_date, $order->id, $order->client_id
                 );
                 $changes['expires_at'] = now()->addDays((int) Setting::number('prereservation_days'));
+            }
+            if ($target === OrderStatus::Cancelled) { // las unidades ya escaneadas para salir vuelven a estar disponibles
+                foreach ($order->units()->whereNull('return_status')->with('unit')->get() as $row) {
+                    $row->unit->update(['status' => UnitStatus::Available]);
+                    $row->delete();
+                }
             }
             if ($target === OrderStatus::Paid) {
                 $changes['expires_at'] = null; // pagado: ya no caduca

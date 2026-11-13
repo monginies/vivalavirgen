@@ -78,6 +78,37 @@
     <div class="head" style="margin-bottom:10px"><h2 style="margin:0">Expedición</h2>
         @if ($shippable)<a class="btn sm" href="{{ route('orders.expedition', $order) }}" target="_blank">Hoja de expedición (PDF)</a>
         @else<span class="muted">La hoja de expedición se puede sacar cuando el pedido está pagado.</span>@endif</div>
+    @php($S = \App\Enums\OrderStatus::class)
+    @if ($shippable)
+        @php($outUnits = $order->units)
+        @php($back = $outUnits->whereNotNull('return_status'))
+        <div style="display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-bottom:14px;padding-bottom:14px;border-bottom:1px solid var(--line)">
+            <span><b>Salida:</b> {{ $outUnits->count() }} unidades
+                @if ($outUnits->isNotEmpty()) · <b>Entrada:</b> {{ $back->where('return_status', 'ok')->count() }} devueltas
+                    @if ($n = $back->where('return_status', 'damaged')->count()), <span class="badge amber">{{ $n }} rotas</span>@endif
+                    @if ($n = $back->where('return_status', 'lost')->count()), <span class="badge red">{{ $n }} perdidas</span>@endif
+                    @if ($n = $outUnits->whereNull('return_status')->count()) · {{ $n }} fuera @endif
+                @endif
+            </span>
+            <span style="flex:1"></span>
+            @if (in_array($order->status, [$S::Paid, $S::Delivered], true))
+                <a @class(['btn', 'sec' => $order->status === $S::Delivered]) href="{{ route('scan.show', [$order, 'salida']) }}">{{ $order->status === $S::Paid ? 'Dar salida (escanear QR)' : 'Seguir dando salida' }}</a>
+            @endif
+            @if (in_array($order->status, [$S::Delivered, $S::Returned], true))
+                <a @class(['btn', 'sec' => $order->status === $S::Returned]) href="{{ route('scan.show', [$order, 'entrada']) }}">{{ $order->status === $S::Delivered ? 'Dar entrada (escanear QR)' : 'Revisar entrada' }}</a>
+            @endif
+        </div>
+        @if ($bad = $back->whereIn('return_status', ['damaged', 'lost']))
+            @if ($bad->isNotEmpty())
+                <p style="margin-top:0"><b>Incidencias a la vuelta:</b>
+                    @foreach ($bad as $b){{ $b->unit->code }} {{ $b->unit->article->name }} ({{ mb_strtolower(\App\Models\OrderUnit::RETURN_LABELS[$b->return_status]) }})@unless ($loop->last), @endunless @endforeach.
+                    @if ($lostValue = $back->where('return_status', 'lost')->sum(fn ($b) => $b->unit->article->replacement_price))
+                        Reposición de lo perdido: <b>{{ \App\Support\Money::eur($lostValue) }}</b>.
+                    @endif
+                </p>
+            @endif
+        @endif
+    @endif
     @if ($order->status === \App\Enums\OrderStatus::Closed)
         <dl class="props">
             <dt>Entrega</dt><dd>{{ $order->delivery_time ?: '—' }}</dd><dt>Recogida</dt><dd>{{ $order->pickup_time ?: '—' }}</dd>

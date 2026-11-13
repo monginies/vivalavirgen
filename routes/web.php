@@ -12,6 +12,7 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\Portal;
 use App\Http\Controllers\PostalCodeController;
+use App\Http\Controllers\ScanController;
 use App\Http\Controllers\SettingController;
 use App\Http\Controllers\StatsController;
 use App\Http\Controllers\UnitController;
@@ -104,6 +105,10 @@ Route::prefix('app')->middleware(NoIndex::class)->group(function () {
         Route::post('orders/{order}/extend', [OrderController::class, 'extend'])->name('orders.extend');
         Route::patch('orders/{order}/logistics', [OrderController::class, 'logistics'])->name('orders.logistics');
         Route::get('orders/{order}/expedition', [OrderController::class, 'expedition'])->name('orders.expedition');
+        Route::get('orders/{order}/escaneo/{mode}', [ScanController::class, 'show'])->name('scan.show');
+        Route::post('orders/{order}/escaneo/{mode}', [ScanController::class, 'scan'])->name('scan.scan');
+        Route::post('orders/{order}/escaneo/{mode}/terminar', [ScanController::class, 'finish'])->name('scan.finish');
+        Route::post('orders/{order}/escaneo/{mode}/{unit}', [ScanController::class, 'update'])->whereNumber('unit')->name('scan.update');
         Route::get('orders/{order}/proforma', [OrderController::class, 'proforma'])->name('orders.proforma');
         Route::post('orders/{order}/proforma', [OrderController::class, 'sendProforma'])->name('orders.proforma.send');
         Route::get('calendar', CalendarController::class)->name('calendar');
