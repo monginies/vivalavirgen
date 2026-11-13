@@ -11,7 +11,7 @@
     <div class="card table-wrap" style="border:2px solid var(--amber);background:#fdf6ea">
         <div class="head" style="margin-bottom:8px">
             <h2 style="margin:0;color:var(--amber)">{{ $toApprove->count() }} {{ $toApprove->count() > 1 ? 'pedidos pendientes' : 'pedido pendiente' }} de aprobar</h2>
-            <a class="btn sm" href="{{ route('orders.index', ['status' => 'requested']) }}">Ver todos</a>
+            
         </div>
         <table>
             @foreach ($toApprove as $o)
