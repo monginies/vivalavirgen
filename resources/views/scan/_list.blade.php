@@ -2,7 +2,7 @@
 @php($out = $mode === 'salida')
 <div class="card table-wrap" style="padding:14px">
     <h2 style="margin-bottom:6px">{{ $out ? 'Material del pedido' : 'Material fuera' }}</h2>
-    <table>
+    <table class="no-stack">
         <thead><tr><th></th><th>Artículo</th><th class="num">Lleva</th><th class="num">{{ $out ? 'Escaneadas' : 'Vueltas' }}</th></tr></thead>
         <tbody>
         @foreach ($expected as $e)
@@ -30,7 +30,7 @@
 
 <div class="card table-wrap" style="padding:14px">
     <h2 style="margin-bottom:6px">Unidades {{ $out ? 'escaneadas' : 'del pedido' }} ({{ $units->count() }})</h2>
-    <table>
+    <table class="no-stack">
         <tbody>
         @forelse ($units->sortByDesc($out ? 'out_at' : 'in_at') as $u)
             <tr>

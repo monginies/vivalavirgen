@@ -387,3 +387,27 @@ body.portal h1{font-family:var(--serif);font-weight:400}
 .totals-tbl tr.sub td{border-top:1px solid var(--line);padding-top:9px;font-weight:600}
 .totals-tbl tr.sub + tr td{padding-top:6px}
 .totals-tbl tr.grand td{border-top:2px solid var(--ink);padding-top:10px;font-weight:700;font-size:17px}
+
+/* Móvil en vertical: las tablas pasan a filas apiladas (sin deslizar hacia la derecha).
+   .hide-sm oculta columnas secundarias; data-label pone una etiqueta corta delante del dato. */
+@media (max-width:640px){
+  .table-wrap table:not(.no-stack):not(.cal),.table-wrap table:not(.no-stack):not(.cal) tbody{display:block}
+  .table-wrap table:not(.no-stack):not(.cal) thead{display:none}
+  .table-wrap table:not(.no-stack):not(.cal) tr{display:flex;flex-wrap:wrap;align-items:center;gap:4px 12px;padding:10px 0;border-bottom:1px solid var(--line)}
+  .table-wrap table:not(.no-stack):not(.cal) tr:last-child{border-bottom:0}
+  .table-wrap table:not(.no-stack):not(.cal) td{display:block;border:0;padding:0}
+  .table-wrap table:not(.no-stack):not(.cal) td.num{text-align:left}
+  .table-wrap table:not(.no-stack):not(.cal) td.grow{flex:1 1 60%;min-width:0}
+  .table-wrap table:not(.no-stack):not(.cal) td.end{margin-left:auto;text-align:right}
+  .table-wrap table:not(.no-stack):not(.cal) td.actions{margin-left:auto}
+  .table-wrap table:not(.no-stack):not(.cal) td.empty{flex-basis:100%}
+  .table-wrap td[data-label]::before{content:attr(data-label) " ";color:var(--muted);font-size:12px}
+  .hide-sm{display:none!important}
+  .filters input[type=checkbox]{min-width:0}
+  /* Calendario: celdas compactas que caben en la pantalla */
+  table.cal{min-width:0;width:100%}
+  table.cal th{padding:8px 0;font-size:11px}
+  table.cal td{height:64px;padding:3px 2px}
+  table.cal .d{font-size:12px}
+  table.cal .ev{font-size:10px;padding:1px 3px;border-radius:4px}
+}

@@ -19,17 +19,17 @@
 @error('to')<div class="flash ko">{{ $message }}</div>@enderror
 <div class="card table-wrap">
     <table>
-        <thead><tr><th>Referencia</th><th>Artículo</th><th>Categoría</th><th class="num">Utilizables</th><th class="num">Reservadas</th><th class="num">Libres</th></tr></thead>
+        <thead><tr><th class="hide-sm">Referencia</th><th>Artículo</th><th class="hide-sm">Categoría</th><th class="num">Utilizables</th><th class="num hide-sm">Reservadas</th><th class="num">Libres</th></tr></thead>
         <tbody>
         @forelse ($articles as $a)
             @php($av = $availability[$a->id])
             <tr>
-                <td class="mono">{{ $a->reference }}</td>
-                <td><a href="{{ route('articles.show', $a) }}">{{ $a->name }}</a></td>
-                <td class="muted">{{ $a->category->name }}</td>
-                <td class="num">{{ $av['capacity'] }}</td>
-                <td class="num">{{ $av['reserved'] ?: '—' }}</td>
-                <td class="num">
+                <td class="mono hide-sm">{{ $a->reference }}</td>
+                <td class="grow"><a href="{{ route('articles.show', $a) }}">{{ $a->name }}</a></td>
+                <td class="muted hide-sm">{{ $a->category->name }}</td>
+                <td class="num" data-label="Total">{{ $av['capacity'] }}</td>
+                <td class="num hide-sm">{{ $av['reserved'] ?: '—' }}</td>
+                <td class="num" data-label="Libres">
                     @if ($av['available'] < 0)<span class="badge red">{{ $av['available'] }}</span>
                     @elseif ($av['available'] === 0)<span class="badge grey">0</span>
                     @else<b>{{ $av['available'] }}</b>@endif

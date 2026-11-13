@@ -149,7 +149,7 @@ class BundlesTest extends TestCase
 
         $this->actingAs($this->user)->get(route('articles.show', $rincon))->assertOk()->assertSee('Piezas')->assertDontSee('Imprimir etiquetas QR');
         $this->actingAs($this->user)->get(route('articles.edit', $rincon))->assertOk();
-        $this->actingAs($this->user)->get(route('articles.index'))->assertOk()->assertSee('montables');
+        $this->actingAs($this->user)->get(route('articles.index'))->assertOk()->assertSee('montables')->assertSee('3 / 3');
 
         // Sin piezas no se puede guardar como combinado
         $this->actingAs($this->user)->put(route('articles.update', $rincon), [

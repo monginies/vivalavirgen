@@ -147,17 +147,17 @@
 <div class="card table-wrap">
     <h2>Material</h2>
     <table>
-        <thead><tr><th>Artículo</th><th class="num">Cantidad</th><th class="num">Precio ud.</th><th class="num">Importe</th><th class="num">Libres en esas fechas</th></tr></thead>
+        <thead><tr><th>Artículo</th><th class="num">Cantidad</th><th class="num hide-sm">Precio ud.</th><th class="num">Importe</th><th class="num">Libres en esas fechas</th></tr></thead>
         <tbody>
         @foreach ($order->lines as $l)
             @php($av = $availability[$l->article_id])
             <tr>
                 <td><span class="mono">{{ $l->article->reference }}</span> · <a href="{{ route('articles.show', $l->article) }}">{{ $l->article->name }}</a>
                     @if ($inc = $l->article->componentsSummary())<br><span class="muted" style="font-size:13px">Incluye: {{ $inc }}</span>@endif</td>
-                <td class="num">{{ $l->quantity }}</td>
-                <td class="num">{{ $money($l->unit_price) }}</td>
-                <td class="num">{{ $money($l->total()) }}</td>
-                <td class="num">
+                <td class="num" data-label="Cant.">{{ $l->quantity }}</td>
+                <td class="num hide-sm">{{ $money($l->unit_price) }}</td>
+                <td class="num" data-label="Importe">{{ $money($l->total()) }}</td>
+                <td class="num end" data-label="Libres">
                     @if ($order->status->isBlocking() && $l->quantity > $av['available'])
                         <span class="badge red">Faltan {{ $l->quantity - max(0, $av['available']) }}</span>
                     @else

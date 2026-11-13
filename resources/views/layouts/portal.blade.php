@@ -25,7 +25,7 @@
     <meta property="og:image" content="{!! $seoImg !!}">
     <meta name="twitter:card" content="summary_large_image">
     @stack('jsonld')
-    <link rel="stylesheet" href="{{ asset('css/app.css') }}?v=39">
+    <link rel="stylesheet" href="{{ asset('css/app.css') }}?v=40">
     <link rel="icon" type="image/png" href="{{ asset('img/favicon-32.png') }}">
     <link rel="apple-touch-icon" href="{{ asset('img/apple-touch-icon.png') }}">
     <meta name="theme-color" content="#9a9b88">

@@ -14,14 +14,14 @@
 </form>
 <div class="card table-wrap">
     <table>
-        <thead><tr><th>Pedido</th><th>Entrega</th><th>Recogida</th><th>Lugar</th><th>Estado</th><th></th></tr></thead>
+        <thead><tr><th>Pedido</th><th>Entrega</th><th>Recogida</th><th class="hide-sm">Lugar</th><th>Estado</th><th></th></tr></thead>
         <tbody>
         @forelse ($orders as $o)
             <tr>
-                <td><a class="mono" href="{{ route('expeditions.show', $o) }}">{{ $o->number }}</a><br><span class="muted" style="font-size:13px">{{ $o->client->name }}</span></td>
-                <td>{{ $o->start_date->isoFormat('ddd D/MM') }}@if ($o->delivery_time)<br><span class="muted" style="font-size:13px">{{ $o->delivery_time }}</span>@endif</td>
-                <td>{{ $o->end_date->isoFormat('ddd D/MM') }}@if ($o->pickup_time)<br><span class="muted" style="font-size:13px">{{ $o->pickup_time }}</span>@endif</td>
-                <td>{{ $o->venue?->name ?? ($o->destination_city ?: '—') }}</td>
+                <td class="grow"><a class="mono" href="{{ route('expeditions.show', $o) }}">{{ $o->number }}</a><br><span class="muted" style="font-size:13px">{{ $o->client->name }}</span></td>
+                <td data-label="Entrega">{{ $o->start_date->isoFormat('ddd D/MM') }}@if ($o->delivery_time)<br><span class="muted" style="font-size:13px">{{ $o->delivery_time }}</span>@endif</td>
+                <td data-label="Recogida">{{ $o->end_date->isoFormat('ddd D/MM') }}@if ($o->pickup_time)<br><span class="muted" style="font-size:13px">{{ $o->pickup_time }}</span>@endif</td>
+                <td class="hide-sm">{{ $o->venue?->name ?? ($o->destination_city ?: '—') }}</td>
                 <td>
                     @if ($o->status === $S::Paid)<span class="badge amber">Pendiente de salir</span>
                     @elseif ($o->status === $S::Delivered)<span class="badge blue">Fuera · {{ $o->units_count }} ud.</span>

@@ -18,8 +18,8 @@
                 @php($urgent = $o->expires_at && $o->expires_at->diffInHours(now(), true) < 24)
                 <tr>
                     <td class="mono"><a href="{{ route('orders.show', $o) }}">{{ $o->number }}</a>@if ($o->source === 'web') <span class="badge blue">Web</span>@endif</td>
-                    <td>{{ $o->client->name }}</td>
-                    <td>{{ $o->event_date ? 'Evento '.$o->event_date->format('d/m/Y') : $o->start_date->format('d/m').' – '.$o->end_date->format('d/m') }}</td>
+                    <td class="grow">{{ $o->client->name }}</td>
+                    <td class="hide-sm">{{ $o->event_date ? 'Evento '.$o->event_date->format('d/m/Y') : $o->start_date->format('d/m').' – '.$o->end_date->format('d/m') }}</td>
                     <td class="num">{{ \App\Support\Money::eur($o->total()) }}</td>
                     <td>@if ($o->expires_at)<span class="badge {{ $urgent ? 'red' : 'amber' }}">Caduca {{ $o->expires_at->diffForHumans() }}</span>@endif</td>
                     <td class="actions" style="justify-content:flex-end"><a class="btn sm" href="{{ route('orders.show', $o) }}">Revisar</a></td>
@@ -39,7 +39,7 @@
                 @php($urgent = $o->expires_at && $o->expires_at->diffInHours(now(), true) < 24)
                 <tr>
                     <td class="mono"><a href="{{ route('orders.show', $o) }}">{{ $o->number }}</a></td>
-                    <td>{{ $o->client->name }}</td>
+                    <td class="grow">{{ $o->client->name }}</td>
                     <td><span class="badge {{ $o->status->color() }}">{{ $o->status->label() }}</span>@if ($o->proforma_sent_at)<br><span class="muted" style="font-size:13px">enviada {{ $o->proforma_sent_at->format('d/m H:i') }}</span>@endif</td>
                     <td class="num">{{ \App\Support\Money::eur($o->amountDue()) }}</td>
                     <td>@if ($o->expires_at)<span class="badge {{ $urgent ? 'red' : 'amber' }}">Caduca {{ $o->expires_at->diffForHumans() }}</span><br><span class="muted" style="font-size:13px">{{ $o->expires_at->format('d/m H:i') }}</span>@endif</td>
@@ -68,7 +68,7 @@
         @forelse ($upcomingOrders as $o)
             <tr>
                 <td class="mono"><a href="{{ route('orders.show', $o) }}">{{ $o->number }}</a></td>
-                <td>{{ $o->client->name }}</td>
+                <td class="grow">{{ $o->client->name }}</td>
                 <td>{{ $o->start_date->format('d/m') }} – {{ $o->end_date->format('d/m') }}</td>
                 <td><span class="badge {{ $o->status->color() }}">{{ $o->status->label() }}</span></td>
             </tr>

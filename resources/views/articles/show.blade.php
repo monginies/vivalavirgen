@@ -73,14 +73,14 @@
 <div class="card table-wrap">
     <h2>Unidades</h2>
     <table>
-        <thead><tr><th>Código</th><th>Estado</th><th>Alta</th><th>Notas</th><th></th></tr></thead>
+        <thead><tr><th>Código</th><th>Estado</th><th class="hide-sm">Alta</th><th class="hide-sm">Notas</th><th></th></tr></thead>
         <tbody>
         @forelse ($article->units as $u)
             <tr>
                 <td class="mono"><a href="{{ route('units.show', $u) }}">{{ $u->code }}</a></td>
                 <td><span class="badge {{ $u->status->color() }}">{{ $u->status->label() }}</span></td>
-                <td class="muted">{{ $u->acquired_at?->format('d/m/Y') }}</td>
-                <td class="muted">{{ Str::limit($u->notes, 60) }}</td>
+                <td class="muted hide-sm">{{ $u->acquired_at?->format('d/m/Y') }}</td>
+                <td class="muted hide-sm">{{ Str::limit($u->notes, 60) }}</td>
                 <td class="actions" style="justify-content:flex-end"><a class="btn sec sm" href="{{ route('units.qr', $u) }}" target="_blank">QR</a></td>
             </tr>
         @empty
