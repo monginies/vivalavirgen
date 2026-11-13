@@ -95,7 +95,8 @@
                 @if ($discount > 0)<dt>Tu descuento {{ rtrim(rtrim(number_format($discount, 2, ',', ''), '0'), ',') }} %</dt><dd id="s-disc">—</dd>@endif
                 <dt>Transporte</dt><dd id="s-tr">Indica el lugar</dd>
                 <dt>IVA {{ rtrim(rtrim(number_format($settings['vat'], 2, ',', ''), '0'), ',') }} %</dt><dd id="s-vat">—</dd>
-                <dt>Subtotal</dt><dd id="s-total">—</dd>
+                @if ($settings['withholding'] > 0)<dt>Retención IRPF {{ rtrim(rtrim(number_format($settings['withholding'], 2, ',', ''), '0'), ',') }} %</dt><dd id="s-wh">—</dd>@endif
+                <dt>Total</dt><dd id="s-total">—</dd>
                 <dt>Fianza</dt><dd>{{ $money($settings['deposit']) }}<div class="hint" style="margin:0">Se devuelve tras revisar el material</div></dd>
                 <dt><b>Total</b></dt><dd><b id="s-due">—</b></dd>
             </dl>
@@ -123,7 +124,7 @@
 (() => {
     const form = document.getElementById('cart-form');
     if (!form) return;
-    const approved = @json((bool) $approved), discount = @json((float) $discount), vat = @json((float) $settings['vat']), deposit = @json((float) $settings['deposit']);
+    const approved = @json((bool) $approved), discount = @json((float) $discount), vat = @json((float) $settings['vat']), wh = @json((float) $settings['withholding']), deposit = @json((float) $settings['deposit']);
     const eur = n => n.toLocaleString('es-ES', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + ' €';
     let transport = null;
 
@@ -140,8 +141,9 @@
         if (document.getElementById('s-disc')) document.getElementById('s-disc').textContent = '− ' + eur(disc);
         document.getElementById('s-tr').textContent = transport === null ? 'Indica el lugar' : eur(tr);
         document.getElementById('s-vat').textContent = eur(base * vat / 100);
-        document.getElementById('s-total').textContent = eur(base * (1 + vat / 100));
-        document.getElementById('s-due').textContent = eur(base * (1 + vat / 100) + deposit);
+        if (document.getElementById('s-wh')) document.getElementById('s-wh').textContent = '− ' + eur(base * wh / 100);
+        document.getElementById('s-total').textContent = eur(base * (1 + vat / 100 - wh / 100));
+        document.getElementById('s-due').textContent = eur(base * (1 + vat / 100 - wh / 100) + deposit);
     }
 
     // Transporte estimado según finca o dirección

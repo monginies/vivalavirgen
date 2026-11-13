@@ -15,7 +15,7 @@ class Order extends Model
         'number', 'client_id', 'status', 'source', 'event_date', 'venue_id', 'start_date', 'end_date',
         'destination_address', 'destination_city', 'destination_postal_code', 'distance_km', 'trucks',
         'transport_manual', 'transport_amount', 'discount_percent', 'deposit_amount',
-        'vat_rate', 'expires_at', 'proforma_sent_at', 'proforma_sent_to', 'notes', 'created_by',
+        'vat_rate', 'withholding_rate', 'expires_at', 'proforma_sent_at', 'proforma_sent_to', 'notes', 'created_by',
     ];
 
     protected function casts(): array
@@ -33,6 +33,7 @@ class Order extends Model
             'discount_percent' => 'decimal:2',
             'deposit_amount' => 'decimal:2',
             'vat_rate' => 'decimal:2',
+            'withholding_rate' => 'decimal:2',
         ];
     }
 
@@ -151,9 +152,16 @@ class Order extends Model
         return round($this->taxableBase() * $this->vat_rate / 100, 2);
     }
 
+    /** Retención (IRPF) sobre la base imponible; la fianza no lleva retención. */
+    public function withholdingAmount(): float
+    {
+        return round($this->taxableBase() * $this->withholding_rate / 100, 2);
+    }
+
+    /** Total de la proforma: base + IVA − retención (sin fianza). */
     public function total(): float
     {
-        return round($this->taxableBase() + $this->vatAmount(), 2);
+        return round($this->taxableBase() + $this->vatAmount() - $this->withholdingAmount(), 2);
     }
 
     /** Lo que paga el cliente: total con IVA más la fianza. */

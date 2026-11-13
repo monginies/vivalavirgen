@@ -94,7 +94,10 @@
     <tr><td>Transporte @if ($order->distance_km)<span class="muted">({{ $order->distance_km }} km, {{ $order->trucks }} {{ $order->trucks > 1 ? 'camiones' : 'camión' }})</span>@endif</td><td class="num">{{ $eur($order->transport_amount) }}</td></tr>
     <tr><td>Base imponible</td><td class="num">{{ $eur($order->taxableBase()) }}</td></tr>
     <tr><td>IVA {{ $pct($order->vat_rate) }} %</td><td class="num">{{ $eur($order->vatAmount()) }}</td></tr>
-    <tr class="sub"><td><b>Subtotal</b> <span class="muted">(IVA incluido)</span></td><td class="num"><b>{{ $eur($order->total()) }}</b></td></tr>
+    @if ($order->withholding_rate > 0)
+        <tr><td>Retención IRPF {{ $pct($order->withholding_rate) }} %</td><td class="num">− {{ $eur($order->withholdingAmount()) }}</td></tr>
+    @endif
+    <tr class="sub"><td><b>Total</b> <span class="muted">(IVA incluido)</span></td><td class="num"><b>{{ $eur($order->total()) }}</b></td></tr>
     @if ($order->deposit_amount > 0)
         <tr><td>Fianza <span class="muted">(no sujeta a IVA; se devuelve tras revisar el material)</span></td><td class="num">{{ $eur($order->deposit_amount) }}</td></tr>
     @endif

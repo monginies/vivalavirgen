@@ -28,6 +28,8 @@ class Setting extends Model
         'prereservation_days' => ['label' => 'Duración de la pre-reserva', 'unit' => 'días', 'default' => '3', 'type' => 'number',
             'hint' => 'Si el pedido no se paga en este plazo, caduca y el material se libera.'],
         'vat_rate' => ['label' => 'IVA', 'unit' => '%', 'default' => '21', 'type' => 'number', 'hint' => null],
+        'withholding_rate' => ['label' => 'Retención (IRPF)', 'unit' => '%', 'default' => '7', 'type' => 'number',
+            'hint' => 'Se descuenta en todos los pedidos, sobre la base imponible (material con descuento + transporte). No afecta a la fianza. Se aplica a los pedidos nuevos.'],
         'company_name' => ['label' => 'Proforma: titular / razón social', 'unit' => null, 'default' => null, 'type' => 'text', 'hint' => null],
         'company_tax_id' => ['label' => 'Proforma: CIF / NIF', 'unit' => null, 'default' => null, 'type' => 'text', 'hint' => null],
         'company_address' => ['label' => 'Proforma: dirección fiscal', 'unit' => null, 'default' => 'C/ Driza, 13 · 29006 Málaga', 'type' => 'text', 'hint' => null],

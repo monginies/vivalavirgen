@@ -74,6 +74,7 @@ class OrderController extends Controller
                 'number' => Order::nextNumber(),
                 'status' => OrderStatus::Requested,
                 'vat_rate' => Setting::number('vat_rate'),
+                'withholding_rate' => Setting::number('withholding_rate'),
                 'expires_at' => now()->addDays((int) Setting::number('prereservation_days')),
                 'created_by' => auth()->id(),
             ]);

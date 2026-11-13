@@ -46,6 +46,7 @@ class CartController extends Controller
                 'per_km' => Setting::number('transport_price_per_km'),
                 'minimum' => Setting::number('transport_minimum'),
                 'vat' => Setting::number('vat_rate'),
+                'withholding' => Setting::number('withholding_rate'),
                 'deposit' => Setting::number('deposit_amount'),
             ],
         ]);
@@ -169,6 +170,7 @@ class CartController extends Controller
                 'discount_percent' => $client->discountPercent(),
                 'deposit_amount' => Setting::number('deposit_amount'),
                 'vat_rate' => Setting::number('vat_rate'),
+                'withholding_rate' => Setting::number('withholding_rate'),
                 'expires_at' => now()->addDays((int) Setting::number('prereservation_days')),
                 'notes' => $cart['notes'] ? "Nota del cliente:\n".$cart['notes'] : null,
             ]);

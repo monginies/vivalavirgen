@@ -123,11 +123,32 @@ class OrdersTest extends TestCase
         // 2 trayectos × 100 km × 0,60 €/km × 2 camiones = 240
         $this->assertEquals(240, $order->transport_amount);
         $this->assertTrue($order->expires_at->between(now()->addDays(3)->subMinute(), now()->addDays(3)->addMinute()));
-        // 36 € material + 240 transporte = 276 base, IVA 21 %
+        // 36 € material + 240 transporte = 276 base, IVA 21 % (57,96), retención 7 % (19,32)
         $this->assertEquals(276, $order->taxableBase());
-        $this->assertEquals(333.96, $order->total());
+        $this->assertEquals(7, $order->withholding_rate);
+        $this->assertEquals(19.32, $order->withholdingAmount());
+        $this->assertEquals(314.64, $order->total());
+        // La fianza (150) no lleva retención
+        $this->assertEquals(464.64, $order->amountDue());
 
         $this->actingAs($this->user)->get(route('orders.show', $order))->assertOk()->assertSee('PED-');
+    }
+
+    public function test_withholding_is_on_base_with_discount_and_transport_not_on_deposit(): void
+    {
+        $o = $this->order('2026-12-04', '2026-12-06', 10, [
+            'discount_percent' => 10, 'transport_amount' => 60, 'deposit_amount' => 150, 'vat_rate' => 21, 'withholding_rate' => 7,
+        ]);
+        $o->load('lines');
+        // Material 45 − 10 % = 40,50 + 60 transporte = 100,50 base
+        $this->assertEquals(100.5, $o->taxableBase());
+        $this->assertEquals(21.11, $o->vatAmount());
+        $this->assertEquals(7.04, $o->withholdingAmount());
+        $this->assertEquals(114.57, $o->total());
+        $this->assertEquals(264.57, $o->amountDue());
+
+        $this->actingAs($this->user)->get(route('orders.show', $o))->assertOk()->assertSee('Retención IRPF 7 %');
+        $this->actingAs($this->user)->get(route('orders.proforma', $o))->assertOk();
     }
 
     public function test_transport_minimum_applies(): void
@@ -201,7 +222,7 @@ class OrdersTest extends TestCase
 
         $this->actingAs($this->user)->put(route('settings.update'), [
             'transport_price_per_km' => '0.8', 'transport_minimum' => '50', 'deposit_amount' => '200',
-            'prereservation_days' => '3', 'vat_rate' => '21', 'base_address' => 'C/ Driza, 13',
+            'prereservation_days' => '3', 'vat_rate' => '21', 'withholding_rate' => '7', 'base_address' => 'C/ Driza, 13',
         ])->assertSessionHasNoErrors();
 
         Setting::flushCache();

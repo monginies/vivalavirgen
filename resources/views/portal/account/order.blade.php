@@ -27,7 +27,10 @@
             @if ($order->discount_percent > 0)<dt>Descuento</dt><dd>− {{ $money($order->discountAmount()) }}</dd>@endif
             <dt>Transporte</dt><dd>{{ $order->transport_amount > 0 ? $money($order->transport_amount) : 'Pendiente' }}</dd>
             <dt>IVA</dt><dd>{{ $money($order->vatAmount()) }}</dd>
-            <dt>Subtotal</dt><dd>{{ $money($order->total()) }} <span class="muted">IVA incl.</span></dd>
+            @if ($order->withholding_rate > 0)
+                <dt>Retención IRPF {{ rtrim(rtrim(number_format($order->withholding_rate, 2, ',', ''), '0'), ',') }} %</dt><dd>− {{ $money($order->withholdingAmount()) }}</dd>
+            @endif
+            <dt>Total</dt><dd>{{ $money($order->total()) }} <span class="muted">IVA incl.@if ($order->withholding_rate > 0), retención desc.@endif</span></dd>
             <dt>Fianza</dt><dd>{{ $money($order->deposit_amount) }} <span class="muted">se devuelve</span></dd>
             <dt><b>Total a pagar</b></dt><dd><b>{{ $money($order->amountDue()) }}</b></dd>
         </dl>

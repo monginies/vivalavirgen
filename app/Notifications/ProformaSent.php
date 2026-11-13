@@ -28,7 +28,7 @@ class ProformaSent extends Notification
             $mail->line($this->note);
         }
         $mail->line($o->deposit_amount > 0
-            ? 'Subtotal '.Money::eur($o->total()).' (IVA incluido) + fianza '.Money::eur($o->deposit_amount).' = **total a pagar '.Money::eur($o->amountDue()).'**.'
+            ? 'Total '.Money::eur($o->total()).($o->withholding_rate > 0 ? ' (IVA incluido, retención descontada)' : ' (IVA incluido)').' + fianza '.Money::eur($o->deposit_amount).' = **total a pagar '.Money::eur($o->amountDue()).'**.'
             : 'Total a pagar: **'.Money::eur($o->amountDue()).'** (IVA incluido).');
         if ($o->expires_at && $o->status->isExpirable()) {
             $mail->line("El material queda reservado hasta el {$o->expires_at->format('d/m/Y')}. Para confirmar el pedido, realiza el pago antes de esa fecha indicando **{$o->number}** en el concepto.");
