@@ -18,7 +18,7 @@
     @endif
     <tr class="sub"><td>Total proforma</td><td class="num">{{ $eur($order->total()) }}</td></tr>
     @if ($order->deposit_amount > 0)
-        <tr><td>Fianza <span class="muted">(se devuelve)</span></td><td class="num">+ {{ $eur($order->deposit_amount) }}</td></tr>
+        <tr><td>Fianza</td><td class="num">+ {{ $eur($order->deposit_amount) }}</td></tr>
     @endif
     <tr class="grand"><td>Total a pagar</td><td class="num">{{ $eur($order->amountDue()) }}</td></tr>
 </table>
