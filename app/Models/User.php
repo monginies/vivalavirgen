@@ -7,6 +7,7 @@ use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
@@ -33,6 +34,11 @@ class User extends Authenticatable
     }
 
     public const ROLES = ['office' => 'Oficina (todo el backoffice)', 'logistics' => 'Logística (solo expediciones)'];
+
+    public function pushSubscriptions(): HasMany
+    {
+        return $this->hasMany(PushSubscription::class);
+    }
 
     /** Personal de logística: solo ve las expediciones. */
     public function isLogistics(): bool

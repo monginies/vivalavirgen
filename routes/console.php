@@ -11,6 +11,7 @@ Artisan::command('inspire', function () {
 
 // Libera las pre-reservas que no se han pagado a tiempo
 Schedule::command('orders:expire')->everyFifteenMinutes();
+Schedule::command('orders:expiry-alerts')->everyFifteenMinutes();
 
 // Borra las estadísticas de la web más antiguas que el plazo de conservación
 Schedule::command('model:prune', ['--model' => [WebEvent::class]])->dailyAt('04:10');

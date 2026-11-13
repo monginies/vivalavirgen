@@ -151,6 +151,7 @@ class OrderController extends Controller
                     $order->start_date, $order->end_date, $order->id, $order->client_id
                 );
                 $changes['expires_at'] = now()->addDays((int) Setting::number('prereservation_days'));
+                $changes['expiry_alerted_at'] = null;
             }
             if ($target === OrderStatus::Cancelled) { // las unidades ya escaneadas para salir vuelven a estar disponibles
                 foreach ($order->units()->whereNull('return_status')->with('unit')->get() as $row) {
@@ -234,7 +235,7 @@ class OrderController extends Controller
         abort_unless($order->status->isExpirable(), 403);
         $days = $request->validate(['days' => ['required', 'integer', 'min:1', 'max:60']])['days'];
         $base = $order->expires_at && $order->expires_at->isFuture() ? $order->expires_at : now();
-        $order->update(['expires_at' => $base->copy()->addDays($days)]);
+        $order->update(['expires_at' => $base->copy()->addDays($days), 'expiry_alerted_at' => null]);
 
         return back()->with('status', "Pre-reserva ampliada hasta el {$order->expires_at->format('d/m/Y H:i')}.");
     }

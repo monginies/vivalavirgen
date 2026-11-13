@@ -77,6 +77,7 @@
         @endforelse
     </table>
 </div>
+@include('partials.push')
 <div class="grid g2">
     <div class="card">
         <h2>Estado de las unidades</h2>

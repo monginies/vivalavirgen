@@ -13,6 +13,8 @@ use App\Notifications\OrderReceived;
 use App\Services\Availability;
 use App\Services\Distance;
 use App\Support\Cart;
+use App\Support\Money;
+use App\Support\Push;
 use App\Support\Tracker;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -194,6 +196,9 @@ class CartController extends Controller
         Tracker::record('checkout', ['value' => $order->id]);
         rescue(fn () => $client->notify(new OrderReceived($order)), report: true);
         rescue(fn () => Notification::route('mail', Setting::get('notify_email'))->notify(new NewWebOrder($order)), report: true);
+        rescue(fn () => Push::toOffice("Pedido nuevo: {$order->number}",
+            "{$client->name} · ".Money::eur($order->amountDue()).($order->event_date ? ' · evento '.$order->event_date->format('d/m/Y') : '').' · pendiente de aprobar',
+            route('orders.show', $order), 'order-'.$order->id), report: true);
 
         return redirect()->route('portal.orders.show', $order->number)
             ->with('status', "¡Pedido {$order->number} recibido! El material queda pre-reservado. Te hemos enviado un email con el resumen.");

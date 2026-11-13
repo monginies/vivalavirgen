@@ -13,6 +13,7 @@ use App\Http\Controllers\ExpeditionController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\Portal;
 use App\Http\Controllers\PostalCodeController;
+use App\Http\Controllers\PushController;
 use App\Http\Controllers\PwaController;
 use App\Http\Controllers\ScanController;
 use App\Http\Controllers\SettingController;
@@ -85,6 +86,9 @@ Route::prefix('app')->middleware(NoIndex::class)->group(function () {
 
     Route::middleware(['auth', RestrictLogistics::class])->group(function () {
         Route::post('logout', [LoginController::class, 'logout'])->name('logout');
+        Route::post('push/subscribe', [PushController::class, 'subscribe'])->name('push.subscribe');
+        Route::post('push/unsubscribe', [PushController::class, 'unsubscribe'])->name('push.unsubscribe');
+        Route::post('push/test', [PushController::class, 'test'])->name('push.test');
         Route::get('expediciones', [ExpeditionController::class, 'index'])->name('expeditions.index');
         Route::view('expediciones/ayuda', 'expeditions.help')->name('expeditions.help');
         Route::get('expediciones/{order}', [ExpeditionController::class, 'show'])->name('expeditions.show');
