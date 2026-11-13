@@ -2,7 +2,8 @@
 @section('title', 'Expediciones')
 @section('content')
 @php($S = \App\Enums\OrderStatus::class)
-<div class="head"><h1>Expediciones</h1><a class="btn sec" href="{{ route('expeditions.help') }}">Cómo dar salida y entrada</a></div>
+<div class="head"><h1>Expediciones</h1><button type="button" class="btn sec" data-help-toggle="help-box" aria-expanded="false" data-open="Cómo dar salida y entrada" data-close="Cerrar explicación">Cómo dar salida y entrada</button></div>
+<div id="help-box" hidden>@include('expeditions._help')</div>
 <form class="filters" method="get">
     <select name="status" onchange="this.form.submit()">
         <option value="">Todas</option>
@@ -38,4 +39,12 @@
         </tbody>
     </table>
 </div>
+<script>
+document.querySelectorAll('[data-help-toggle]').forEach(b => b.addEventListener('click', () => {
+    const box = document.getElementById(b.dataset.helpToggle);
+    box.hidden = !box.hidden;
+    b.setAttribute('aria-expanded', String(!box.hidden));
+    b.textContent = box.hidden ? b.dataset.open : b.dataset.close;
+}));
+</script>
 @endsection

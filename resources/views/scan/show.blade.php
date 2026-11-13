@@ -7,10 +7,12 @@
         <div class="sub">{{ $order->client->name }} · {{ $mode === 'salida' ? 'entrega '.$order->start_date->format('d/m/Y').($order->delivery_time ? ' '.$order->delivery_time : '') : 'recogida '.$order->end_date->format('d/m/Y').($order->pickup_time ? ' '.$order->pickup_time : '') }}</div>
     </div>
     <div class="actions">
-        <a class="btn sec" href="{{ route('expeditions.help') }}" target="_blank">Ayuda</a>
+        <button type="button" class="btn sec" data-help-toggle="help-box" aria-expanded="false" data-open="Ayuda" data-close="Cerrar ayuda">Ayuda</button>
         <a class="btn sec" href="{{ route('expeditions.show', $order) }}">Volver a la expedición</a>
     </div>
 </div>
+
+<div id="help-box" hidden>@include('expeditions._help')</div>
 
 <div class="card" style="padding:14px">
     <div id="scan-box" style="position:relative;max-width:520px;margin:0 auto;border-radius:10px;overflow:hidden;background:#222;aspect-ratio:4/3">
@@ -32,6 +34,14 @@
     <button class="btn" style="width:100%;justify-content:center;padding:14px">{{ $mode === 'salida' ? 'Terminar salida' : 'Terminar entrada' }}</button>
 </form>
 
+<script>
+document.querySelectorAll('[data-help-toggle]').forEach(b => b.addEventListener('click', () => {
+    const box = document.getElementById(b.dataset.helpToggle);
+    box.hidden = !box.hidden;
+    b.setAttribute('aria-expanded', String(!box.hidden));
+    b.textContent = box.hidden ? b.dataset.open : b.dataset.close;
+}));
+</script>
 <script src="{{ asset('js/jsQR.js') }}?v=1"></script>
 <script>
 (() => {
