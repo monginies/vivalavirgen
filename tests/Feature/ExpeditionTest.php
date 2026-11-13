@@ -62,10 +62,10 @@ class ExpeditionTest extends TestCase
         $this->assertSame('Juan', $this->order->fresh()->site_contact_name);
 
         $this->actingAs($this->user)->get(route('orders.expedition', $this->order))->assertForbidden();
-        $this->actingAs($this->user)->get(route('orders.show', $this->order))->assertOk()->assertSee('cuando el pedido está pagado');
+        $this->actingAs($this->user)->get(route('orders.show', $this->order))->assertOk()->assertSee('cuando el pedido esté pagado');
 
         $this->order->update(['status' => OrderStatus::Paid, 'paid_at' => now()]);
-        $this->actingAs($this->user)->get(route('orders.show', $this->order))->assertOk()->assertSee('Hoja de expedición (PDF)');
+        $this->actingAs($this->user)->get(route('orders.show', $this->order))->assertOk()->assertSee('Ir a la expedición')->assertDontSee('Dar salida');
         $res = $this->actingAs($this->user)->get(route('orders.expedition', $this->order))->assertOk();
         $this->assertSame('application/pdf', $res->headers->get('Content-Type'));
     }

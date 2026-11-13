@@ -76,8 +76,8 @@
 @php($shippable = in_array($order->status, [\App\Enums\OrderStatus::Paid, \App\Enums\OrderStatus::Delivered, \App\Enums\OrderStatus::Returned, \App\Enums\OrderStatus::Closed], true))
 <div class="card" id="expedicion">
     <div class="head" style="margin-bottom:10px"><h2 style="margin:0">Expedición</h2>
-        @if ($shippable)<a class="btn sm" href="{{ route('orders.expedition', $order) }}" target="_blank">Hoja de expedición (PDF)</a>
-        @else<span class="muted">La hoja de expedición se puede sacar cuando el pedido está pagado.</span>@endif</div>
+        @if ($shippable)<a class="btn sec sm" href="{{ route('expeditions.show', $order) }}">Ir a la expedición</a>
+        @else<span class="muted">Pasará a Expediciones cuando el pedido esté pagado.</span>@endif</div>
     @php($S = \App\Enums\OrderStatus::class)
     @if ($shippable)
         @php($outUnits = $order->units)
@@ -90,13 +90,6 @@
                     @if ($n = $outUnits->whereNull('return_status')->count()) · {{ $n }} fuera @endif
                 @endif
             </span>
-            <span style="flex:1"></span>
-            @if (in_array($order->status, [$S::Paid, $S::Delivered], true))
-                <a @class(['btn', 'sec' => $order->status === $S::Delivered]) href="{{ route('scan.show', [$order, 'salida']) }}">{{ $order->status === $S::Paid ? 'Dar salida (escanear QR)' : 'Seguir dando salida' }}</a>
-            @endif
-            @if (in_array($order->status, [$S::Delivered, $S::Returned], true))
-                <a @class(['btn', 'sec' => $order->status === $S::Returned]) href="{{ route('scan.show', [$order, 'entrada']) }}">{{ $order->status === $S::Delivered ? 'Dar entrada (escanear QR)' : 'Revisar entrada' }}</a>
-            @endif
         </div>
         @if ($bad = $back->whereIn('return_status', ['damaged', 'lost']))
             @if ($bad->isNotEmpty())
