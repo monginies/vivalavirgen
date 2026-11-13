@@ -136,7 +136,6 @@
             <div class="field">Fecha y hora</div>
             <div class="field">Nombre</div>
             <div class="field tall">Firma</div>
-            <div class="field tall">Incidencias (roturas, faltas, suciedad)</div>
         @endif
     </td>
 </tr></table>
