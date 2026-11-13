@@ -8,6 +8,7 @@ use App\Models\Order;
 use App\Models\PushSubscription;
 use App\Models\Setting;
 use App\Models\User;
+use App\Support\Push;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -29,6 +30,24 @@ class PushTest extends TestCase
 
         $this->actingAs($u)->postJson(route('push.unsubscribe'), ['endpoint' => $data['endpoint']])->assertOk();
         $this->assertSame(0, PushSubscription::count());
+    }
+
+    public function test_expiry_alert_says_what_is_missing(): void
+    {
+        Push::fake();
+        $client = Client::create(['type' => 'individual', 'name' => 'Ana']);
+        $make = fn ($n, $status, $extra = []) => Order::create($extra + ['number' => $n, 'client_id' => $client->id, 'status' => $status,
+            'start_date' => '2026-12-04', 'end_date' => '2026-12-06', 'expires_at' => now()->addHours(5)]);
+        $make('PED-2026-0001', OrderStatus::Requested);
+        $make('PED-2026-0002', OrderStatus::Accepted);
+        $make('PED-2026-0003', OrderStatus::ProformaSent, ['proforma_sent_at' => now()->setDate(2026, 11, 14)]);
+
+        $this->artisan('orders:expiry-alerts')->assertSuccessful();
+        $bodies = collect(Push::$faked)->pluck('body', 'title');
+        $this->assertStringContainsString('sin aprobar', $bodies['Caduca pronto: PED-2026-0001']);
+        $this->assertStringContainsString('proforma sin enviar', $bodies['Caduca pronto: PED-2026-0002']);
+        $this->assertStringContainsString('proforma enviada el 14/11, sin pagar', $bodies['Caduca pronto: PED-2026-0003']);
+        Push::$faked = null;
     }
 
     public function test_expiry_alert_runs_once_per_order_and_resets_on_extend(): void

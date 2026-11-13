@@ -24,7 +24,12 @@ class ExpiryAlerts extends Command
             ->get();
 
         foreach ($orders as $o) {
-            $what = $o->status === OrderStatus::Requested ? 'sin aprobar' : 'sin pagar';
+            $what = match (true) {
+                $o->status === OrderStatus::Requested => 'sin aprobar',
+                $o->status === OrderStatus::Accepted => 'proforma sin enviar',
+                (bool) $o->proforma_sent_at => "proforma enviada el {$o->proforma_sent_at->format('d/m')}, sin pagar",
+                default => 'proforma enviada, sin pagar',
+            };
             Push::toOffice(
                 "Caduca pronto: {$o->number}",
                 "{$o->client->name} · {$what} · ".Money::eur($o->amountDue())." · caduca el {$o->expires_at->format('d/m H:i')}",
