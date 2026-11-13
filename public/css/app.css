@@ -447,3 +447,6 @@ body.portal h1{font-family:var(--serif);font-weight:400}
 .settings-fields textarea{min-height:150px}
 .settings-save{position:sticky;bottom:0;z-index:5;border-top:1px solid var(--line);display:flex;gap:14px;align-items:center;flex-wrap:wrap;margin-top:16px;padding:12px 0;background:var(--bg)}
 @media (max-width:640px){.settings-grid{grid-template-columns:1fr}.settings-fields{grid-template-columns:1fr}.settings-save{position:static;border-top:0}}
+.filters .flbl{display:flex;gap:8px;align-items:center;font-weight:500;flex:1;min-width:200px}
+.filters .flbl input{min-width:0}
+@media (max-width:640px){.filters .flbl{min-width:100%}}

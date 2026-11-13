@@ -5,8 +5,8 @@
     <a class="btn" href="{{ route('orders.create', ['start' => $from->toDateString(), 'end' => $to->toDateString()]) }}">+ Pedido para estas fechas</a>
 </div>
 <form class="filters" method="get">
-    <label class="check">Desde <input type="date" name="from" value="{{ $from->toDateString() }}"></label>
-    <label class="check">Hasta <input type="date" name="to" value="{{ $to->toDateString() }}"></label>
+    <label class="flbl">Desde <input type="date" name="from" value="{{ $from->toDateString() }}"></label>
+    <label class="flbl">Hasta <input type="date" name="to" value="{{ $to->toDateString() }}"></label>
     <select name="category">
         <option value="">Todas las categorías</option>
         @foreach ($categories as $c)
