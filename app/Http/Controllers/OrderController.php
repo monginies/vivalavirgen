@@ -11,6 +11,7 @@ use App\Models\Venue;
 use App\Notifications\ProformaSent;
 use App\Services\Availability;
 use App\Services\Distance;
+use App\Support\Expedition;
 use App\Support\Proforma;
 use Illuminate\Database\QueryException;
 use Illuminate\Http\Client\ConnectionException;
@@ -194,6 +195,30 @@ class OrderController extends Controller
         $order->update($changes);
 
         return back()->with('status', "Proforma enviada a {$data['email']}.");
+    }
+
+    /** Datos de logística (horas, contacto en el lugar, notas). Se pueden cambiar hasta cerrar el pedido. */
+    public function logistics(Request $request, Order $order)
+    {
+        abort_if(in_array($order->status, [OrderStatus::Closed, OrderStatus::Cancelled], true), 403);
+        $order->update($request->validate([
+            'delivery_time' => ['nullable', 'string', 'max:40'],
+            'pickup_time' => ['nullable', 'string', 'max:40'],
+            'site_contact_name' => ['nullable', 'string', 'max:255'],
+            'site_contact_phone' => ['nullable', 'string', 'max:40'],
+            'logistics_notes' => ['nullable', 'string', 'max:5000'],
+        ]));
+
+        return back()->with('status', 'Datos de logística guardados.');
+    }
+
+    /** Hoja de expedición en PDF (sin precios), una vez pagado el pedido. */
+    public function expedition(Order $order)
+    {
+        abort_unless(in_array($order->status, [OrderStatus::Paid, OrderStatus::Delivered, OrderStatus::Returned, OrderStatus::Closed], true), 403,
+            'La hoja de expedición está disponible cuando el pedido está pagado.');
+
+        return Expedition::pdf($order)->stream(Expedition::filename($order));
     }
 
     /** Amplía el plazo de la pre-reserva. */

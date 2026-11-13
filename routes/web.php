@@ -102,6 +102,8 @@ Route::prefix('app')->middleware(NoIndex::class)->group(function () {
         Route::resource('orders', OrderController::class)->except('destroy');
         Route::post('orders/{order}/status', [OrderController::class, 'transition'])->name('orders.transition');
         Route::post('orders/{order}/extend', [OrderController::class, 'extend'])->name('orders.extend');
+        Route::patch('orders/{order}/logistics', [OrderController::class, 'logistics'])->name('orders.logistics');
+        Route::get('orders/{order}/expedition', [OrderController::class, 'expedition'])->name('orders.expedition');
         Route::get('orders/{order}/proforma', [OrderController::class, 'proforma'])->name('orders.proforma');
         Route::post('orders/{order}/proforma', [OrderController::class, 'sendProforma'])->name('orders.proforma.send');
         Route::get('calendar', CalendarController::class)->name('calendar');

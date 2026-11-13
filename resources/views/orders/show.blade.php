@@ -72,6 +72,35 @@
 </div>
 @endif
 
+@unless (in_array($order->status, [\App\Enums\OrderStatus::Cancelled, \App\Enums\OrderStatus::Expired], true))
+@php($shippable = in_array($order->status, [\App\Enums\OrderStatus::Paid, \App\Enums\OrderStatus::Delivered, \App\Enums\OrderStatus::Returned, \App\Enums\OrderStatus::Closed], true))
+<div class="card" id="expedicion">
+    <div class="head" style="margin-bottom:10px"><h2 style="margin:0">Expedición</h2>
+        @if ($shippable)<a class="btn sm" href="{{ route('orders.expedition', $order) }}" target="_blank">Hoja de expedición (PDF)</a>
+        @else<span class="muted">La hoja de expedición se puede sacar cuando el pedido está pagado.</span>@endif</div>
+    @if ($order->status === \App\Enums\OrderStatus::Closed)
+        <dl class="props">
+            <dt>Entrega</dt><dd>{{ $order->delivery_time ?: '—' }}</dd><dt>Recogida</dt><dd>{{ $order->pickup_time ?: '—' }}</dd>
+            <dt>Contacto en el lugar</dt><dd>{{ collect([$order->site_contact_name, $order->site_contact_phone])->filter()->join(' · ') ?: '—' }}</dd>
+            @if ($order->logistics_notes)<dt>Notas</dt><dd>{!! nl2br(e($order->logistics_notes)) !!}</dd>@endif
+        </dl>
+    @else
+    <form method="post" action="{{ route('orders.logistics', $order) }}">
+        @csrf @method('patch')
+        <div class="grid g2">
+            @include('partials.field', ['name' => 'delivery_time', 'label' => 'Hora de entrega / montaje', 'value' => $order->delivery_time, 'hint' => 'Ej.: 10:00 o 9:00–11:00'])
+            @include('partials.field', ['name' => 'pickup_time', 'label' => 'Hora de recogida / desmontaje', 'value' => $order->pickup_time])
+            @include('partials.field', ['name' => 'site_contact_name', 'label' => 'Contacto en el lugar', 'value' => $order->site_contact_name, 'hint' => 'Planner, encargado de la finca…'])
+            @include('partials.field', ['name' => 'site_contact_phone', 'label' => 'Teléfono del contacto', 'value' => $order->site_contact_phone, 'type' => 'tel'])
+        </div>
+        @include('partials.field', ['name' => 'logistics_notes', 'label' => 'Notas para logística', 'value' => $order->logistics_notes, 'type' => 'textarea',
+            'hint' => 'Accesos, aparcamiento, planta, horarios de la finca, montaje especial… Sale en la hoja de expedición (las notas del pedido no).'])
+        <button class="btn sec">Guardar datos de logística</button>
+    </form>
+    @endif
+</div>
+@endunless
+
 <div class="grid g2">
     <div class="card">
         <h2>Fechas y destino</h2>
