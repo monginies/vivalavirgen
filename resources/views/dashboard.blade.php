@@ -64,7 +64,6 @@
                     <td class="num">{{ \App\Support\Money::eur($o->amountDue()) }}</td>
                     <td>@if ($o->expires_at)<span class="badge {{ $urgent ? 'red' : 'amber' }}">Caduca {{ $o->expires_at->diffForHumans() }}</span><br><span class="muted" style="font-size:13px">{{ $o->expires_at->format('d/m H:i') }}</span>@endif</td>
                     <td class="actions" style="justify-content:flex-end">
-                        <form method="post" action="{{ route('orders.extend', $o) }}">@csrf<input type="hidden" name="days" value="3"><button class="btn sec sm" title="Amplía la pre-reserva 3 días más">+3 días</button></form>
                         <a class="btn sm" href="{{ route('orders.show', $o) }}">Revisar</a>
                     </td>
                 </tr>

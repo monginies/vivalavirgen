@@ -164,7 +164,7 @@ class OrdersTest extends TestCase
             ->assertSee('1 pedido aceptado con la proforma sin enviar')->assertSee('Enviar proforma')->assertDontSee('pendiente de pago');
 
         $o->update(['status' => OrderStatus::ProformaSent, 'proforma_sent_at' => now()]);
-        $this->actingAs($this->user)->get(route('dashboard'))->assertSee('con la proforma enviada, pendiente de pago')->assertSee('+3 días')
+        $this->actingAs($this->user)->get(route('dashboard'))->assertSee('con la proforma enviada, pendiente de pago')->assertDontSee('+3 días')
             ->assertDontSee('proforma sin enviar');
 
         $o->update(['status' => OrderStatus::Paid, 'expires_at' => null]);
