@@ -19,7 +19,7 @@
             ['Inicio', 'home', 'dashboard', ['dashboard']],
             ['Pedidos', 'orders', null, ['orders.*', 'calendar', 'expeditions.*', 'scan.*'], [
                 ['Pedidos', 'orders', 'orders.index', ['orders.*']],
-                ['Expediciones', 'orders', 'expeditions.index', ['expeditions.*', 'scan.*']],
+                ['Expediciones', 'truck', 'expeditions.index', ['expeditions.*', 'scan.*']],
                 ['Calendario', 'calendar', 'calendar', ['calendar']],
             ]],
             ['Artículos', 'articles', null, ['articles.*', 'units.*', 'categories.*', 'availability'], [
@@ -42,7 +42,7 @@
         }
     @endphp
     @if (auth()->user()->isLogistics())
-        @php($menu = [['Expediciones', 'orders', 'expeditions.index', ['expeditions.index', 'expeditions.show', 'scan.*']], ['Ayuda', 'orders', 'expeditions.help', ['expeditions.help']]])
+        @php($menu = [['Expediciones', 'truck', 'expeditions.index', ['expeditions.index', 'expeditions.show', 'scan.*']], ['Ayuda', 'help', 'expeditions.help', ['expeditions.help']]])
     @endif
     <nav id="mainnav">
         @foreach ($menu as $item)
