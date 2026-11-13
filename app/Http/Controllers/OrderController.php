@@ -179,7 +179,8 @@ class OrderController extends Controller
     /** Envía la proforma por email al cliente y deja el pedido en «Proforma enviada». */
     public function sendProforma(Request $request, Order $order)
     {
-        abort_unless(in_array($order->status, [OrderStatus::Requested, OrderStatus::Accepted, OrderStatus::ProformaSent, OrderStatus::Paid], true), 403);
+        abort_unless(in_array($order->status, [OrderStatus::Accepted, OrderStatus::ProformaSent, OrderStatus::Paid], true), 403,
+            'La proforma se envía una vez aprobado el pedido.');
         if ($order->isOverdue()) {
             return back()->with('error', 'La pre-reserva ha caducado: reactívala o amplía el plazo antes de enviar la proforma.');
         }
@@ -197,7 +198,7 @@ class OrderController extends Controller
         }
 
         $changes = ['proforma_sent_at' => now(), 'proforma_sent_to' => $data['email']];
-        if (in_array($order->status, [OrderStatus::Requested, OrderStatus::Accepted], true)) {
+        if ($order->status === OrderStatus::Accepted) {
             $changes['status'] = OrderStatus::ProformaSent;
         }
         $order->update($changes);

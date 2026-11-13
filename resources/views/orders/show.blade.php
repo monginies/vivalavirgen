@@ -64,7 +64,10 @@
     @if ($order->proforma_sent_at)
         <p class="muted" style="margin-top:0">Enviada el {{ $order->proforma_sent_at->format('d/m/Y H:i') }} a {{ $order->proforma_sent_to }}.</p>
     @endif
-    @if (in_array($order->status, [\App\Enums\OrderStatus::Requested, \App\Enums\OrderStatus::Accepted, \App\Enums\OrderStatus::ProformaSent, \App\Enums\OrderStatus::Paid], true))
+    @if ($order->status === \App\Enums\OrderStatus::Requested)
+        <p class="muted" style="margin:0">Podrás enviar la proforma cuando apruebes el pedido.</p>
+    @endif
+    @if (in_array($order->status, [\App\Enums\OrderStatus::Accepted, \App\Enums\OrderStatus::ProformaSent, \App\Enums\OrderStatus::Paid], true))
         <form method="post" action="{{ route('orders.proforma.send', $order) }}" class="grid pf-form" style="grid-template-columns:minmax(0,320px) 1fr auto;gap:10px;align-items:end">
             @csrf
             <div class="field pf-email" style="margin:0"><label for="f-pf-email">Enviar a</label><input id="f-pf-email" type="email" name="email" value="{{ old('email', $order->client->email) }}" required></div>
@@ -73,7 +76,7 @@
         </form>
         @error('email')<div class="err">{{ $message }}</div>@enderror
         <script>if (matchMedia('(display-mode: standalone)').matches || navigator.standalone) { const e = document.getElementById('f-pf-email'); if (e && e.value) { e.readOnly = true; e.tabIndex = -1; } }</script>
-        @if (in_array($order->status, [\App\Enums\OrderStatus::Requested, \App\Enums\OrderStatus::Accepted], true))
+        @if ($order->status === \App\Enums\OrderStatus::Accepted)
             <p class="hint">Al enviarla, el pedido pasa a «Proforma enviada».</p>
         @endif
     @endif

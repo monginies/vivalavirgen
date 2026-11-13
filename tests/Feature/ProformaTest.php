@@ -72,5 +72,11 @@ class ProformaTest extends TestCase
         $this->actingAs(User::factory()->create())->post(route('orders.proforma.send', $o), ['email' => 'x@example.com'])->assertForbidden();
         $o->update(['status' => OrderStatus::Accepted, 'expires_at' => now()->subHour()]);
         $this->actingAs(User::factory()->create())->post(route('orders.proforma.send', $o), ['email' => 'x@example.com'])->assertSessionHas('error');
+
+        // Pendiente de aprobar: aún no se puede enviar
+        $o->update(['status' => OrderStatus::Requested, 'expires_at' => now()->addDay()]);
+        $u = User::factory()->create();
+        $this->actingAs($u)->post(route('orders.proforma.send', $o), ['email' => 'x@example.com'])->assertForbidden();
+        $this->actingAs($u)->get(route('orders.show', $o))->assertOk()->assertDontSee('Enviar proforma')->assertSee('cuando apruebes el pedido');
     }
 }
