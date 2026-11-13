@@ -93,7 +93,7 @@ class OrderController extends Controller
             Order::expireOverdue();
             $order->refresh();
         }
-        $order->load(['client', 'lines.article', 'creator', 'venue']);
+        $order->load(['client', 'lines.article', 'creator', 'payer', 'venue']);
 
         $availability = Availability::forArticles(
             $order->lines->pluck('article_id')->all(), $order->start_date, $order->end_date, $order->id
@@ -152,6 +152,8 @@ class OrderController extends Controller
             }
             if ($target === OrderStatus::Paid) {
                 $changes['expires_at'] = null; // pagado: ya no caduca
+                $changes['paid_at'] = now();
+                $changes['paid_by'] = auth()->id();
             }
             $order->update($changes);
         });

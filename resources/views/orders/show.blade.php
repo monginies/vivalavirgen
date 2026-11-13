@@ -20,6 +20,9 @@
         </form>
     </div>
 @endif
+@if ($order->paid_at)
+    <div class="flash ok">Marcado como pagado el <b>{{ $order->paid_at->format('d/m/Y') }}</b> a las <b>{{ $order->paid_at->format('H:i') }}</b>@if ($order->payer) por {{ $order->payer->name }}@endif.</div>
+@endif
 @if ($order->status === \App\Enums\OrderStatus::Expired)
     <div class="flash ko">La pre-reserva caducó y el material quedó libre. Puedes reactivarla si sigue habiendo disponibilidad.</div>
 @endif

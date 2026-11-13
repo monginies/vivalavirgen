@@ -191,9 +191,16 @@ class OrdersTest extends TestCase
         $go('paid')->assertSessionHas('error'); // no se puede saltar pasos
         $go('accepted');
         $go('proforma_sent');
+        $this->assertNull($o->fresh()->paid_at);
+        $this->travelTo(now()->setTime(17, 45));
         $go('paid');
         $this->assertNull($o->fresh()->expires_at);
         $this->assertSame(OrderStatus::Paid, $o->fresh()->status);
+        // Queda registrado cuándo y quién lo marcó como pagado
+        $this->assertSame(now()->format('Y-m-d H:i'), $o->fresh()->paid_at->format('Y-m-d H:i'));
+        $this->assertSame($this->user->id, $o->fresh()->paid_by);
+        $this->actingAs($this->user)->get(route('orders.show', $o))->assertSee('Marcado como pagado el')->assertSee('17:45');
+        $this->travelBack();
 
         $expired = $this->order('2026-12-10', '2026-12-11', 2, ['status' => OrderStatus::Expired]);
         $this->actingAs($this->user)->post(route('orders.transition', $expired), ['status' => 'requested']);

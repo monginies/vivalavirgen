@@ -15,7 +15,7 @@ class Order extends Model
         'number', 'client_id', 'status', 'source', 'event_date', 'venue_id', 'start_date', 'end_date',
         'destination_address', 'destination_city', 'destination_postal_code', 'distance_km', 'trucks',
         'transport_manual', 'transport_amount', 'discount_percent', 'deposit_amount',
-        'vat_rate', 'withholding_rate', 'expires_at', 'proforma_sent_at', 'proforma_sent_to', 'notes', 'created_by',
+        'vat_rate', 'withholding_rate', 'expires_at', 'proforma_sent_at', 'proforma_sent_to', 'paid_at', 'paid_by', 'notes', 'created_by',
     ];
 
     protected function casts(): array
@@ -27,6 +27,7 @@ class Order extends Model
             'end_date' => 'date',
             'expires_at' => 'datetime',
             'proforma_sent_at' => 'datetime',
+            'paid_at' => 'datetime',
             'distance_km' => 'integer',
             'transport_manual' => 'boolean',
             'transport_amount' => 'decimal:2',
@@ -50,6 +51,11 @@ class Order extends Model
     public function lines(): HasMany
     {
         return $this->hasMany(OrderLine::class);
+    }
+
+    public function payer(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'paid_by');
     }
 
     public function creator(): BelongsTo
