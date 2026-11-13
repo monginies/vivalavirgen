@@ -35,7 +35,6 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <meta name="apple-mobile-web-app-title" content="Viva la Virgen">
 
-    @if ($gsv = \App\Models\Setting::get('google_site_verification'))<meta name="google-site-verification" content="{{ $gsv }}">@endif
 </head>
 <body class="portal">
 @php($me = auth('client')->user())

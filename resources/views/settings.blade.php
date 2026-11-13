@@ -5,7 +5,7 @@
     $groups = [
         'Precios y pedidos' => ['transport_price_per_km', 'transport_minimum', 'deposit_amount', 'prereservation_days', 'vat_rate', 'withholding_rate', 'base_address'],
         'Datos de la proforma' => ['company_name', 'company_tax_id', 'company_address', 'company_phone', 'company_email', 'company_iban', 'proforma_terms'],
-        'Web' => ['hero_title', 'hero_image', 'notify_email', 'google_site_verification'],
+        'Web' => ['hero_title', 'hero_image', 'notify_email'],
     ];
     $wide = ['base_address', 'company_name', 'company_address', 'company_iban', 'proforma_terms', 'hero_title'];
     $listed = array_merge(...array_values($groups));
