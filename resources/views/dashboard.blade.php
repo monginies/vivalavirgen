@@ -28,6 +28,30 @@
         </table>
     </div>
 @endif
+@if ($toPay->isNotEmpty())
+    <div class="card table-wrap" style="border:2px solid var(--red);background:#fbefea">
+        <div class="head" style="margin-bottom:4px">
+            <h2 style="margin:0;color:var(--red)">{{ $toPay->count() }} {{ $toPay->count() > 1 ? 'pedidos pendientes' : 'pedido pendiente' }} de pago</h2>
+        </div>
+        <p class="muted" style="margin:0 0 8px;font-size:14px">Si no se pagan antes de que caduque la pre-reserva, el pedido se cancela y el material queda libre.</p>
+        <table>
+            @foreach ($toPay as $o)
+                @php($urgent = $o->expires_at && $o->expires_at->diffInHours(now(), true) < 24)
+                <tr>
+                    <td class="mono"><a href="{{ route('orders.show', $o) }}">{{ $o->number }}</a></td>
+                    <td>{{ $o->client->name }}</td>
+                    <td><span class="badge {{ $o->status->color() }}">{{ $o->status->label() }}</span>@if ($o->proforma_sent_at)<br><span class="muted" style="font-size:13px">enviada {{ $o->proforma_sent_at->format('d/m H:i') }}</span>@endif</td>
+                    <td class="num">{{ \App\Support\Money::eur($o->amountDue()) }}</td>
+                    <td>@if ($o->expires_at)<span class="badge {{ $urgent ? 'red' : 'amber' }}">Caduca {{ $o->expires_at->diffForHumans() }}</span><br><span class="muted" style="font-size:13px">{{ $o->expires_at->format('d/m H:i') }}</span>@endif</td>
+                    <td class="actions" style="justify-content:flex-end">
+                        <form method="post" action="{{ route('orders.extend', $o) }}">@csrf<input type="hidden" name="days" value="3"><button class="btn sec sm" title="Amplía la pre-reserva 3 días más">+3 días</button></form>
+                        <a class="btn sm" href="{{ route('orders.show', $o) }}">Revisar</a>
+                    </td>
+                </tr>
+            @endforeach
+        </table>
+    </div>
+@endif
 @if ($pendingClients)
     <div class="flash ko"><b>{{ $pendingClients }}</b> cliente{{ $pendingClients > 1 ? 's' : '' }} de la web pendiente{{ $pendingClients > 1 ? 's' : '' }} de aprobar. <a href="{{ route('clients.index', ['pendientes' => 1]) }}">Revisar</a></div>
 @endif

@@ -160,7 +160,14 @@ class OrdersTest extends TestCase
             ->assertSee('1 pedido pendiente de aprobar')->assertSee($o->number)->assertSee('Revisar');
 
         $o->update(['status' => OrderStatus::Accepted]);
-        $this->actingAs($this->user)->get(route('dashboard'))->assertDontSee('pendiente de aprobar');
+        $this->actingAs($this->user)->get(route('dashboard'))->assertDontSee('pendiente de aprobar')
+            ->assertSee('1 pedido pendiente de pago')->assertSee('+3 días');
+
+        $o->update(['status' => OrderStatus::ProformaSent, 'proforma_sent_at' => now()]);
+        $this->actingAs($this->user)->get(route('dashboard'))->assertSee('1 pedido pendiente de pago')->assertSee('enviada');
+
+        $o->update(['status' => OrderStatus::Paid, 'expires_at' => null]);
+        $this->actingAs($this->user)->get(route('dashboard'))->assertDontSee('pendiente de pago');
     }
 
     public function test_transport_minimum_applies(): void

@@ -39,6 +39,7 @@ class DashboardController extends Controller
             'pendingClients' => Client::whereNotNull('password')->whereNotNull('email_verified_at')->whereNull('approved_at')->count(),
             'pendingOrders' => Order::whereIn('status', OrderStatus::expirable())->count(),
             'toApprove' => Order::with('client', 'lines')->where('status', OrderStatus::Requested)->orderBy('created_at')->get(),
+            'toPay' => Order::with('client', 'lines')->whereIn('status', [OrderStatus::Accepted, OrderStatus::ProformaSent])->orderBy('expires_at')->get(),
             'recentArticles' => Article::with('category')->withCount('units')->latest()->take(5)->get(),
         ]);
     }
