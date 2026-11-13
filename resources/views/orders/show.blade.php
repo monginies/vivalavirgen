@@ -15,27 +15,23 @@
 @if ($order->status->isExpirable() && $order->expires_at)
     <div class="flash {{ $order->expires_at->diffInHours(now(), true) < 24 ? 'ko' : 'ok' }}">
         Pre-reserva hasta el <b>{{ $order->expires_at->format('d/m/Y H:i') }}</b>. Si no se paga antes, caduca y el material se libera.
-        <form method="post" action="{{ route('orders.extend', $order) }}" class="web-only" style="display:inline-flex;gap:6px;margin-left:8px">
-            @csrf <input type="hidden" name="days" value="3"><button class="btn sec sm">Ampliar 3 días</button>
-        </form>
-        {{-- App instalada: ampliar 1, 2 o 3 días --}}
-        <div class="app-inline" style="gap:8px;margin-top:10px;flex-wrap:wrap;justify-content:center;width:100%">
+        <div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap;justify-content:center;align-items:center">
             @foreach ([1, 2, 3] as $d)
                 <form method="post" action="{{ route('orders.extend', $order) }}">@csrf<input type="hidden" name="days" value="{{ $d }}"><button class="btn sec sm">+{{ $d }} {{ $d > 1 ? 'días' : 'día' }}</button></form>
             @endforeach
-    </div>
-        @if ($order->status === \App\Enums\OrderStatus::Requested)
-            {{-- En la web, «Aceptar pedido» entre ampliar y cancelar; en la app instalada va en su tarjeta --}}
-            <form method="post" action="{{ route('orders.transition', $order) }}" class="cancel-web" style="display:inline-flex;margin-left:6px">@csrf
-                <input type="hidden" name="status" value="accepted"><button class="btn sm">Aceptar pedido</button>
-            </form>
-        @endif
-        @if ($order->status->canCancel())
-            {{-- En la web, a la derecha de «Ampliar 3 días»; en la app instalada va bajo «Enviar proforma» --}}
-            <form method="post" action="{{ route('orders.transition', $order) }}" class="cancel-web" style="display:inline-flex;margin-left:6px" onsubmit="return confirm('¿Cancelar este pedido? El material quedará libre.')">@csrf
-                <input type="hidden" name="status" value="cancelled"><button class="btn danger sm">Cancelar pedido</button>
-            </form>
-        @endif
+            @if ($order->status === \App\Enums\OrderStatus::Requested)
+                {{-- En la web, «Aceptar pedido» junto a las ampliaciones; en la app instalada va en su tarjeta --}}
+                <form method="post" action="{{ route('orders.transition', $order) }}" class="cancel-web">@csrf
+                    <input type="hidden" name="status" value="accepted"><button class="btn sm">Aceptar pedido</button>
+                </form>
+            @endif
+            @if ($order->status->canCancel())
+                {{-- En la web, aquí; en la app instalada va junto a «Aceptar pedido» o bajo «Enviar proforma» --}}
+                <form method="post" action="{{ route('orders.transition', $order) }}" class="cancel-web" onsubmit="return confirm('¿Cancelar este pedido? El material quedará libre.')">@csrf
+                    <input type="hidden" name="status" value="cancelled"><button class="btn danger sm">Cancelar pedido</button>
+                </form>
+            @endif
+        </div>
         @if ($order->extensions->isNotEmpty())
             <ul style="margin:10px 0 0;padding-left:18px;font-size:13px">
                 @foreach ($order->extensions as $x)
