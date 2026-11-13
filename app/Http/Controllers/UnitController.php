@@ -13,6 +13,10 @@ class UnitController extends Controller
     public function resolve(string $token)
     {
         $unit = Unit::where('qr_token', $token)->firstOrFail();
+        if (auth()->user()->isLogistics()) {
+            return redirect()->route('expeditions.index')
+                ->with('error', "Etiqueta {$unit->code} ({$unit->article->name}). Para dar salida o entrada, abre la expedición y usa «Dar salida» o «Dar entrada».");
+        }
 
         return redirect()->route('units.show', $unit);
     }

@@ -14,6 +14,10 @@ class DashboardController extends Controller
 {
     public function __invoke()
     {
+        if (auth()->user()->isLogistics()) {
+            return redirect()->route('expeditions.index');
+        }
+
         Order::expireOverdue();
 
         $unitsByStatus = Unit::query()

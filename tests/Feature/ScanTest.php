@@ -82,7 +82,7 @@ class ScanTest extends TestCase
         $this->assertSame(UnitStatus::Available, $c3->fresh()->status);
 
         $this->scan('salida', $t1->qr_token)->assertJson(['level' => 'ok']);
-        $this->actingAs($this->user)->post(route('scan.finish', [$this->order, 'salida']))->assertRedirect(route('orders.show', $this->order));
+        $this->actingAs($this->user)->post(route('scan.finish', [$this->order, 'salida']))->assertRedirect(route('expeditions.show', $this->order));
         $this->assertSame(OrderStatus::Delivered, $this->order->fresh()->status);
 
         // Entrada: una devuelta, una rota, una perdida

@@ -9,6 +9,7 @@ use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\ClientCategoryController;
 use App\Http\Controllers\ClientController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\ExpeditionController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\Portal;
 use App\Http\Controllers\PostalCodeController;
@@ -20,6 +21,7 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\VenueController;
 use App\Http\Middleware\EnsureSuperadmin;
 use App\Http\Middleware\NoIndex;
+use App\Http\Middleware\RestrictLogistics;
 use App\Http\Middleware\TrackPageView;
 use Illuminate\Support\Facades\Route;
 
@@ -73,8 +75,10 @@ Route::prefix('app')->middleware(NoIndex::class)->group(function () {
         Route::post('login', [LoginController::class, 'login']);
     });
 
-    Route::middleware('auth')->group(function () {
+    Route::middleware(['auth', RestrictLogistics::class])->group(function () {
         Route::post('logout', [LoginController::class, 'logout'])->name('logout');
+        Route::get('expediciones', [ExpeditionController::class, 'index'])->name('expeditions.index');
+        Route::get('expediciones/{order}', [ExpeditionController::class, 'show'])->name('expeditions.show');
         Route::get('/', DashboardController::class)->name('dashboard');
 
         Route::resource('categories', CategoryController::class)->except('show');

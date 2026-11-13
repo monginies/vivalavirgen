@@ -17,6 +17,17 @@
         <label for="f-password_confirmation">Repite la contraseña</label>
         <input id="f-password_confirmation" type="password" name="password_confirmation" autocomplete="new-password">
     </div>
+    <div class="field">
+        <label for="f-role">Tipo de usuario *</label>
+        @if ($self)<input type="hidden" name="role" value="office">@endif
+        <select id="f-role" name="role" @disabled($self)>
+            @foreach (\App\Models\User::ROLES as $value => $label)
+                <option value="{{ $value }}" @selected(old('role', $user->role ?? 'office') === $value)>{{ $label }}</option>
+            @endforeach
+        </select>
+        <div class="hint">Logística solo ve las expediciones: lista, hojas de entrega y recogida y escaneo de salida y entrada. No ve precios ni clientes.</div>
+        @error('role')<div class="err">{{ $message }}</div>@enderror
+    </div>
     <div class="field"><label class="check"><input type="checkbox" name="is_superadmin" value="1" @checked(old('is_superadmin', $user->is_superadmin)) @disabled($self)> Superusuario (gestiona usuarios)</label></div>
     <div class="field"><label class="check"><input type="checkbox" name="active" value="1" @checked(old('active', $user->active)) @disabled($self)> Activo (puede iniciar sesión)</label></div>
     <div class="actions">

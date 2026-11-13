@@ -92,7 +92,7 @@ class ScanController extends Controller
             $missing = collect($state['expected'])->sum(fn ($e) => max(0, $e['needed'] - $e['scanned']));
             $msg = "Salida registrada: {$state['outCount']} unidades. Pedido marcado como entregado.";
 
-            return redirect()->route('orders.show', $order)->with($missing ? 'error' : 'status', $missing ? $msg." Faltan {$missing} piezas por salir." : $msg);
+            return redirect()->route('expeditions.show', $order)->with($missing ? 'error' : 'status', $missing ? $msg." Faltan {$missing} piezas por salir." : $msg);
         }
 
         if ($order->status === OrderStatus::Delivered) {
@@ -101,7 +101,7 @@ class ScanController extends Controller
         $pending = $state['units']->filter->isOut()->count();
         $msg = 'Entrada registrada. Pedido marcado como devuelto.';
 
-        return redirect()->route('orders.show', $order)->with($pending ? 'error' : 'status', $pending ? $msg." Quedan {$pending} unidades sin volver." : $msg);
+        return redirect()->route('expeditions.show', $order)->with($pending ? 'error' : 'status', $pending ? $msg." Quedan {$pending} unidades sin volver." : $msg);
     }
 
     private function checkOut(Order $order, Unit $unit, ?OrderUnit $existing, string $label): array

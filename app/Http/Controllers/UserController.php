@@ -16,7 +16,7 @@ class UserController extends Controller
 
     public function create()
     {
-        return view('users.form', ['user' => new User(['active' => true])]);
+        return view('users.form', ['user' => new User(['active' => true, 'role' => 'office'])]);
     }
 
     public function store(Request $request)
@@ -41,6 +41,7 @@ class UserController extends Controller
             // Evita que el superusuario se quite permisos o se desactive a sí mismo.
             $data['is_superadmin'] = true;
             $data['active'] = true;
+            $data['role'] = 'office';
         }
         $user->update($data);
 
@@ -61,8 +62,9 @@ class UserController extends Controller
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'email', 'max:255', Rule::unique('users')->ignore($user)],
             'password' => [$user ? 'nullable' : 'required', 'confirmed', Password::min(8)],
+            'role' => ['required', Rule::in(array_keys(User::ROLES))],
         ]);
-        $data['is_superadmin'] = $request->boolean('is_superadmin');
+        $data['is_superadmin'] = $data['role'] === 'office' && $request->boolean('is_superadmin');
         $data['active'] = $request->boolean('active');
 
         return $data;

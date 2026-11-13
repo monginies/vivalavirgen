@@ -6,7 +6,7 @@
         <h1>{{ $mode === 'salida' ? 'Salida' : 'Entrada' }} · <span class="mono">{{ $order->number }}</span></h1>
         <div class="sub">{{ $order->client->name }} · {{ $mode === 'salida' ? 'entrega '.$order->start_date->format('d/m/Y').($order->delivery_time ? ' '.$order->delivery_time : '') : 'recogida '.$order->end_date->format('d/m/Y').($order->pickup_time ? ' '.$order->pickup_time : '') }}</div>
     </div>
-    <a class="btn sec" href="{{ route('orders.show', $order) }}">Volver al pedido</a>
+    <a class="btn sec" href="{{ route('expeditions.show', $order) }}">Volver a la expedición</a>
 </div>
 
 <div class="card" style="padding:14px">

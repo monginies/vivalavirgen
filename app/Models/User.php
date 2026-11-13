@@ -10,7 +10,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
-#[Fillable(['name', 'email', 'password', 'is_superadmin', 'active'])]
+#[Fillable(['name', 'email', 'password', 'is_superadmin', 'role', 'active'])]
 #[Hidden(['password', 'remember_token'])]
 class User extends Authenticatable
 {
@@ -30,5 +30,13 @@ class User extends Authenticatable
             'is_superadmin' => 'boolean',
             'active' => 'boolean',
         ];
+    }
+
+    public const ROLES = ['office' => 'Oficina (todo el backoffice)', 'logistics' => 'Logística (solo expediciones)'];
+
+    /** Personal de logística: solo ve las expediciones. */
+    public function isLogistics(): bool
+    {
+        return $this->role === 'logistics';
     }
 }

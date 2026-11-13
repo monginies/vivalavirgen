@@ -83,6 +83,8 @@ Todo, menos el login, exige sesión iniciada.
 
 ## Usuarios
 
+- `users.role`: `office` (todo el backoffice) o `logistics` (solo expediciones). El middleware `RestrictLogistics` deja a logística únicamente las rutas de `RestrictLogistics::ALLOWED`: lista y ficha de expediciones (`ExpeditionController`, sin precios), hojas PDF, escaneo de salida y entrada, y `q/{token}` (que les redirige a sus expediciones). Un usuario de logística nunca es superusuario.
+
 - Solo el superadmin gestiona usuarios desde la app.
 - Para crear o ascender un superadmin por consola: `php artisan app:superuser --name=... --email=...` (pide la contraseña de forma interactiva).
 
