@@ -14,7 +14,7 @@
         @if ($order->status === $S::Delivered || $order->status === $S::Returned)
             <a @class(['btn', 'sec' => $order->status === $S::Returned]) href="{{ route('scan.show', [$order, 'entrada']) }}">{{ $order->status === $S::Delivered ? 'Dar entrada' : 'Revisar entrada' }}</a>
         @endif
-        <a class="btn sec" href="{{ route('orders.expedition', $order) }}" target="_blank">Hojas PDF</a>
+        <a class="btn sec web-only" href="{{ route('orders.expedition', $order) }}" target="_blank">Hojas PDF</a>
     </div>
 </div>
 

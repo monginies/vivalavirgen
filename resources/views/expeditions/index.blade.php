@@ -30,7 +30,7 @@
                 <td class="actions" style="justify-content:flex-end">
                     @if ($o->status === $S::Paid)<a class="btn sm" href="{{ route('scan.show', [$o, 'salida']) }}">Dar salida</a>
                     @elseif ($o->status === $S::Delivered)<a class="btn sm" href="{{ route('scan.show', [$o, 'entrada']) }}">Dar entrada</a>@endif
-                    <a class="btn sec sm" href="{{ route('orders.expedition', $o) }}" target="_blank">Hojas PDF</a>
+                    <a class="btn sec sm web-only" href="{{ route('orders.expedition', $o) }}" target="_blank">Hojas PDF</a>
                 </td>
             </tr>
         @empty

@@ -12,7 +12,7 @@
     <ul>
         <li>En <b>Expediciones</b> aparecen los pedidos ya pagados: <span class="badge amber">Pendiente de salir</span>, <span class="badge blue">Fuera</span> (en el evento) y <span class="badge green">Devuelta</span>.</li>
         <li>Pulsa el número del pedido para ver la <b>ficha</b>: fechas y horas, lugar, persona de contacto (pulsa el teléfono para llamar), notas y la lista de material.</li>
-        <li>Con <b>Hojas PDF</b> descargas la hoja de entrega y la de recogida para imprimirlas. Lleva la hoja de entrega en el camión para que el cliente la firme.</li>
+        <li>Con <b>Hojas PDF</b> descargas la hoja de entrega y la de recogida para imprimirlas (desde el ordenador; en la app del móvil no aparece). Lleva la hoja de entrega en el camión para que el cliente la firme.</li>
         <li>Cada pieza lleva una <b>etiqueta QR</b> con su código (por ejemplo <span class="mono">SAL-0002-003</span>). Es lo que vas a escanear.</li>
         <li>Usa el <b>móvil</b> con la cámara trasera. La primera vez, el navegador te pedirá permiso para usar la cámara: pulsa <b>Permitir</b>.</li>
     </ul>
