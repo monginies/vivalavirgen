@@ -7,6 +7,27 @@
         <a class="btn sec" href="{{ route('clients.create') }}">+ Cliente</a>
     </div>
 </div>
+@if ($toApprove->isNotEmpty())
+    <div class="card table-wrap" style="border:2px solid var(--amber);background:#fdf6ea">
+        <div class="head" style="margin-bottom:8px">
+            <h2 style="margin:0;color:var(--amber)">{{ $toApprove->count() }} {{ $toApprove->count() > 1 ? 'pedidos pendientes' : 'pedido pendiente' }} de aprobar</h2>
+            <a class="btn sm" href="{{ route('orders.index', ['status' => 'requested']) }}">Ver todos</a>
+        </div>
+        <table>
+            @foreach ($toApprove as $o)
+                @php($urgent = $o->expires_at && $o->expires_at->diffInHours(now(), true) < 24)
+                <tr>
+                    <td class="mono"><a href="{{ route('orders.show', $o) }}">{{ $o->number }}</a>@if ($o->source === 'web') <span class="badge blue">Web</span>@endif</td>
+                    <td>{{ $o->client->name }}</td>
+                    <td>{{ $o->event_date ? 'Evento '.$o->event_date->format('d/m/Y') : $o->start_date->format('d/m').' – '.$o->end_date->format('d/m') }}</td>
+                    <td class="num">{{ \App\Support\Money::eur($o->total()) }}</td>
+                    <td>@if ($o->expires_at)<span class="badge {{ $urgent ? 'red' : 'amber' }}">Caduca {{ $o->expires_at->diffForHumans() }}</span>@endif</td>
+                    <td class="actions" style="justify-content:flex-end"><a class="btn sm" href="{{ route('orders.show', $o) }}">Revisar</a></td>
+                </tr>
+            @endforeach
+        </table>
+    </div>
+@endif
 @if ($pendingClients)
     <div class="flash ko"><b>{{ $pendingClients }}</b> cliente{{ $pendingClients > 1 ? 's' : '' }} de la web pendiente{{ $pendingClients > 1 ? 's' : '' }} de aprobar. <a href="{{ route('clients.index', ['pendientes' => 1]) }}">Revisar</a></div>
 @endif

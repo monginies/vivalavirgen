@@ -151,6 +151,18 @@ class OrdersTest extends TestCase
         $this->actingAs($this->user)->get(route('orders.proforma', $o))->assertOk();
     }
 
+    public function test_dashboard_highlights_orders_to_approve(): void
+    {
+        $this->actingAs($this->user)->get(route('dashboard'))->assertOk()->assertDontSee('pendiente de aprobar');
+
+        $o = $this->order('2026-12-04', '2026-12-06', 2, ['source' => 'web']);
+        $this->actingAs($this->user)->get(route('dashboard'))->assertOk()
+            ->assertSee('1 pedido pendiente de aprobar')->assertSee($o->number)->assertSee('Revisar');
+
+        $o->update(['status' => OrderStatus::Accepted]);
+        $this->actingAs($this->user)->get(route('dashboard'))->assertDontSee('pendiente de aprobar');
+    }
+
     public function test_transport_minimum_applies(): void
     {
         $this->assertEquals(60, Order::calculateTransport(10, 1));
