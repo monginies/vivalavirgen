@@ -103,7 +103,6 @@
             @if ($short->isNotEmpty())<p class="err">Algún artículo no tiene unidades suficientes para tu fecha: ajusta las cantidades y pulsa «Actualizar cantidades».</p>@endif
             @if (! $period)<p class="hint">Indica la fecha del evento para poder enviarlo.</p>@endif
             <button class="btn" style="width:100%;justify-content:center" formaction="{{ route('portal.checkout') }}" @disabled($short->isNotEmpty() || ! $period)>Solicitar pedido</button>
-            <p class="hint">Al solicitarlo, el material queda pre-reservado {{ (int) \App\Models\Setting::number('prereservation_days') }} días mientras preparamos la proforma.</p>
         @elseif ($client)
             <p>Tu cuenta está pendiente de aprobación. Puedes dejar el pedido preparado; cuando la activemos verás los precios y podrás enviarlo.</p>
             <button class="btn sec" style="width:100%;justify-content:center">Guardar pedido</button>
