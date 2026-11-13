@@ -9,6 +9,12 @@
     <link rel="icon" type="image/png" href="{{ asset('img/favicon-32.png') }}">
     <link rel="apple-touch-icon" href="{{ asset('img/apple-touch-icon.png') }}">
     <meta name="theme-color" content="#9a9b88">
+    <link rel="manifest" href="{{ route('pwa.app-manifest') }}">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="VLV Gestión">
+
 </head>
 <body>
 @auth
@@ -123,5 +129,6 @@ document.querySelectorAll('input[data-cp-city]').forEach(cp => {
     document.addEventListener('keydown', e => { if (e.key === 'Escape') closeAll(); });
 })();
 </script>
+<script>if ('serviceWorker' in navigator) navigator.serviceWorker.register('/sw.js', {scope: '/'}).catch(() => {});</script>
 </body>
 </html>

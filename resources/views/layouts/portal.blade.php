@@ -29,6 +29,12 @@
     <link rel="icon" type="image/png" href="{{ asset('img/favicon-32.png') }}">
     <link rel="apple-touch-icon" href="{{ asset('img/apple-touch-icon.png') }}">
     <meta name="theme-color" content="#9a9b88">
+    <link rel="manifest" href="{{ route('pwa.manifest') }}">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="Viva la Virgen">
+
     @if ($gsv = \App\Models\Setting::get('google_site_verification'))<meta name="google-site-verification" content="{{ $gsv }}">@endif
 </head>
 <body class="portal">
@@ -138,5 +144,6 @@ document.querySelectorAll('input[data-cp-city]').forEach(cp => {
 });
 </script>
 @stack('scripts')
+<script>if ('serviceWorker' in navigator) navigator.serviceWorker.register('/sw.js', {scope: '/'}).catch(() => {});</script>
 </body>
 </html>

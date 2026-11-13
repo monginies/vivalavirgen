@@ -13,6 +13,7 @@ use App\Http\Controllers\ExpeditionController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\Portal;
 use App\Http\Controllers\PostalCodeController;
+use App\Http\Controllers\PwaController;
 use App\Http\Controllers\ScanController;
 use App\Http\Controllers\SettingController;
 use App\Http\Controllers\StatsController;
@@ -30,6 +31,11 @@ use Illuminate\Support\Facades\Route;
 */
 
 // ---------- Web de clientes ----------
+// App instalable (PWA)
+Route::get('manifest.webmanifest', [PwaController::class, 'portalManifest'])->name('pwa.manifest');
+Route::get('sw.js', [PwaController::class, 'serviceWorker'])->name('pwa.sw');
+Route::get('offline', [PwaController::class, 'offline'])->name('pwa.offline');
+
 Route::name('portal.')->middleware(TrackPageView::class)->group(function () {
     Route::get('/', [Portal\CatalogController::class, 'index'])->name('home');
     Route::get('coleccion/{slug}', [Portal\CatalogController::class, 'collection'])->name('collection');
@@ -70,6 +76,8 @@ Route::name('portal.')->middleware(TrackPageView::class)->group(function () {
 
 // ---------- Backoffice ----------
 Route::prefix('app')->middleware(NoIndex::class)->group(function () {
+    Route::get('manifest.webmanifest', [PwaController::class, 'appManifest'])->name('pwa.app-manifest');
+
     Route::middleware('guest')->group(function () {
         Route::get('login', [LoginController::class, 'show'])->name('login');
         Route::post('login', [LoginController::class, 'login']);
