@@ -60,6 +60,12 @@ class Order extends Model
         return $this->hasMany(OrderUnit::class)->orderBy('out_at');
     }
 
+    /** Ampliaciones de la pre-reserva, de la más reciente a la más antigua. */
+    public function extensions(): HasMany
+    {
+        return $this->hasMany(OrderExtension::class)->latest('id');
+    }
+
     public function payer(): BelongsTo
     {
         return $this->belongsTo(User::class, 'paid_by');

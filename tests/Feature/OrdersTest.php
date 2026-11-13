@@ -171,6 +171,20 @@ class OrdersTest extends TestCase
         $this->actingAs($this->user)->get(route('dashboard'))->assertDontSee('pendiente de pago')->assertDontSee('sin enviar');
     }
 
+    public function test_extensions_are_logged_and_shown(): void
+    {
+        $o = $this->order('2026-12-04', '2026-12-06', 2);
+        $before = $o->expires_at->copy();
+        $this->actingAs($this->user)->post(route('orders.extend', $o), ['days' => 2])->assertSessionHas('status');
+        $this->actingAs($this->user)->post(route('orders.extend', $o), ['days' => 1]);
+
+        $o->refresh();
+        $this->assertEquals($before->copy()->addDays(3)->format('Y-m-d H:i'), $o->expires_at->format('Y-m-d H:i'));
+        $this->assertSame([1, 2], $o->extensions->pluck('days')->all());
+        $this->assertSame($this->user->id, $o->extensions->first()->user_id);
+        $this->actingAs($this->user)->get(route('orders.show', $o))->assertOk()->assertSee('+2 días')->assertSee('+1 día')->assertSee('por '.$this->user->name);
+    }
+
     public function test_transport_minimum_applies(): void
     {
         $this->assertEquals(60, Order::calculateTransport(10, 1));

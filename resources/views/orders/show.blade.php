@@ -19,11 +19,11 @@
             @csrf <input type="hidden" name="days" value="3"><button class="btn sec sm">Ampliar 3 días</button>
         </form>
         {{-- App instalada: ampliar 1, 2 o 3 días --}}
-        <div class="app-inline" style="gap:6px;margin-top:8px;flex-wrap:wrap">
+        <div class="app-inline" style="gap:8px;margin-top:10px;flex-wrap:wrap;justify-content:center;width:100%">
             @foreach ([1, 2, 3] as $d)
                 <form method="post" action="{{ route('orders.extend', $order) }}">@csrf<input type="hidden" name="days" value="{{ $d }}"><button class="btn sec sm">+{{ $d }} {{ $d > 1 ? 'días' : 'día' }}</button></form>
             @endforeach
-        </div>
+    </div>
         @if ($order->status === \App\Enums\OrderStatus::Requested)
             {{-- En la web, «Aceptar pedido» entre ampliar y cancelar; en la app instalada va en su tarjeta --}}
             <form method="post" action="{{ route('orders.transition', $order) }}" class="cancel-web" style="display:inline-flex;margin-left:6px">@csrf
@@ -35,6 +35,14 @@
             <form method="post" action="{{ route('orders.transition', $order) }}" class="cancel-web" style="display:inline-flex;margin-left:6px" onsubmit="return confirm('¿Cancelar este pedido? El material quedará libre.')">@csrf
                 <input type="hidden" name="status" value="cancelled"><button class="btn danger sm">Cancelar pedido</button>
             </form>
+        @endif
+        @if ($order->extensions->isNotEmpty())
+            <ul style="margin:10px 0 0;padding-left:18px;font-size:13px">
+                @foreach ($order->extensions as $x)
+                    <li>Ampliada <b>+{{ $x->days }} {{ $x->days > 1 ? 'días' : 'día' }}</b> el {{ $x->created_at->format('d/m H:i') }} @if ($x->user) por {{ $x->user->name }} @endif
+                        <span class="muted">({{ $x->previous_expires_at?->format('d/m H:i') ?? '—' }} → {{ $x->new_expires_at->format('d/m H:i') }})</span></li>
+                @endforeach
+            </ul>
         @endif
     </div>
 @endif

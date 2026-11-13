@@ -95,7 +95,7 @@ class OrderController extends Controller
             Order::expireOverdue();
             $order->refresh();
         }
-        $order->load(['client', 'lines.article', 'creator', 'payer', 'venue', 'units.unit.article']);
+        $order->load(['client', 'lines.article', 'creator', 'payer', 'venue', 'units.unit.article', 'extensions.user']);
 
         $availability = Availability::forArticles(
             $order->lines->pluck('article_id')->all(), $order->start_date, $order->end_date, $order->id
@@ -236,9 +236,15 @@ class OrderController extends Controller
         abort_unless($order->status->isExpirable(), 403);
         $days = $request->validate(['days' => ['required', 'integer', 'min:1', 'max:60']])['days'];
         $base = $order->expires_at && $order->expires_at->isFuture() ? $order->expires_at : now();
-        $order->update(['expires_at' => $base->copy()->addDays($days), 'expiry_alerted_at' => null]);
+        $previous = $order->expires_at;
+        DB::transaction(function () use ($order, $base, $days, $previous) {
+            $order->update(['expires_at' => $base->copy()->addDays($days), 'expiry_alerted_at' => null]);
+            $order->extensions()->create([
+                'days' => $days, 'previous_expires_at' => $previous, 'new_expires_at' => $order->expires_at, 'user_id' => auth()->id(),
+            ]);
+        });
 
-        return back()->with('status', "Pre-reserva ampliada hasta el {$order->expires_at->format('d/m/Y H:i')}.");
+        return back()->with('status', "Pre-reserva ampliada {$days} ".($days > 1 ? 'días' : 'día')." hasta el {$order->expires_at->format('d/m/Y H:i')}.");
     }
 
     /** Km por carretera desde la base (JSON para el botón del formulario). */
