@@ -30,9 +30,12 @@
 <div class="card">
     <div class="actions">
         @if ($next = $order->status->next())
+            {{-- «Proforma enviada» se marca sola al enviarla desde la tarjeta Proforma: sin botón aparte --}}
+            @if ($next[0] !== \App\Enums\OrderStatus::ProformaSent)
             <form method="post" action="{{ route('orders.transition', $order) }}">@csrf
                 <input type="hidden" name="status" value="{{ $next[0]->value }}"><button class="btn">{{ $next[1] }}</button>
             </form>
+            @endif
         @endif
         @if ($order->status === \App\Enums\OrderStatus::Expired)
             <form method="post" action="{{ route('orders.transition', $order) }}">@csrf
