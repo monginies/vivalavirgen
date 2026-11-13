@@ -31,7 +31,7 @@ class OrderReceived extends Notification
 
         return $mail
             ->line('**Total a pagar = '.Money::eur($o->amountDue()).'**')
-            ->line('Estamos revisando su pedido, en breve le remitimos proforma para realizar el pago del mismo.')
+            ->line('Estamos revisando tu pedido, en breve te remitimos proforma para realizar el pago del mismo.')
             ->action('Ver mi pedido', route('portal.orders.show', $o->number));
     }
 }
