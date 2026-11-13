@@ -55,7 +55,7 @@
                             @foreach ($articles->groupBy(fn ($a) => $a->category->name) as $cat => $group)
                                 <optgroup label="{{ $cat }}">
                                 @foreach ($group as $a)
-                                    <option value="{{ $a->id }}" data-price="{{ $a->rental_price }}" @selected($line['article_id'] == $a->id)>{{ $a->reference }} · {{ $a->name }}</option>
+                                    <option value="{{ $a->id }}" data-price="{{ $a->rental_price }}" @selected($line['article_id'] == $a->id)>{{ $a->reference }} · {{ $a->name }}@if ($a->exclusive) (exclusivo)@endif</option>
                                 @endforeach
                                 </optgroup>
                             @endforeach

@@ -68,7 +68,7 @@ class OrderController extends Controller
         [$data, $lines] = $this->validated($request);
 
         $order = DB::transaction(function () use ($data, $lines) {
-            $this->assertAvailable($lines, $data['start_date'], $data['end_date']);
+            $this->assertAvailable($lines, $data['start_date'], $data['end_date'], null, (int) $data['client_id']);
 
             $order = Order::create($data + [
                 'number' => Order::nextNumber(),
@@ -115,7 +115,7 @@ class OrderController extends Controller
         [$data, $lines] = $this->validated($request);
 
         DB::transaction(function () use ($order, $data, $lines) {
-            $this->assertAvailable($lines, $data['start_date'], $data['end_date'], $order->id);
+            $this->assertAvailable($lines, $data['start_date'], $data['end_date'], $order->id, (int) $data['client_id']);
             $order->update($data);
             $order->lines()->delete();
             $order->lines()->createMany($lines);
@@ -146,7 +146,7 @@ class OrderController extends Controller
                 $order->load('lines');
                 $this->assertAvailable(
                     $order->lines->map->only('article_id', 'quantity')->all(),
-                    $order->start_date, $order->end_date, $order->id
+                    $order->start_date, $order->end_date, $order->id, $order->client_id
                 );
                 $changes['expires_at'] = now()->addDays((int) Setting::number('prereservation_days'));
             }
@@ -332,9 +332,13 @@ class OrderController extends Controller
         return [$data, $lines];
     }
 
-    private function assertAvailable(array $lines, $from, $to, ?int $exceptOrderId = null): void
+    private function assertAvailable(array $lines, $from, $to, ?int $exceptOrderId, int $clientId): void
     {
-        if ($errors = Availability::shortages($lines, $from, $to, $exceptOrderId)) {
+        $errors = array_merge(
+            Availability::exclusiveErrors($lines, $clientId),
+            Availability::shortages($lines, $from, $to, $exceptOrderId),
+        );
+        if ($errors) {
             throw ValidationException::withMessages(['lines' => $errors]);
         }
     }

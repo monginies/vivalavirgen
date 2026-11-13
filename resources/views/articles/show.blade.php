@@ -4,6 +4,7 @@
 <div class="head">
     <div><h1>{{ $article->name }}</h1><div class="sub"><span class="mono">{{ $article->reference }}</span> · {{ $article->category->name }}
         @if ($article->is_bundle) · <span class="badge grey">Combinado</span>@endif
+        @if ($article->exclusive) · <span class="badge grey">Exclusivo</span>@endif
         @unless ($article->active) · <span class="badge grey">Inactivo</span>@endunless</div></div>
     <div class="actions">
         @unless ($article->is_bundle)<a class="btn sec" href="{{ route('articles.labels', $article) }}">Imprimir etiquetas QR</a>@endunless
@@ -19,6 +20,9 @@
             @if ($article->dimensions)<dt>Medidas</dt><dd>{{ $article->dimensions }}</dd>@endif
             @if ($article->description)<dt>Descripción</dt><dd>{!! nl2br(e($article->description)) !!}</dd>@endif
             @if ($article->notes)<dt>Notas</dt><dd>{!! nl2br(e($article->notes)) !!}</dd>@endif
+            @if ($article->exclusive)
+                <dt>Exclusivo para</dt><dd>@forelse ($article->clients as $c)<a href="{{ route('clients.show', $c) }}">{{ $c->name }}</a>@unless ($loop->last), @endunless @empty<span class="muted">ningún cliente (nadie lo puede alquilar)</span>@endforelse</dd>
+            @endif
             @if ($article->bundles->isNotEmpty())
                 <dt>Forma parte de</dt><dd>@foreach ($article->bundles as $b)<a href="{{ route('articles.show', $b) }}">{{ $b->name }}</a> ({{ $b->pivot->quantity }})@unless ($loop->last), @endunless @endforeach</dd>
             @endif

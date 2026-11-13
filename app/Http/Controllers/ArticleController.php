@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Enums\UnitStatus;
 use App\Models\Article;
 use App\Models\Category;
+use App\Models\Client;
 use App\Services\Availability;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -49,16 +50,18 @@ class ArticleController extends Controller
             'article' => new Article(['category_id' => $request->category, 'active' => true, 'is_bundle' => $request->boolean('bundle')]),
             'categories' => $categories,
             'componentOptions' => $this->componentOptions(),
+            'clientOptions' => $this->clientOptions(),
         ]);
     }
 
     public function store(Request $request)
     {
-        [$data, $components] = $this->validated($request);
+        [$data, $components, $clients] = $this->validated($request);
         $data['reference'] = Article::nextReference(Category::findOrFail($data['category_id']));
-        $article = DB::transaction(function () use ($data, $components) {
+        $article = DB::transaction(function () use ($data, $components, $clients) {
             $article = Article::create($data);
             $article->components()->sync($components);
+            $article->clients()->sync($clients);
 
             return $article;
         });
@@ -78,7 +81,7 @@ class ArticleController extends Controller
 
     public function show(Article $article)
     {
-        $article->load('category', 'units', 'photos', 'components.category', 'bundles');
+        $article->load('category', 'units', 'photos', 'components.category', 'bundles', 'clients');
 
         $partIds = $article->components->pluck('id')->all();
 
@@ -92,19 +95,21 @@ class ArticleController extends Controller
     public function edit(Article $article)
     {
         return view('articles.form', [
-            'article' => $article->load('components'),
+            'article' => $article->load('components', 'clients'),
             'categories' => Category::orderBy('name')->get(),
             'componentOptions' => $this->componentOptions($article),
+            'clientOptions' => $this->clientOptions(),
         ]);
     }
 
     public function update(Request $request, Article $article)
     {
-        [$data, $components] = $this->validated($request, $article);
+        [$data, $components, $clients] = $this->validated($request, $article);
 
-        DB::transaction(function () use ($article, $data, $components) {
+        DB::transaction(function () use ($article, $data, $components, $clients) {
             $article->update($data);
             $article->components()->sync($components);
+            $article->clients()->sync($clients);
         });
 
         return redirect()->route('articles.show', $article)->with('status', 'Artículo actualizado.');
@@ -159,10 +164,14 @@ class ArticleController extends Controller
             'components' => ['nullable', 'array', 'max:50'],
             'components.*.article_id' => ['nullable', Rule::exists('articles', 'id')->whereNull('deleted_at')],
             'components.*.quantity' => ['nullable', 'integer', 'min:1', 'max:1000'],
+            'clients' => ['nullable', 'array'],
+            'clients.*' => ['integer', Rule::exists('clients', 'id')->whereNull('deleted_at')],
         ]);
         $data['active'] = $request->boolean('active');
         $data['is_bundle'] = $request->boolean('is_bundle');
-        unset($data['photos'], $data['initial_units'], $data['components']);
+        $data['exclusive'] = $request->boolean('exclusive');
+        $clients = $data['exclusive'] ? array_values(array_unique(array_map('intval', $data['clients'] ?? []))) : [];
+        unset($data['photos'], $data['initial_units'], $data['components'], $data['clients']);
 
         $components = [];
         if ($data['is_bundle']) {
@@ -189,7 +198,13 @@ class ArticleController extends Controller
             }
         }
 
-        return [$data, $components];
+        return [$data, $components, $clients];
+    }
+
+    /** Clientes que se pueden autorizar para un artículo exclusivo. */
+    private function clientOptions()
+    {
+        return Client::orderBy('name')->get(['id', 'name', 'trade_name']);
     }
 
     /** Artículos que pueden ser pieza de un combinado (sueltos, sin contar el propio). */

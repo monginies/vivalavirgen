@@ -79,6 +79,25 @@
         </table>
         <div class="actions" style="margin-top:8px"><button type="button" class="btn sec sm" id="add-part">+ Añadir pieza</button></div>
     </div>
+    @php
+        $isExclusive = (bool) old('exclusive', $article->exclusive);
+        $chosen = collect(old('clients', $article->exists ? $article->clients->pluck('id')->all() : []))->map(fn ($v) => (int) $v)->all();
+    @endphp
+    <div class="field">
+        <label class="check"><input type="hidden" name="exclusive" value="0"><input type="checkbox" name="exclusive" value="1" id="f-exclusive" @checked($isExclusive)> Alquiler exclusivo</label>
+        <div class="hint">Solo lo pueden alquilar los clientes que elijas. Los demás lo ven en la web, pero sin disponibilidad, como si ya estuviera alquilado.</div>
+    </div>
+    <div class="field" id="exclusive-clients" @if (! $isExclusive) hidden @endif>
+        <label for="f-clients">Clientes autorizados</label>
+        <select id="f-clients" name="clients[]" multiple size="{{ min(10, max(4, $clientOptions->count())) }}">
+            @foreach ($clientOptions as $c)
+                <option value="{{ $c->id }}" @selected(in_array($c->id, $chosen, true))>{{ $c->name }}@if ($c->trade_name) ({{ $c->trade_name }})@endif</option>
+            @endforeach
+        </select>
+        <div class="hint">Mantén pulsada Cmd (Mac) o Ctrl (Windows) para elegir varios. Si no eliges ninguno, nadie lo puede alquilar.</div>
+        @error('clients')<div class="err">{{ $message }}</div>@enderror
+        @error('clients.*')<div class="err">{{ $message }}</div>@enderror
+    </div>
     @unless ($article->exists)
         @include('partials.field', ['name' => 'initial_units', 'label' => 'Unidades iniciales', 'value' => 0, 'type' => 'number', 'step' => 1, 'min' => 0,
             'hint' => 'Se crearán con su código y QR. Puedes añadir más después.'])
@@ -91,6 +110,8 @@
 </form>
 <script>
 (() => {
+    const ex = document.getElementById('f-exclusive'), exBox = document.getElementById('exclusive-clients');
+    ex.addEventListener('change', () => exBox.hidden = !ex.checked);
     const box = document.getElementById('f-is_bundle'), parts = document.getElementById('bundle-parts');
     const units = document.getElementById('f-initial_units')?.closest('.field');
     const sync = () => { parts.hidden = !box.checked; if (units) units.hidden = box.checked; };

@@ -47,14 +47,18 @@
             </div>
         @endif
         <div class="pt-info-price">@include('portal._price', ['article' => $article])</div>
-        @if ($availability !== null)
+        @if ($blocked)
+            <p class="pt-spec"><span>Disponibles</span>No disponible</p>
+        @elseif ($availability !== null)
             <p class="pt-spec"><span>Disponibles</span>{{ $availability }} para la fecha de tu evento</p>
         @endif
+        @unless ($blocked)
         <form method="post" action="{{ route('portal.cart.add', $article) }}" class="pt-addbig">
             @csrf
             <div class="pt-qty"><button type="button" data-d="-1">−</button><input type="number" name="quantity" value="1" min="1" max="10000" aria-label="Cantidad"><button type="button" data-d="1">+</button></div>
             <button class="pt-pill dark big">Añadir al pedido</button>
         </form>
+        @endunless
         @if ($inCart)<p class="muted" style="font-size:14px">Ya tienes {{ $inCart }} en tu pedido · <a href="{{ route('portal.cart') }}">Ver pedido</a></p>@endif
         @if ($article->description)<div class="pt-desc">{!! nl2br(e($article->description)) !!}</div>@endif
     </div>

@@ -205,6 +205,58 @@ class Availability
         return $errors;
     }
 
+    /**
+     * Artículos que este cliente no puede alquilar por ser exclusivos de otros
+     * (para él cuentan como ya alquilados). Un combinado queda bloqueado si es
+     * exclusivo o si lo es alguna de sus piezas. Sin cliente (visitante), todo
+     * lo exclusivo queda bloqueado.
+     *
+     * @return int[] ids bloqueados de entre los indicados
+     */
+    public static function blockedFor(?int $clientId, array $articleIds): array
+    {
+        $articleIds = array_values(array_unique(array_map('intval', $articleIds)));
+        if (! $articleIds) {
+            return [];
+        }
+        $components = self::components($articleIds);
+        $all = $articleIds;
+        foreach ($components as $parts) {
+            $all = array_merge($all, array_keys($parts));
+        }
+
+        $exclusive = Article::withTrashed()->whereIn('id', array_unique($all))->where('exclusive', true)->pluck('id')->map(fn ($v) => (int) $v)->all();
+        if (! $exclusive) {
+            return [];
+        }
+        $allowed = $clientId
+            ? DB::table('article_client')->where('client_id', $clientId)->whereIn('article_id', $exclusive)->pluck('article_id')->map(fn ($v) => (int) $v)->all()
+            : [];
+        $denied = array_diff($exclusive, $allowed);
+
+        return array_values(array_filter($articleIds, fn ($id) => in_array($id, $denied, true)
+            || (isset($components[$id]) && array_intersect(array_keys($components[$id]), $denied))));
+    }
+
+    /**
+     * Mensajes para las líneas que el cliente no puede alquilar por ser exclusivas.
+     *
+     * @param  iterable<array{article_id:int, quantity:int}>  $lines
+     * @return string[]
+     */
+    public static function exclusiveErrors(iterable $lines, ?int $clientId): array
+    {
+        $ids = collect($lines)->pluck('article_id')->map(fn ($v) => (int) $v)->unique()->all();
+        $blocked = self::blockedFor($clientId, $ids);
+        if (! $blocked) {
+            return [];
+        }
+
+        return Article::withTrashed()->whereIn('id', $blocked)->orderBy('reference')->get()
+            ->map(fn (Article $a) => "{$a->reference} {$a->name}: es de alquiler exclusivo y este cliente no está autorizado.")
+            ->all();
+    }
+
     /** @param array<int,int> $parts */
     private static function bundleFigures(array $parts, Collection $capacity, Collection $reserved): array
     {

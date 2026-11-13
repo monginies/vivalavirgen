@@ -18,7 +18,7 @@ class Article extends Model
     use SoftDeletes;
 
     protected $fillable = [
-        'category_id', 'is_bundle', 'reference', 'name', 'description', 'dimensions',
+        'category_id', 'is_bundle', 'exclusive', 'reference', 'name', 'description', 'dimensions',
         'rental_price', 'replacement_price', 'photo_path', 'notes', 'active',
     ];
 
@@ -29,6 +29,7 @@ class Article extends Model
             'replacement_price' => 'decimal:2',
             'active' => 'boolean',
             'is_bundle' => 'boolean',
+            'exclusive' => 'boolean',
         ];
     }
 
@@ -52,6 +53,12 @@ class Article extends Model
         }
 
         return $this->components->map(fn (Article $c) => "{$c->pivot->quantity} × {$c->name}")->join(', ');
+    }
+
+    /** Clientes autorizados a alquilar un artículo exclusivo. */
+    public function clients(): BelongsToMany
+    {
+        return $this->belongsToMany(Client::class, 'article_client')->orderBy('name');
     }
 
     /** Combinados de los que forma parte este artículo. */

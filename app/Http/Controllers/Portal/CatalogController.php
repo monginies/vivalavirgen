@@ -45,6 +45,7 @@ class CatalogController extends Controller
             'article' => $article,
             'inCart' => Cart::get()['items'][$article->id] ?? 0,
             'availability' => $this->availability([$article->id])[$article->id] ?? null,
+            'blocked' => (bool) Availability::blockedFor(auth('client')->id(), [$article->id]),
             'related' => Article::where('active', true)->where('category_id', $article->category_id)->whereKeyNot($article->id)
                 ->with('mainPhoto')->inRandomOrder()->take(4)->get(),
         ]);
@@ -74,6 +75,7 @@ class CatalogController extends Controller
             'title' => $title,
             'articles' => $articles,
             'availability' => $this->availability($articles->pluck('id')->all()),
+            'blocked' => Availability::blockedFor(auth('client')->id(), $articles->pluck('id')->all()),
         ]);
     }
 
@@ -110,14 +112,20 @@ class CatalogController extends Controller
         ]);
     }
 
-    /** Si el pedido ya tiene fecha, se muestran las unidades libres para ese fin de semana. */
+    /**
+     * Si el pedido ya tiene fecha, se muestran las unidades libres para ese fin de semana.
+     * Lo exclusivo de otros clientes aparece siempre sin disponibilidad.
+     */
     private function availability(array $ids): array
     {
         $period = Cart::period();
-        if (! $period || ! $ids) {
-            return [];
+        $free = $period && $ids
+            ? Availability::forArticles($ids, ...$period)->map(fn ($a) => max(0, $a['available']))->all()
+            : [];
+        foreach (Availability::blockedFor(auth('client')->id(), $ids) as $id) {
+            $free[$id] = 0;
         }
 
-        return Availability::forArticles($ids, ...$period)->map(fn ($a) => max(0, $a['available']))->all();
+        return $free;
     }
 }

@@ -33,6 +33,9 @@ class CartController extends Controller
         $availability = $period && $lines->isNotEmpty()
             ? Availability::forArticles($lines->pluck('article.id')->all(), ...$period)->map(fn ($a) => max(0, $a['available']))
             : collect();
+        foreach (Availability::blockedFor($client?->id, $lines->pluck('article.id')->all()) as $id) {
+            $availability[$id] = 0;
+        }
 
         return view('portal.cart', [
             'cart' => $cart,
@@ -55,6 +58,9 @@ class CartController extends Controller
     public function add(Request $request, Article $article)
     {
         abort_unless($article->active, 404);
+        if (Availability::blockedFor(auth('client')->id(), [$article->id])) {
+            return back()->with('error', "{$article->name} no está disponible.");
+        }
         $qty = $request->validate(['quantity' => ['required', 'integer', 'min:1', 'max:10000']])['quantity'];
         Cart::add($article->id, $qty);
         Tracker::record('cart_add', ['article_id' => $article->id, 'value' => $qty]);
@@ -142,9 +148,12 @@ class CartController extends Controller
         }
 
         $order = DB::transaction(function () use ($client, $cart, $lines, $period, $venue, $km) {
-            $short = Availability::shortages(
-                $lines->map(fn ($l) => ['article_id' => $l['article']->id, 'quantity' => $l['quantity']]), ...$period
-            );
+            $items = $lines->map(fn ($l) => ['article_id' => $l['article']->id, 'quantity' => $l['quantity']]);
+            if ($blocked = Availability::blockedFor($client->id, $items->pluck('article_id')->all())) {
+                throw ValidationException::withMessages(['items' => $lines->filter(fn ($l) => in_array($l['article']->id, $blocked, true))
+                    ->map(fn ($l) => "{$l['article']->name}: no está disponible.")->values()->all()]);
+            }
+            $short = Availability::shortages($items, ...$period);
             if ($short) {
                 // Sin referencias internas para el cliente
                 throw ValidationException::withMessages(['items' => array_map(

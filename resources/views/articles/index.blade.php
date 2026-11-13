@@ -20,7 +20,7 @@
             <tr>
                 <td>@if ($a->photoUrl())<img class="thumb" src="{{ $a->photoUrl() }}" alt="">@else<div class="thumb"></div>@endif</td>
                 <td class="mono">{{ $a->reference }}</td>
-                <td><a href="{{ route('articles.show', $a) }}">{{ $a->name }}</a>@unless ($a->active) <span class="badge grey">Inactivo</span>@endunless</td>
+                <td><a href="{{ route('articles.show', $a) }}">{{ $a->name }}</a>@if ($a->exclusive) <span class="badge grey">Exclusivo</span>@endif @unless ($a->active) <span class="badge grey">Inactivo</span>@endunless</td>
                 <td class="muted">{{ $a->category->name }}</td>
                 <td class="num">{{ number_format($a->rental_price, 2, ',', '.') }} €</td>
                 <td class="num">@if ($a->is_bundle)<span class="badge grey">Combinado</span> {{ $bundleCapacity[$a->id]['capacity'] ?? 0 }} montables@else{{ $a->available_count }} / {{ $a->units_count }}@endif</td>

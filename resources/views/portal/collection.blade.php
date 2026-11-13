@@ -25,14 +25,15 @@
             <a class="pt-prod-img" href="{{ route('portal.article', $a->reference) }}">
                 @if ($a->mainPhoto)<img src="{{ $a->mainPhoto->url() }}" alt="{{ $a->name }}" loading="lazy">@else<span class="pt-noimg"></span>@endif
                 @if ($a->dimensions)<span class="pt-dim">{{ $a->dimensions }}</span>@endif
-                @isset($availability[$a->id])<span class="pt-free {{ $availability[$a->id] ? '' : 'none' }}">{{ $availability[$a->id] }} libres</span>@endisset
+                @if (in_array($a->id, $blocked, true))<span class="pt-free none">No disponible</span>
+                @elseif (isset($availability[$a->id]))<span class="pt-free {{ $availability[$a->id] ? '' : 'none' }}">{{ $availability[$a->id] }} libres</span>@endif
             </a>
             <div class="pt-prod-body">
                 <h3><a href="{{ route('portal.article', $a->reference) }}">{{ $a->name }}</a></h3>
                 @if ($a->description)<p class="pt-prod-desc">{{ \Illuminate\Support\Str::limit(strtok($a->description, "\n"), 70) }}</p>@endif
                 <div class="pt-prod-foot">
                     @include('portal._price', ['article' => $a])
-                    <form method="post" action="{{ route('portal.cart.add', $a) }}">@csrf<input type="hidden" name="quantity" value="1"><button class="pt-plus" title="Añadir 1 al pedido" aria-label="Añadir al pedido">+</button></form>
+                    @unless (in_array($a->id, $blocked, true))<form method="post" action="{{ route('portal.cart.add', $a) }}">@csrf<input type="hidden" name="quantity" value="1"><button class="pt-plus" title="Añadir 1 al pedido" aria-label="Añadir al pedido">+</button></form>@endunless
                 </div>
             </div>
         </article>
