@@ -411,3 +411,10 @@ body.portal h1{font-family:var(--serif);font-weight:400}
   table.cal .d{font-size:12px}
   table.cal .ev{font-size:10px;padding:1px 3px;border-radius:4px}
 }
+
+/* App instalada (pantalla de inicio): sin botón Salir a la vista; aparece al pulsar el nombre */
+@media (display-mode:standalone){
+  .topbar .who .who-name{cursor:pointer;text-decoration:underline dotted;text-underline-offset:3px}
+  .topbar .who form{display:none}
+  .topbar .who.open form{display:block}
+}

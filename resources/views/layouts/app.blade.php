@@ -5,7 +5,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>@yield('title', 'Inicio') · {{ config('app.name') }}</title>
-    <link rel="stylesheet" href="{{ asset('css/app.css') }}?v=40">
+    <link rel="stylesheet" href="{{ asset('css/app.css') }}?v=41">
     <link rel="icon" type="image/png" href="{{ asset('img/favicon-32.png') }}">
     <link rel="apple-touch-icon" href="{{ asset('img/apple-touch-icon.png') }}">
     <meta name="theme-color" content="#9a9b88">
@@ -74,7 +74,7 @@
         @endforeach
     </nav>
     <div class="who">
-        {{ auth()->user()->name }}
+        <span class="who-name" onclick="this.parentNode.classList.toggle('open')" title="En la app instalada, pulsa tu nombre para ver «Salir»">{{ auth()->user()->name }}</span>
         <form method="post" action="{{ route('logout') }}">@csrf<button title="Cerrar sesión">@include('partials.icon', ['i' => 'logout'])<span>Salir</span></button></form>
     </div>
 </header>
