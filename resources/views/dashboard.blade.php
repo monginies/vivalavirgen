@@ -8,9 +8,9 @@
     </div>
 </div>
 @if ($toApprove->isNotEmpty())
-    <div class="card table-wrap" style="border:2px solid var(--amber);background:#fdf6ea">
+    <div class="card table-wrap" style="border:2px solid var(--green);background:#eff5ea">
         <div class="head" style="margin-bottom:8px">
-            <h2 style="margin:0;color:var(--amber)">{{ $toApprove->count() }} {{ $toApprove->count() > 1 ? 'pedidos pendientes' : 'pedido pendiente' }} de aprobar</h2>
+            <h2 style="margin:0;color:var(--green)">{{ $toApprove->count() }} {{ $toApprove->count() > 1 ? 'pedidos pendientes' : 'pedido pendiente' }} de aprobar</h2>
             
         </div>
         <table>
