@@ -11,7 +11,7 @@
             <label for="f-password">Contraseña</label>
             <input id="f-password" type="password" name="password" required autocomplete="current-password">
         </div>
-        <div class="field"><label class="check"><input type="checkbox" name="remember" value="1"> Recordarme</label></div>
+        <div class="field"><label class="check"><input type="checkbox" name="remember" value="1" @checked(old('remember', true))> Recordarme</label></div>
         <button class="btn" style="width:100%;justify-content:center">Entrar</button>
     </form>
 </div>
