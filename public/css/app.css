@@ -439,3 +439,10 @@ body.portal h1{font-family:var(--serif);font-weight:400}
   .app-tel{display:inline-flex!important;align-items:center;gap:6px;font-weight:600;white-space:nowrap;text-decoration:none;color:var(--ink)}
   .app-tel .ico{color:var(--muted)}
   .pf-form .pf-email.has-email{display:none}}
+/* Ajustes */
+.settings-grid{grid-template-columns:repeat(auto-fit,minmax(420px,1fr));align-items:start}
+.settings-fields{display:grid;grid-template-columns:1fr 1fr;gap:0 16px}
+.settings-fields > .wide{grid-column:1/-1}
+.settings-fields textarea{min-height:150px}
+.settings-save{position:sticky;bottom:0;z-index:5;border-top:1px solid var(--line);display:flex;gap:14px;align-items:center;flex-wrap:wrap;margin-top:16px;padding:12px 0;background:var(--bg)}
+@media (max-width:640px){.settings-grid{grid-template-columns:1fr}.settings-fields{grid-template-columns:1fr}.settings-save{position:static;border-top:0}}
