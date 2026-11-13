@@ -234,7 +234,7 @@ class OrderController extends Controller
     public function extend(Request $request, Order $order)
     {
         abort_unless($order->status->isExpirable(), 403);
-        $days = $request->validate(['days' => ['required', 'integer', 'min:1', 'max:60']])['days'];
+        $days = (int) $request->validate(['days' => ['required', 'integer', 'min:1', 'max:60']])['days'];
         $base = $order->expires_at && $order->expires_at->isFuture() ? $order->expires_at : now();
         $previous = $order->expires_at;
         DB::transaction(function () use ($order, $base, $days, $previous) {

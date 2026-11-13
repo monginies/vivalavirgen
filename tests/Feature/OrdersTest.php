@@ -175,7 +175,7 @@ class OrdersTest extends TestCase
     {
         $o = $this->order('2026-12-04', '2026-12-06', 2);
         $before = $o->expires_at->copy();
-        $this->actingAs($this->user)->post(route('orders.extend', $o), ['days' => 2])->assertSessionHas('status');
+        $this->actingAs($this->user)->post(route('orders.extend', $o), ['days' => '2'])->assertSessionHas('status');
         $this->actingAs($this->user)->post(route('orders.extend', $o), ['days' => 1]);
 
         $o->refresh();
