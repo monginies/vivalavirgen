@@ -91,6 +91,7 @@ class ClientController extends Controller
     {
         $data = $request->validate([
             'type' => ['required', Rule::in(array_keys(Client::TYPES))],
+            'profession' => ['nullable', Rule::in(array_keys(Client::PROFESSIONS))],
             'client_category_id' => ['nullable', Rule::exists('client_categories', 'id')],
             'name' => ['required', 'string', 'max:255'],
             'trade_name' => ['nullable', 'string', 'max:255'],
@@ -104,6 +105,9 @@ class ClientController extends Controller
             'province' => ['nullable', 'string', 'max:255'],
             'notes' => ['nullable', 'string', 'max:5000'],
         ]);
+        if ($data['type'] !== 'company') {
+            $data['profession'] = null;
+        }
         if (! empty($data['tax_id'])) {
             $data['tax_id'] = strtoupper(preg_replace('/[\s.-]/', '', $data['tax_id']));
         }

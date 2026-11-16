@@ -12,9 +12,25 @@
                 <label class="check"><input type="radio" name="type" value="individual" @checked(old('type', 'individual') === 'individual')> Particular</label>
                 <label class="check"><input type="radio" name="type" value="company" @checked(old('type') === 'company')> Empresa / profesional</label>
             </div>
-            <label class="check" style="margin-top:8px"><input type="checkbox" name="wedding_planner" value="1" @checked(old('wedding_planner'))> Soy wedding planner u organizador de eventos</label>
             @error('type')<div class="err">{{ $message }}</div>@enderror
         </div>
+        <div class="field" id="profession-field" style="max-width:360px" @if (old('type') !== 'company') hidden @endif>
+            <label for="f-profession">¿A qué te dedicas? *</label>
+            <select id="f-profession" name="profession" @required(old('type') === 'company')>
+                <option value="">Elige una opción</option>
+                @foreach (\App\Models\Client::PROFESSIONS as $value => $label)
+                    <option value="{{ $value }}" @selected(old('profession') === $value)>{{ $label }}</option>
+                @endforeach
+            </select>
+            @error('profession')<div class="err">{{ $message }}</div>@enderror
+        </div>
+        <script>
+            document.querySelectorAll('input[name=type]').forEach(r => r.addEventListener('change', () => {
+                const pro = document.querySelector('input[name=type]:checked').value === 'company';
+                document.getElementById('profession-field').hidden = !pro;
+                document.getElementById('f-profession').required = pro;
+            }));
+        </script>
         <div class="grid g2">
             @include('partials.field', ['name' => 'name', 'label' => 'Nombre y apellidos / razón social', 'required' => true, 'attrs' => 'autocomplete=organization'])
             @include('partials.field', ['name' => 'trade_name', 'label' => 'Nombre comercial', 'hint' => 'Si tu empresa usa un nombre distinto de la razón social.'])

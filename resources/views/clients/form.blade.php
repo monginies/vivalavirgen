@@ -13,6 +13,21 @@
         </div>
         @error('type')<div class="err">{{ $message }}</div>@enderror
     </div>
+    <div class="field" id="profession-field" style="max-width:360px" @if (old('type', $client->type) !== 'company') hidden @endif>
+        <label for="f-profession">Actividad profesional</label>
+        <select id="f-profession" name="profession">
+            <option value="">Sin indicar</option>
+            @foreach (\App\Models\Client::PROFESSIONS as $value => $label)
+                <option value="{{ $value }}" @selected(old('profession', $client->profession) === $value)>{{ $label }}</option>
+            @endforeach
+        </select>
+        @error('profession')<div class="err">{{ $message }}</div>@enderror
+    </div>
+    <script>
+        document.querySelectorAll('input[name=type]').forEach(r => r.addEventListener('change', () => {
+            document.getElementById('profession-field').hidden = document.querySelector('input[name=type]:checked').value !== 'company';
+        }));
+    </script>
     <div class="field" style="max-width:360px">
         <label for="f-client_category_id">Tipo de cliente (descuento)</label>
         <select id="f-client_category_id" name="client_category_id">

@@ -19,8 +19,11 @@ class Client extends Authenticatable implements MustVerifyEmail
 
     public const TYPES = ['company' => 'Empresa', 'individual' => 'Particular'];
 
+    /** Categoría profesional (solo empresas / profesionales). */
+    public const PROFESSIONS = ['wedding' => 'Wedding', 'sitio' => 'Sitio', 'florista' => 'Florista', 'catering' => 'Catering'];
+
     protected $fillable = [
-        'type', 'client_category_id', 'name', 'trade_name', 'tax_id', 'contact_name', 'email', 'phone',
+        'type', 'profession', 'client_category_id', 'name', 'trade_name', 'tax_id', 'contact_name', 'email', 'phone',
         'address', 'postal_code', 'city', 'province', 'notes',
     ];
 
@@ -48,7 +51,14 @@ class Client extends Authenticatable implements MustVerifyEmail
 
     public function typeLabel(): string
     {
-        return self::TYPES[$this->type] ?? $this->type;
+        $label = self::TYPES[$this->type] ?? $this->type;
+
+        return $this->professionLabel() ? $label.' · '.$this->professionLabel() : $label;
+    }
+
+    public function professionLabel(): ?string
+    {
+        return $this->type === 'company' ? (self::PROFESSIONS[$this->profession] ?? null) : null;
     }
 
     public function discountPercent(): float

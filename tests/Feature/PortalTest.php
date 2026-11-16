@@ -51,7 +51,7 @@ class PortalTest extends TestCase
     private function registerData(array $over = []): array
     {
         return $over + [
-            'type' => 'company', 'wedding_planner' => 1, 'name' => 'Bodas Bonitas SL', 'tax_id' => 'B12345678',
+            'type' => 'company', 'profession' => 'florista', 'name' => 'Bodas Bonitas SL', 'tax_id' => 'B12345678',
             'contact_name' => 'Lucía', 'phone' => '600000000', 'email' => 'lucia@example.com',
             'address' => 'Calle Mar 1', 'postal_code' => '29730', 'city' => 'Rincón de la Victoria',
             'password' => 'secreta123', 'password_confirmation' => 'secreta123', 'privacy' => 1,
@@ -69,11 +69,14 @@ class PortalTest extends TestCase
         $this->get(route('portal.article', 'SIL-0001'))->assertOk()->assertSee('Añadir al pedido');
 
         // Registro
+        $this->post(route('portal.register'), $this->registerData(['profession' => '']))->assertSessionHasErrors('profession');
+        $this->post(route('portal.register'), $this->registerData(['profession' => 'otro']))->assertSessionHasErrors('profession');
         $this->post(route('portal.register'), $this->registerData())->assertRedirect(route('portal.account'));
         $client = Client::where('email', 'lucia@example.com')->firstOrFail();
         $this->assertSame('web', $client->source);
         $this->assertNull($client->client_category_id);
-        $this->assertStringContainsString('wedding planner', $client->notes);
+        $this->assertSame('florista', $client->profession);
+        $this->assertSame('Empresa · Florista', $client->typeLabel());
         $this->assertNotNull($client->privacy_accepted_at);
         $this->assertFalse($client->isApproved());
         Notification::assertSentTo($client, ClientVerifyEmail::class);

@@ -70,7 +70,7 @@ class AuthController extends Controller
 
         $data = $request->validate([
             'type' => ['required', Rule::in(array_keys(Client::TYPES))],
-            'wedding_planner' => ['nullable', 'boolean'],
+            'profession' => ['nullable', 'required_if:type,company', Rule::in(array_keys(Client::PROFESSIONS))],
             'name' => ['required', 'string', 'max:255'],
             'trade_name' => ['nullable', 'string', 'max:255'],
             'tax_id' => ['required', 'string', 'max:20'],
@@ -85,6 +85,7 @@ class AuthController extends Controller
             'privacy' => ['accepted'],
             'website' => ['prohibited'], // trampa para bots
         ], [
+            'profession.required_if' => 'Elige a qué te dedicas.',
             'email.unique' => 'Ya hay una cuenta con ese email. ¿Has olvidado la contraseña?',
             'privacy.accepted' => 'Tienes que aceptar la política de privacidad.',
             'postal_code.regex' => 'El código postal tiene 5 cifras.',
@@ -93,9 +94,7 @@ class AuthController extends Controller
 
         $client = new Client(collect($data)->only(['type', 'name', 'trade_name', 'tax_id', 'contact_name', 'phone', 'email', 'address', 'postal_code', 'city', 'province'])->all());
         // Entra sin tipo (precio base); el equipo le asigna Esparto, Mimbre o Ratán al aprobarlo
-        if ($request->boolean('wedding_planner')) {
-            $client->notes = 'Al registrarse indicó que es wedding planner u organizador de eventos.';
-        }
+        $client->profession = $data['type'] === 'company' ? ($data['profession'] ?? null) : null;
         $client->password = $data['password'];
         $client->privacy_accepted_at = now();
         $client->source = 'web';
