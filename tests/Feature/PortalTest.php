@@ -69,6 +69,7 @@ class PortalTest extends TestCase
         $this->get(route('portal.article', 'SIL-0001'))->assertOk()->assertSee('Añadir al pedido');
 
         // Registro
+        $this->get(route('portal.register'))->assertOk()->assertDontSee('name="city" value="catering"', false);
         $this->post(route('portal.register'), $this->registerData(['profession' => '']))->assertSessionHasErrors('profession');
         $this->post(route('portal.register'), $this->registerData(['profession' => 'otro']))->assertSessionHasErrors('profession');
         $this->post(route('portal.register'), $this->registerData())->assertRedirect(route('portal.account'));

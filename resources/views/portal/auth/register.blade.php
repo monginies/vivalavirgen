@@ -18,8 +18,8 @@
             <label for="f-profession">¿A qué te dedicas? *</label>
             <select id="f-profession" name="profession" @required(old('type') === 'company')>
                 <option value="">Elige una opción</option>
-                @foreach (\App\Models\Client::PROFESSIONS as $value => $label)
-                    <option value="{{ $value }}" @selected(old('profession') === $value)>{{ $label }}</option>
+                @foreach (\App\Models\Client::PROFESSIONS as $proKey => $proLabel)
+                    <option value="{{ $proKey }}" @selected(old('profession') === $proKey)>{{ $proLabel }}</option>
                 @endforeach
             </select>
             @error('profession')<div class="err">{{ $message }}</div>@enderror

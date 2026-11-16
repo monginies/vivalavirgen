@@ -17,8 +17,8 @@
         <label for="f-profession">Actividad profesional</label>
         <select id="f-profession" name="profession">
             <option value="">Sin indicar</option>
-            @foreach (\App\Models\Client::PROFESSIONS as $value => $label)
-                <option value="{{ $value }}" @selected(old('profession', $client->profession) === $value)>{{ $label }}</option>
+            @foreach (\App\Models\Client::PROFESSIONS as $proKey => $proLabel)
+                <option value="{{ $proKey }}" @selected(old('profession', $client->profession) === $proKey)>{{ $proLabel }}</option>
             @endforeach
         </select>
         @error('profession')<div class="err">{{ $message }}</div>@enderror
