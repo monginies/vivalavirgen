@@ -71,6 +71,7 @@ Route::name('portal.')->middleware(TrackPageView::class)->group(function () {
         Route::get('mi-cuenta', [Portal\AccountController::class, 'index'])->name('account');
         Route::get('mi-cuenta/pedidos/{number}', [Portal\AccountController::class, 'order'])->name('orders.show');
         Route::get('mi-cuenta/pedidos/{number}/proforma', [Portal\AccountController::class, 'proforma'])->name('orders.proforma');
+        Route::post('mi-cuenta/pedidos/{number}/proforma-cliente', [Portal\AccountController::class, 'endClientProforma'])->name('orders.end-client')->middleware('throttle:10,1');
         Route::post('pedido/solicitar', [Portal\CartController::class, 'checkout'])->name('checkout');
     });
 });

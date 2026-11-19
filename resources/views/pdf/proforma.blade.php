@@ -59,11 +59,20 @@
     <td>
         <div class="label">Cliente</div>
         @php($c = $order->client)
-        <b>{{ $c->name }}</b><br>
-        @if ($c->trade_name)<span class="muted">{{ $c->trade_name }}</span><br>@endif
-        @if ($c->tax_id){{ $c->tax_id }}<br>@endif
-        @if ($addr = collect([$c->address, trim($c->postal_code.' '.$c->city), $c->province])->filter()->join(', ')){{ $addr }}<br>@endif
-        <span class="muted">{{ collect([$c->contact_name, $c->phone, $c->email])->filter()->join(' · ') }}</span>
+        @if (! empty($endClient))
+            {{-- Proforma para el cliente final de un profesional --}}
+            <b>{{ $endClient['name'] }}</b><br>
+            @if (! empty($endClient['tax_id'])){{ $endClient['tax_id'] }}<br>@endif
+            @if (! empty($endClient['address'])){{ $endClient['address'] }}<br>@endif
+            @if (! empty($endClient['email']))<span class="muted">{{ $endClient['email'] }}</span><br>@endif
+            <div style="margin-top:6px">Pedido gestionado por: <b>{{ $c->trade_name ?: $c->name }}</b></div>
+        @else
+            <b>{{ $c->name }}</b><br>
+            @if ($c->trade_name)<span class="muted">{{ $c->trade_name }}</span><br>@endif
+            @if ($c->tax_id){{ $c->tax_id }}<br>@endif
+            @if ($addr = collect([$c->address, trim($c->postal_code.' '.$c->city), $c->province])->filter()->join(', ')){{ $addr }}<br>@endif
+            <span class="muted">{{ collect([$c->contact_name, $c->phone, $c->email])->filter()->join(' · ') }}</span>
+        @endif
     </td>
     <td>
         <div class="label">Evento</div>

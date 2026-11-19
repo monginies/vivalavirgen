@@ -7,6 +7,27 @@
     <div class="sub">Solicitado el {{ $order->created_at->format('d/m/Y') }}</div></div>
     @if ($order->proforma_sent_at)<a class="btn" href="{{ route('portal.orders.proforma', $order->number) }}">Descargar proforma (PDF)</a>@endif
 </div>
+@if ($order->proforma_sent_at && auth('client')->user()->professionLabel())
+    @php($ec = session("end_client.{$order->id}", []))
+    <div class="card">
+        <h2>Proforma para tu cliente</h2>
+        <p class="muted" style="margin-top:0">Con los precios de tarifa, sin tu comisión. Aparece «Pedido gestionado por {{ auth('client')->user()->trade_name ?: auth('client')->user()->name }}» y tu cliente paga a Viva la Virgen con los datos de pago de la proforma.</p>
+        <form method="post" action="{{ route('portal.orders.end-client', $order->number) }}">
+            @csrf
+            <div class="grid g2">
+                @include('partials.field', ['name' => 'name', 'label' => 'Nombre de tu cliente', 'value' => $ec['name'] ?? null, 'required' => true, 'attrs' => 'maxlength=150'])
+                @include('partials.field', ['name' => 'email', 'label' => 'Email de tu cliente', 'value' => $ec['email'] ?? null, 'type' => 'email', 'hint' => 'Solo hace falta para enviársela.'])
+                @include('partials.field', ['name' => 'tax_id', 'label' => 'NIF (opcional)', 'value' => $ec['tax_id'] ?? null, 'attrs' => 'maxlength=20'])
+                @include('partials.field', ['name' => 'address', 'label' => 'Dirección (opcional)', 'value' => $ec['address'] ?? null, 'attrs' => 'maxlength=255'])
+            </div>
+            <div class="actions">
+                <button class="btn sec" name="action" value="download">Descargar PDF</button>
+                <button class="btn" name="action" value="send">Enviar a mi cliente</button>
+            </div>
+            <p class="hint">Al enviarla, te ponemos en copia y, si tu cliente responde, la respuesta te llega a ti.</p>
+        </form>
+    </div>
+@endif
 @if ($order->status->isExpirable() && $order->expires_at)
     <div class="flash ok">Material pre-reservado hasta el {{ $order->expires_at->format('d/m/Y H:i') }}. En breve recibirás una proforma con los datos para realizar el pago.</div>
 @endif

@@ -8,7 +8,9 @@ use App\Models\Category;
 use App\Models\Client;
 use App\Models\Order;
 use App\Models\User;
+use App\Notifications\EndClientProforma;
 use App\Notifications\ProformaSent;
+use App\Support\Proforma;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Notifications\AnonymousNotifiable;
 use Illuminate\Support\Facades\Notification;
@@ -111,6 +113,57 @@ class ProformaTest extends TestCase
         // En el backoffice se sigue viendo como una línea más
         $o->update(['discount_percent' => 10]);
         $this->actingAs(User::factory()->create())->get(route('orders.show', $o))->assertSee('Descuento / comisión 10 %')->assertDontSee('Tu descuento');
+    }
+
+    public function test_professional_gets_list_price_proforma_for_end_client(): void
+    {
+        Notification::fake();
+        $o = $this->order(OrderStatus::ProformaSent);
+        $o->update(['assembly_amount' => 40, 'withholding_rate' => 15]);
+        $pro = $o->client;
+        $pro->forceFill(['profession' => 'wedding', 'trade_name' => 'Bodas Bonitas', 'password' => 'secreta123', 'email_verified_at' => now(), 'approved_at' => now()])->save();
+        $route = route('portal.orders.end-client', $o->number);
+
+        // Antes de que el equipo envíe la proforma no existe
+        $this->actingAs($pro, 'client')->get(route('portal.orders.show', $o->number))->assertDontSee('Proforma para tu cliente');
+        $this->post($route, ['action' => 'download', 'name' => 'Lucía y Juan'])->assertNotFound();
+        $o->update(['proforma_sent_at' => now()]);
+        $this->get(route('portal.orders.show', $o->number))->assertSee('Proforma para tu cliente');
+
+        // Importes de tarifa: sin el 10 % ni la retención; con transporte, montaje, IVA y fianza
+        $copy = Proforma::atListPrice($o->fresh('lines'));
+        $this->assertEquals(550, $copy->taxableBase()); // 450 + 60 + 40
+        $this->assertEquals(815.50, $copy->amountDue()); // 550 + 115,50 IVA + 150 fianza
+        $this->assertEquals(10, $o->fresh()->discount_percent); // el pedido no cambia
+        $html = view('pdf.proforma', ['order' => $copy, 'endClient' => ['name' => 'Lucía y Juan', 'email' => 'lucia@example.com'],
+            'company' => array_fill_keys(['name', 'tax_id', 'address', 'phone', 'email', 'iban'], null), 'terms' => null])->render();
+        $this->assertStringContainsString('Lucía y Juan', $html);
+        $this->assertStringContainsString('Pedido gestionado por: <b>Bodas Bonitas</b>', $html);
+        $this->assertStringNotContainsString('B12345678', $html); // el NIF del profesional no aparece
+        $this->assertStringNotContainsString('comisión', $html);
+        $this->assertStringNotContainsString('IRPF', $html);
+
+        // Descargar: hace falta el nombre
+        $this->post($route, ['action' => 'download', 'name' => ''])->assertSessionHasErrors('name');
+        $this->post($route, ['action' => 'download', 'name' => 'Lucía y Juan'])->assertOk()->assertDownload('Proforma-PED-2026-0007.pdf');
+
+        // Enviar: hace falta el email; copia y respuestas al profesional
+        $this->post($route, ['action' => 'send', 'name' => 'Lucía y Juan'])->assertSessionHasErrors('email');
+        $this->post($route, ['action' => 'send', 'name' => 'Lucía y Juan', 'email' => 'lucia@example.com'])->assertSessionHas('status');
+        Notification::assertSentTo(new AnonymousNotifiable, EndClientProforma::class, function ($n, $channels, $notifiable) {
+            $mail = $n->toMail($notifiable);
+
+            return $notifiable->routes['mail'] === 'lucia@example.com' && $mail->cc[0][0] === 'cliente@example.com'
+                && $mail->replyTo[0][0] === 'cliente@example.com' && count($mail->rawAttachments) === 1
+                && str_contains(implode(' ', $mail->introLines), '815,50 €');
+        });
+        // Lo escrito se recuerda
+        $this->get(route('portal.orders.show', $o->number))->assertSee('value="lucia@example.com"', false);
+
+        // Un particular no tiene esta opción
+        $pro->update(['type' => 'individual', 'profession' => null]);
+        $this->get(route('portal.orders.show', $o->number))->assertDontSee('Proforma para tu cliente');
+        $this->post($route, ['action' => 'download', 'name' => 'X'])->assertForbidden();
     }
 
     public function test_client_downloads_own_proforma_only_after_sent(): void
