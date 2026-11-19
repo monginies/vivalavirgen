@@ -15,7 +15,7 @@ class Order extends Model
         'number', 'client_id', 'status', 'source', 'event_date', 'event_start_time', 'event_end_time',
         'event_wedding', 'event_catering', 'event_florist', 'referral', 'venue_id', 'start_date', 'end_date', 'delivery_time', 'pickup_time',
         'destination_address', 'destination_city', 'destination_postal_code', 'distance_km', 'trucks',
-        'transport_manual', 'transport_amount', 'discount_percent', 'deposit_amount', 'site_contact_name', 'site_contact_phone', 'logistics_notes',
+        'transport_manual', 'transport_amount', 'assembly_amount', 'discount_percent', 'deposit_amount', 'site_contact_name', 'site_contact_phone', 'logistics_notes',
         'vat_rate', 'withholding_rate', 'expires_at', 'expiry_alerted_at', 'proforma_sent_at', 'proforma_sent_to', 'paid_at', 'paid_by', 'notes', 'created_by',
     ];
 
@@ -34,6 +34,7 @@ class Order extends Model
             'transport_manual' => 'boolean',
             'transport_amount' => 'decimal:2',
             'discount_percent' => 'decimal:2',
+            'assembly_amount' => 'decimal:2',
             'deposit_amount' => 'decimal:2',
             'vat_rate' => 'decimal:2',
             'withholding_rate' => 'decimal:2',
@@ -162,9 +163,10 @@ class Order extends Model
         return round($this->subtotal() * $this->discount_percent / 100, 2);
     }
 
+    /** Material con descuento + transporte + montaje (el descuento solo se aplica al material). */
     public function taxableBase(): float
     {
-        return round($this->subtotal() - $this->discountAmount() + $this->transport_amount, 2);
+        return round($this->subtotal() - $this->discountAmount() + $this->transport_amount + $this->assembly_amount, 2);
     }
 
     public function vatAmount(): float

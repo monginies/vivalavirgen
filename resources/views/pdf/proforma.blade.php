@@ -92,6 +92,7 @@
     <tr><td>Material</td><td class="num">{{ $eur($order->subtotal()) }}</td></tr>
     @if ($order->discount_percent > 0)<tr><td>Descuento {{ $pct($order->discount_percent) }} %</td><td class="num">− {{ $eur($order->discountAmount()) }}</td></tr>@endif
     <tr><td>Transporte @if ($order->distance_km)<span class="muted">({{ $order->distance_km }} km, {{ $order->trucks }} {{ $order->trucks > 1 ? 'camiones' : 'camión' }})</span>@endif</td><td class="num">{{ $eur($order->transport_amount) }}</td></tr>
+    @if ($order->assembly_amount > 0)<tr><td>Montaje</td><td class="num">{{ $eur($order->assembly_amount) }}</td></tr>@endif
     <tr class="sub"><td>Base imponible</td><td class="num">{{ $eur($order->taxableBase()) }}</td></tr>
     <tr><td>IVA {{ $pct($order->vat_rate) }} %</td><td class="num">+ {{ $eur($order->vatAmount()) }}</td></tr>
     @if ($order->withholding_rate > 0)

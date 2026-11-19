@@ -139,12 +139,15 @@
         <h2>Condiciones</h2>
         <div class="grid g2">
             @include('partials.field', ['name' => 'discount_percent', 'label' => 'Descuento / comisión sobre el material (%)', 'value' => $order->discount_percent, 'type' => 'number', 'step' => '0.01', 'min' => 0])
+            @include('partials.field', ['name' => 'assembly_amount', 'label' => 'Montaje (€, sin IVA)', 'value' => $order->assembly_amount ?? 0, 'type' => 'number', 'step' => '0.01', 'min' => 0,
+                'hint' => 'Lleva IVA y no se le aplica el descuento.'])
             @include('partials.field', ['name' => 'deposit_amount', 'label' => 'Fianza (€)', 'value' => $order->deposit_amount, 'type' => 'number', 'step' => '0.01', 'min' => 0])
         </div>
         @include('partials.field', ['name' => 'notes', 'label' => 'Notas', 'value' => $order->notes, 'type' => 'textarea'])
         <dl class="props" id="summary">
             <dt>Material</dt><dd id="s-sub">—</dd>
             <dt>Transporte</dt><dd id="s-tr">—</dd>
+            <dt>Montaje</dt><dd id="s-as">—</dd>
             <dt>Base imponible aprox.</dt><dd id="s-base">—</dd>
         </dl>
     </div>
@@ -180,8 +183,10 @@
         }
         const disc = sub * num(document.getElementById('f-discount_percent')) / 100;
         document.getElementById('s-sub').textContent = eur(sub - disc) + (disc ? ' (con ' + eur(disc) + ' de descuento)' : '');
+        const assembly = num(document.getElementById('f-assembly_amount'));
         document.getElementById('s-tr').textContent = eur(num(trInput));
-        document.getElementById('s-base').textContent = eur(sub - disc + num(trInput)) + ' + IVA';
+        document.getElementById('s-as').textContent = eur(assembly);
+        document.getElementById('s-base').textContent = eur(sub - disc + num(trInput) + assembly) + ' + IVA';
     }
 
     tbody.addEventListener('change', e => {

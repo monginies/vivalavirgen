@@ -93,8 +93,14 @@
         <p class="muted" style="margin:0">Podrás enviar la proforma cuando apruebes el pedido.</p>
     @endif
     @if (in_array($order->status, [\App\Enums\OrderStatus::Accepted, \App\Enums\OrderStatus::ProformaSent, \App\Enums\OrderStatus::Paid], true))
-        <form method="post" action="{{ route('orders.proforma.send', $order) }}" class="grid pf-form" style="grid-template-columns:minmax(0,320px) 1fr auto;gap:10px;align-items:end">
+        <form method="post" action="{{ route('orders.proforma.send', $order) }}" class="grid pf-form" style="grid-template-columns:minmax(0,320px) 1fr auto;gap:10px;align-items:end"
+              onsubmit="const a = this.elements.assembly_amount; return !a || parseFloat(a.value) > 0 || confirm('El montaje está a 0 €. ¿Seguro que este pedido no lleva montaje?')">
             @csrf
+            @if ($order->status !== \App\Enums\OrderStatus::Paid)
+                <div class="field pf-assembly" style="margin:0;grid-column:1/-1;max-width:220px"><label for="f-pf-assembly">Montaje (€, sin IVA)</label>
+                    <input id="f-pf-assembly" type="number" name="assembly_amount" step="0.01" min="0" value="{{ old('assembly_amount', (float) $order->assembly_amount) }}">
+                    @error('assembly_amount')<div class="err">{{ $message }}</div>@enderror</div>
+            @endif
             <div @class(['field pf-email', 'has-email' => $pfEmail]) style="margin:0"><label for="f-pf-email">Enviar a</label><input id="f-pf-email" type="email" name="email" value="{{ old('email', $order->client->email) }}" required></div>
             <div class="field pf-note" style="margin:0"><label for="f-pf-note">Mensaje (opcional)</label><input id="f-pf-note" type="text" name="note" value="{{ old('note') }}" placeholder="Ej.: Hemos incluido el montaje del viernes por la tarde."></div>
             <button class="btn">{{ $order->proforma_sent_at ? 'Reenviar proforma' : 'Enviar proforma' }}</button>

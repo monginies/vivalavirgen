@@ -54,6 +54,38 @@ class ProformaTest extends TestCase
         });
     }
 
+    public function test_assembly_is_set_when_sending_and_has_vat_but_no_discount(): void
+    {
+        Notification::fake();
+        $o = $this->order();
+        $staff = User::factory()->create();
+        // Material 450 − 10 % = 405; transporte 60; base 465
+        $this->assertEquals(465, $o->taxableBase());
+
+        $this->actingAs($staff)->get(route('orders.show', $o))->assertSee('name="assembly_amount"', false)->assertSee('¿Seguro que este pedido no lleva montaje?');
+        $this->actingAs($staff)->post(route('orders.proforma.send', $o), ['email' => 'cliente@example.com', 'assembly_amount' => '120'])->assertSessionHas('status');
+
+        $o->refresh();
+        $this->assertEquals(120, $o->assembly_amount);
+        $this->assertEquals(585, $o->taxableBase()); // + 120 de montaje, sin descuento
+        $this->assertEquals(122.85, $o->vatAmount()); // 21 % de 585
+        $this->assertEquals(857.85, $o->amountDue()); // 707,85 + 150 de fianza
+        $this->actingAs($staff)->get(route('orders.show', $o))->assertSee('Montaje')->assertSee('120,00 €');
+
+        // Ya pagado: el montaje no se toca al reenviar
+        $o->update(['status' => OrderStatus::Paid]);
+        $this->actingAs($staff)->get(route('orders.show', $o))->assertDontSee('name="assembly_amount"', false);
+        $this->actingAs($staff)->post(route('orders.proforma.send', $o), ['email' => 'cliente@example.com', 'assembly_amount' => '999']);
+        $this->assertEquals(120, $o->fresh()->assembly_amount);
+
+        // El cliente lo ve en su pedido; sin montaje, la línea no aparece
+        $client = $o->client;
+        $client->forceFill(['password' => 'secreta123', 'email_verified_at' => now(), 'approved_at' => now()])->save();
+        $this->actingAs($client, 'client')->get(route('portal.orders.show', $o->number))->assertSee('Montaje');
+        $o->update(['assembly_amount' => 0]);
+        $this->actingAs($client, 'client')->get(route('portal.orders.show', $o->number))->assertDontSee('Montaje');
+    }
+
     public function test_client_downloads_own_proforma_only_after_sent(): void
     {
         $o = $this->order(OrderStatus::ProformaSent);

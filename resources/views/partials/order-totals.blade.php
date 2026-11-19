@@ -11,6 +11,9 @@
     @endif
     <tr><td>Transporte @if ($staff && $order->transport_manual)<span class="muted">(a mano)</span>@endif</td>
         <td class="num">{{ ! $staff && $order->transport_amount <= 0 ? 'Pendiente' : $eur($order->transport_amount) }}</td></tr>
+    @if ($staff || $order->assembly_amount > 0)
+        <tr><td>Montaje</td><td class="num">{{ $eur($order->assembly_amount) }}</td></tr>
+    @endif
     <tr class="sub"><td>Base imponible</td><td class="num">{{ $eur($order->taxableBase()) }}</td></tr>
     <tr><td>IVA {{ $pct($order->vat_rate) }} %</td><td class="num">+ {{ $eur($order->vatAmount()) }}</td></tr>
     @if ($order->withholding_rate > 0)

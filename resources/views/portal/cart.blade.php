@@ -112,6 +112,7 @@
                 <dt>Material</dt><dd id="s-sub">—</dd>
                 @if ($discount > 0)<dt>Tu descuento {{ rtrim(rtrim(number_format($discount, 2, ',', ''), '0'), ',') }} %</dt><dd id="s-disc">—</dd>@endif
                 <dt>Transporte</dt><dd id="s-tr">Indica el lugar</dd>
+                <dt>Montaje</dt><dd class="muted">Si lo necesita, te lo indicamos en la proforma</dd>
                 <dt>IVA {{ rtrim(rtrim(number_format($settings['vat'], 2, ',', ''), '0'), ',') }} %</dt><dd id="s-vat">—</dd>
                 @if ($settings['withholding'] > 0)<dt>Retención IRPF {{ rtrim(rtrim(number_format($settings['withholding'], 2, ',', ''), '0'), ',') }} %</dt><dd id="s-wh">—</dd>@endif
                 <dt>Total</dt><dd id="s-total">—</dd>

@@ -188,7 +188,12 @@ class OrderController extends Controller
         $data = $request->validate([
             'email' => ['required', 'email'],
             'note' => ['nullable', 'string', 'max:2000'],
+            'assembly_amount' => ['nullable', 'numeric', 'min:0', 'max:99999'],
         ]);
+        // El montaje se fija al enviar la proforma; ya pagado, no se cambia
+        if ($request->filled('assembly_amount') && $order->status !== OrderStatus::Paid) {
+            $order->update(['assembly_amount' => $data['assembly_amount']]);
+        }
 
         try {
             Notification::route('mail', $data['email'])->notify(new ProformaSent($order, $data['note'] ?? null));
@@ -327,6 +332,7 @@ class OrderController extends Controller
             'transport_amount' => ['nullable', 'numeric', 'min:0', 'max:99999'],
             'discount_percent' => ['nullable', 'numeric', 'min:0', 'max:100'],
             'deposit_amount' => ['nullable', 'numeric', 'min:0', 'max:99999'],
+            'assembly_amount' => ['nullable', 'numeric', 'min:0', 'max:99999'],
             'notes' => ['nullable', 'string', 'max:5000'],
             'event_start_time' => ['nullable', 'date_format:H:i'],
             'event_end_time' => ['nullable', 'date_format:H:i'],
@@ -387,6 +393,7 @@ class OrderController extends Controller
                 : Order::calculateTransport(isset($v['distance_km']) ? (float) $v['distance_km'] : null, (int) $v['trucks']),
             'discount_percent' => $v['discount_percent'] ?? 0,
             'deposit_amount' => $v['deposit_amount'] ?? 0,
+            'assembly_amount' => $v['assembly_amount'] ?? 0,
             'notes' => $v['notes'] ?? null,
             'event_start_time' => $v['event_start_time'] ?? null,
             'event_end_time' => $v['event_end_time'] ?? null,
