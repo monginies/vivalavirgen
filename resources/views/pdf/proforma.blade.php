@@ -26,6 +26,7 @@
     .totals td { padding: 4px 5px; }
     .totals .sub td { border-top: 1px solid #9a9b88; }
     .totals .grand td { border-top: 2px solid #2e3028; font-size: 12pt; font-weight: bold; padding-top: 7px; }
+    .commission { padding: 12px 14px; background: #5d604e; color: #fff; border-left: 5px solid #9a9b88; }
     .deposit { margin-top: 8px; padding: 8px 12px; border: 1px solid #d3d0c2; }
     .pay { margin-top: 18px; padding: 10px 12px; background: #5d604e; color: #fff; }
     .pay .label { color: #e7e4d8; }
@@ -88,9 +89,25 @@
     </tbody>
 </table>
 
-<table class="totals">
-    <tr><td>Material</td><td class="num">{{ $eur($order->subtotal()) }}</td></tr>
-    @if ($order->discount_percent > 0)<tr><td>Descuento {{ $pct($order->discount_percent) }} %</td><td class="num">− {{ $eur($order->discountAmount()) }}</td></tr>@endif
+{{-- Con descuento / comisión: va en un recuadro destacado a la izquierda y el material ya sale con ella aplicada --}}
+@php($disc = $order->discount_percent > 0)
+<table style="width:100%;border-collapse:collapse"><tr>
+<td style="width:44%;vertical-align:top;padding-right:4%">
+    @if ($disc)
+        <div class="commission">
+            <div class="label" style="color:#e7e4d8">{{ $order->discountLabel() }}</div>
+            <div style="font-size:20pt;line-height:1.15"><b>{{ $pct($order->discount_percent) }} %</b> <span style="font-size:13pt">· {{ $eur($order->discountAmount()) }}</span></div>
+            <div style="font-size:8pt;color:#e7e4d8;margin-top:3px">Aplicado al material (tarifa {{ $eur($order->subtotal()) }}).</div>
+        </div>
+    @endif
+</td>
+<td style="vertical-align:top">
+<table class="totals" style="width:100%;margin-left:0">
+    @if ($disc)
+        <tr><td>Material <span class="muted">(con {{ mb_strtolower($order->discountLabel()) }})</span></td><td class="num">{{ $eur($order->subtotal() - $order->discountAmount()) }}</td></tr>
+    @else
+        <tr><td>Material</td><td class="num">{{ $eur($order->subtotal()) }}</td></tr>
+    @endif
     <tr><td>Transporte @if ($order->distance_km)<span class="muted">({{ $order->distance_km }} km, {{ $order->trucks }} {{ $order->trucks > 1 ? 'camiones' : 'camión' }})</span>@endif</td><td class="num">{{ $eur($order->transport_amount) }}</td></tr>
     @if ($order->assembly_amount > 0)<tr><td>Montaje</td><td class="num">{{ $eur($order->assembly_amount) }}</td></tr>@endif
     <tr class="sub"><td>Base imponible</td><td class="num">{{ $eur($order->taxableBase()) }}</td></tr>
@@ -104,6 +121,8 @@
     @endif
     <tr class="grand"><td>Total a pagar</td><td class="num">{{ $eur($order->amountDue()) }}</td></tr>
 </table>
+</td>
+</tr></table>
 
 @if ($company['iban'])
 <div class="pay">

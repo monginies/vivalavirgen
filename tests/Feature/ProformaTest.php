@@ -86,6 +86,33 @@ class ProformaTest extends TestCase
         $this->actingAs($client, 'client')->get(route('portal.orders.show', $o->number))->assertDontSee('Montaje');
     }
 
+    public function test_commission_is_highlighted_for_the_client(): void
+    {
+        $o = $this->order(OrderStatus::ProformaSent);
+        $o->update(['proforma_sent_at' => now()]);
+        $client = $o->client;
+        $client->forceFill(['profession' => 'wedding', 'password' => 'secreta123', 'email_verified_at' => now(), 'approved_at' => now()])->save();
+        $html = fn () => view('pdf.proforma', ['order' => $o->fresh(['client', 'lines.article']), 'company' => array_fill_keys(['name', 'tax_id', 'address', 'phone', 'email', 'iban'], null), 'terms' => null])->render();
+
+        // Profesional: «Tu comisión», aparte, y el material ya con ella aplicada (450 − 45)
+        $this->assertStringContainsString('class="commission"', $html());
+        $this->assertStringContainsString('Tu comisión', $html());
+        $this->assertStringContainsString('405,00 €', $html());
+        $this->actingAs($client, 'client')->get(route('portal.orders.show', $o->number))
+            ->assertSeeInOrder(['Tu comisión', '10 %', '45,00 €', 'Material', '405,00 €']);
+        $this->actingAs($client, 'client')->get(route('portal.orders.proforma', $o->number))->assertOk();
+
+        // Particular: «Tu descuento»; sin descuento, no hay recuadro
+        $client->update(['type' => 'individual', 'profession' => null]);
+        $this->assertStringContainsString('Tu descuento', $html());
+        $o->update(['discount_percent' => 0]);
+        $this->assertStringNotContainsString('class="commission"', $html());
+
+        // En el backoffice se sigue viendo como una línea más
+        $o->update(['discount_percent' => 10]);
+        $this->actingAs(User::factory()->create())->get(route('orders.show', $o))->assertSee('Descuento / comisión 10 %')->assertDontSee('Tu descuento');
+    }
+
     public function test_client_downloads_own_proforma_only_after_sent(): void
     {
         $o = $this->order(OrderStatus::ProformaSent);

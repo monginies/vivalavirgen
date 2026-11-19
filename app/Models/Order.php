@@ -164,6 +164,12 @@ class Order extends Model
     }
 
     /** Material con descuento + transporte + montaje (el descuento solo se aplica al material). */
+    /** «Tu comisión» para profesionales (wedding, catering…); «Tu descuento» para el resto. */
+    public function discountLabel(): string
+    {
+        return $this->client?->professionLabel() ? 'Tu comisión' : 'Tu descuento';
+    }
+
     public function taxableBase(): float
     {
         return round($this->subtotal() - $this->discountAmount() + $this->transport_amount + $this->assembly_amount, 2);
