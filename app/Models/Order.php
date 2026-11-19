@@ -12,7 +12,8 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 class Order extends Model
 {
     protected $fillable = [
-        'number', 'client_id', 'status', 'source', 'event_date', 'venue_id', 'start_date', 'end_date', 'delivery_time', 'pickup_time',
+        'number', 'client_id', 'status', 'source', 'event_date', 'event_start_time', 'event_end_time',
+        'event_wedding', 'event_catering', 'event_florist', 'referral', 'venue_id', 'start_date', 'end_date', 'delivery_time', 'pickup_time',
         'destination_address', 'destination_city', 'destination_postal_code', 'distance_km', 'trucks',
         'transport_manual', 'transport_amount', 'discount_percent', 'deposit_amount', 'site_contact_name', 'site_contact_phone', 'logistics_notes',
         'vat_rate', 'withholding_rate', 'expires_at', 'expiry_alerted_at', 'proforma_sent_at', 'proforma_sent_to', 'paid_at', 'paid_by', 'notes', 'created_by',
@@ -187,6 +188,35 @@ class Order extends Model
     public function amountDue(): float
     {
         return round($this->total() + $this->deposit_amount, 2);
+    }
+
+    /** Valor guardado cuando el cliente marca que no hay wedding planner, catering, florista o referido. */
+    public const NONE = 'No hay';
+
+    /**
+     * Personas del evento que pide la web antes de enviar el pedido:
+     * columna => [etiqueta, casilla «no hay», aviso si falta].
+     */
+    public const EVENT_PEOPLE = [
+        'event_wedding' => ['Wedding planner', 'No hay wedding planner', 'Escribe el nombre del wedding planner o marca «No hay wedding planner».'],
+        'event_catering' => ['Catering', 'Sin catering', 'Escribe el nombre del catering o marca «Sin catering».'],
+        'event_florist' => ['Florista', 'Sin florista', 'Escribe el nombre del florista o marca «Sin florista».'],
+        'referral' => ['Referido', 'Nadie me ha recomendado', 'Dinos quién te ha recomendado o marca «Nadie me ha recomendado».'],
+    ];
+
+    /** «18:00 – 02:00», o la que haya; null si no hay ninguna. */
+    public function eventHours(): ?string
+    {
+        return collect([$this->event_start_time, $this->event_end_time])->filter()->join(' – ') ?: null;
+    }
+
+    /** Wedding planner, catering y florista que sí hay, para logística: «Catering: X · Florista: Y». */
+    public function eventPeople(): string
+    {
+        return collect(['event_wedding' => 'Wedding', 'event_catering' => 'Catering', 'event_florist' => 'Florista'])
+            ->filter(fn ($label, $field) => filled($this->{$field}) && $this->{$field} !== self::NONE)
+            ->map(fn ($label, $field) => "{$label}: {$this->{$field}}")
+            ->join(' · ');
     }
 
     public function destination(): string

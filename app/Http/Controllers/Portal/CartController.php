@@ -46,6 +46,7 @@ class CartController extends Controller
             'availability' => $availability,
             'venues' => Venue::where('active', true)->orderBy('name')->get(),
             'client' => $client,
+            'prefill' => self::prefill($client),
             'discount' => $client?->isApproved() ? $client->discountPercent() : 0,
             'settings' => [
                 'per_km' => Setting::number('transport_price_per_km'),
@@ -152,6 +153,18 @@ class CartController extends Controller
         if (! $venue && ! $cart['postal_code'] && ! $cart['city']) {
             $errors['destination'] = 'Elige una finca o indica la dirección del evento (al menos población o código postal).';
         }
+        if (! $cart['event_start_time']) {
+            $errors['event_start_time'] = 'Indica la hora de inicio del evento.';
+        }
+        if (! $cart['event_end_time']) {
+            $errors['event_end_time'] = 'Indica la hora de fin del evento.';
+        }
+        foreach (Order::EVENT_PEOPLE as $field => [, , $missing]) {
+            // El referido solo se exige a particulares
+            if (blank($cart[$field]) && ($field !== 'referral' || $client->type === 'individual')) {
+                $errors[$field] = $missing;
+            }
+        }
         if ($errors) {
             throw ValidationException::withMessages($errors);
         }
@@ -186,6 +199,12 @@ class CartController extends Controller
                 'status' => OrderStatus::Requested,
                 'source' => 'web',
                 'event_date' => $cart['event_date'],
+                'event_start_time' => $cart['event_start_time'],
+                'event_end_time' => $cart['event_end_time'],
+                'event_wedding' => $cart['event_wedding'],
+                'event_catering' => $cart['event_catering'],
+                'event_florist' => $cart['event_florist'],
+                'referral' => $cart['referral'],
                 'start_date' => $period[0],
                 'end_date' => $period[1],
                 'venue_id' => $venue?->id,
@@ -232,14 +251,40 @@ class CartController extends Controller
             'postal_code' => ['nullable', 'regex:/^\d{5}$/'],
             'city' => ['nullable', 'string', 'max:255'],
             'notes' => ['nullable', 'string', 'max:2000'],
+            'event_start_time' => ['nullable', 'date_format:H:i'],
+            'event_end_time' => ['nullable', 'date_format:H:i'],
+            ...collect(Order::EVENT_PEOPLE)->mapWithKeys(fn ($x, $field) => [
+                $field => ['nullable', 'string', 'max:150'], $field.'_none' => ['nullable', 'boolean'],
+            ])->all(),
         ], [
             'event_date.after_or_equal' => 'La fecha del evento no puede ser anterior a hoy.',
             'postal_code.regex' => 'El código postal tiene 5 cifras.',
+            'event_start_time.date_format' => 'La hora de inicio no es válida.',
+            'event_end_time.date_format' => 'La hora de fin no es válida.',
         ]);
 
         foreach ($v['quantities'] ?? [] as $id => $qty) {
             Cart::setQuantity((int) $id, (int) $qty);
         }
-        Cart::put(collect($v)->only(['event_date', 'venue_id', 'address', 'postal_code', 'city', 'notes'])->all());
+        Cart::put(collect($v)->only(['event_date', 'venue_id', 'address', 'postal_code', 'city', 'notes', 'event_start_time', 'event_end_time'])->all());
+        // Solo si el formulario los trae (añadir artículos o cambiar la fecha no los toca)
+        if ($request->has('event_start_time')) {
+            Cart::put(collect(Order::EVENT_PEOPLE)->mapWithKeys(fn ($x, $field) => [
+                $field => $request->boolean($field.'_none') ? Order::NONE : (trim((string) ($v[$field] ?? '')) ?: null),
+            ])->all());
+        }
+    }
+
+    /**
+     * Un profesional del evento suele ser el propio cliente: su campo sale relleno
+     * con su nombre (florista → Florista, etc.).
+     *
+     * @return array<string, string>
+     */
+    private static function prefill($client): array
+    {
+        $field = ['wedding' => 'event_wedding', 'catering' => 'event_catering', 'florista' => 'event_florist'][$client?->profession] ?? null;
+
+        return $field && $client->type === 'company' ? [$field => $client->trade_name ?: $client->name] : [];
     }
 }

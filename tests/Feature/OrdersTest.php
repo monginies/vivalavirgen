@@ -113,11 +113,16 @@ class OrdersTest extends TestCase
             'start_date' => '2026-12-04', 'end_date' => '2026-12-06',
             'distance_km' => 100, 'trucks' => 2,
             'deposit_amount' => 150,
+            'event_start_time' => '20:00', 'event_florist' => 'Flores Ana', 'event_catering' => 'No hay',
             'lines' => [['article_id' => $this->chair->id, 'quantity' => 8, 'unit_price' => 4.5]],
         ]);
 
         $order = Order::firstOrFail();
         $res->assertRedirect(route('orders.show', $order));
+        // Datos del evento opcionales en el backoffice
+        $this->assertSame(['20:00', null, 'Flores Ana', null], [$order->event_start_time, $order->event_end_time, $order->event_florist, $order->referral]);
+        $this->assertSame('Florista: Flores Ana', $order->eventPeople());
+        $this->actingAs($this->user)->get(route('orders.show', $order))->assertSee('Flores Ana');
         $this->assertSame(OrderStatus::Requested, $order->status);
         $this->assertSame('PED-'.now()->year.'-0001', $order->number);
         // 2 trayectos × 100 km × 0,60 €/km × 2 camiones = 240

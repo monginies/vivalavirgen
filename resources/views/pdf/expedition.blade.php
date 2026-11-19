@@ -60,6 +60,8 @@
     <td style="width:33%">
         <div class="label">Evento</div>
         <div class="big">{{ $order->event_date ? $order->event_date->isoFormat('ddd D/MM/YYYY') : '—' }}</div>
+        {{ $order->eventHours() ?? 'Horario sin indicar' }}
+        @if ($order->eventPeople())<br><span class="muted">{{ $order->eventPeople() }}</span>@endif
     </td>
     <td style="width:33%">
         <div class="label">Recogida / desmontaje</div>

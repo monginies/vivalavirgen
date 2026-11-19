@@ -13,6 +13,7 @@ class Cart
 
     private const DEFAULTS = [
         'items' => [], 'event_date' => null, 'venue_id' => null,
+        'event_start_time' => null, 'event_end_time' => null, 'event_wedding' => null, 'event_catering' => null, 'event_florist' => null, 'referral' => null,
         'address' => null, 'postal_code' => null, 'city' => null, 'notes' => null,
     ];
 

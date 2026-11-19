@@ -328,6 +328,9 @@ class OrderController extends Controller
             'discount_percent' => ['nullable', 'numeric', 'min:0', 'max:100'],
             'deposit_amount' => ['nullable', 'numeric', 'min:0', 'max:99999'],
             'notes' => ['nullable', 'string', 'max:5000'],
+            'event_start_time' => ['nullable', 'date_format:H:i'],
+            'event_end_time' => ['nullable', 'date_format:H:i'],
+            ...array_fill_keys(array_keys(Order::EVENT_PEOPLE), ['nullable', 'string', 'max:150']),
             'lines' => ['required', 'array', 'min:1'],
             'lines.*.article_id' => ['nullable', Rule::exists('articles', 'id')],
             'lines.*.quantity' => ['nullable', 'integer', 'min:1', 'max:10000'],
@@ -339,6 +342,8 @@ class OrderController extends Controller
             'start_date.required_without' => 'Indica la fecha de entrega (o la del evento).',
             'end_date.required_without' => 'Indica la fecha de recogida (o la del evento).',
             'destination_postal_code.regex' => 'El código postal tiene 5 cifras.',
+            'event_start_time.date_format' => 'La hora de inicio no es válida.',
+            'event_end_time.date_format' => 'La hora de fin no es válida.',
         ]);
 
         // Agrupar líneas por artículo e ignorar filas vacías
@@ -383,7 +388,12 @@ class OrderController extends Controller
             'discount_percent' => $v['discount_percent'] ?? 0,
             'deposit_amount' => $v['deposit_amount'] ?? 0,
             'notes' => $v['notes'] ?? null,
+            'event_start_time' => $v['event_start_time'] ?? null,
+            'event_end_time' => $v['event_end_time'] ?? null,
         ];
+        foreach (array_keys(Order::EVENT_PEOPLE) as $field) {
+            $data[$field] = $v[$field] ?? null;
+        }
 
         return [$data, $lines];
     }

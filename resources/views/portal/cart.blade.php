@@ -82,7 +82,25 @@
         </div>
 
         <div class="card">
-            <h2>4. Comentarios</h2>
+            <h2>4. Datos del evento</h2>
+            <div class="grid" style="grid-template-columns:1fr 1fr;gap:10px">
+                @include('partials.field', ['name' => 'event_start_time', 'label' => 'Hora de inicio', 'value' => $cart['event_start_time'], 'type' => 'time'])
+                @include('partials.field', ['name' => 'event_end_time', 'label' => 'Hora de fin', 'value' => $cart['event_end_time'], 'type' => 'time'])
+            </div>
+            @foreach (\App\Models\Order::EVENT_PEOPLE as $field => [$label, $noneLabel])
+                @php($value = $cart[$field] ?? $prefill[$field] ?? null)
+                @php($none = $value === \App\Models\Order::NONE)
+                <div class="field">
+                    <label for="f-{{ $field }}">{{ $field === 'referral' ? '¿Te ha recomendado alguien?' : $label }}@if ($field === 'referral' && $client?->type === 'company') <span class="muted">(opcional)</span>@endif</label>
+                    <input id="f-{{ $field }}" name="{{ $field }}" value="{{ $none ? '' : $value }}" maxlength="150" placeholder="{{ $field === 'referral' ? 'Nombre de quien te ha recomendado' : 'Nombre' }}" @disabled($none)>
+                    <label class="check" style="margin-top:6px"><input type="checkbox" name="{{ $field }}_none" value="1" data-none="f-{{ $field }}" @checked($none)> {{ $noneLabel }}</label>
+                    @error($field)<div class="err">{{ $message }}</div>@enderror
+                </div>
+            @endforeach
+        </div>
+
+        <div class="card">
+            <h2>5. Comentarios</h2>
             @include('partials.field', ['name' => 'notes', 'label' => 'Algo que debamos saber (horarios, accesos…)', 'value' => $cart['notes'], 'type' => 'textarea'])
         </div>
     </div>
@@ -122,6 +140,12 @@
 (() => {
     const form = document.getElementById('cart-form');
     if (!form) return;
+    // «No hay …»: vacía y bloquea el nombre; al desmarcar, se puede escribir
+    form.querySelectorAll('[data-none]').forEach(cb => cb.addEventListener('change', () => {
+        const input = document.getElementById(cb.dataset.none);
+        input.disabled = cb.checked;
+        if (cb.checked) input.value = ''; else input.focus();
+    }));
     const approved = @json((bool) $approved), discount = @json((float) $discount), vat = @json((float) $settings['vat']), wh = @json((float) $settings['withholding']), deposit = @json((float) $settings['deposit']);
     const eur = n => n.toLocaleString('es-ES', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + ' €';
     let transport = null;

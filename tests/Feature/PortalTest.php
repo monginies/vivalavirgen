@@ -115,7 +115,9 @@ class PortalTest extends TestCase
         $saturday = now()->addWeeks(3)->next('Saturday')->toDateString();
         $this->actingAs($client->fresh(), 'client')->post(route('portal.checkout'), [
             'event_date' => $saturday, 'venue_id' => $venue->id, 'quantities' => [$this->chair->id => 6], 'notes' => 'Montaje a las 10',
-        ])->assertRedirect();
+            'event_start_time' => '18:00', 'event_end_time' => '02:00', 'event_wedding' => 'Ana Bodas', 'event_catering_none' => 1,
+            'event_florist' => 'Bodas Bonitas SL', 'referral' => '',
+        ])->assertRedirect()->assertSessionHasNoErrors();
 
         $order = Order::with('lines')->firstOrFail();
         $this->assertSame('web', $order->source);
@@ -126,6 +128,8 @@ class PortalTest extends TestCase
         $this->assertEquals(60, $order->transport_amount); // 2 × 30 × 0,60 = 36 → mínimo 60
         $this->assertSame(Carbon::parse($saturday)->previous('Friday')->toDateString(), $order->start_date->toDateString());
         $this->assertStringContainsString('Montaje a las 10', $order->notes);
+        $this->assertSame(['18:00', '02:00', 'Ana Bodas', 'No hay', 'Bodas Bonitas SL', null],
+            [$order->event_start_time, $order->event_end_time, $order->event_wedding, $order->event_catering, $order->event_florist, $order->referral]);
         $this->assertSame(0, Cart::count());
         Notification::assertSentTo($client, OrderReceived::class);
         Notification::assertSentTo(new AnonymousNotifiable, NewWebOrder::class);
@@ -164,10 +168,58 @@ class PortalTest extends TestCase
         // Al enviar se vuelve a comprobar todo
         $this->actingAs($client, 'client')->post(route('portal.checkout'), [
             'event_date' => $saturday->toDateString(), 'postal_code' => '29730', 'city' => 'Rincón de la Victoria',
+            'event_start_time' => '18:00', 'event_end_time' => '23:00', 'event_wedding_none' => 1, 'event_catering_none' => 1, 'event_florist_none' => 1, 'referral_none' => 1,
         ])->assertSessionHasErrors('items');
         $this->assertSame(2, Order::count());
 
         $this->actingAs($client, 'client')->get(route('portal.orders.show', $foreign->number))->assertNotFound();
+    }
+
+    public function test_event_details_are_required_before_sending(): void
+    {
+        $cat = ClientCategory::where('name', 'Esparto')->first();
+        $client = Client::create(['type' => 'individual', 'name' => 'Ana', 'email' => 'ana@example.com', 'client_category_id' => $cat->id]);
+        $client->forceFill(['password' => 'secreta123', 'email_verified_at' => now(), 'approved_at' => now()])->save();
+        $base = ['event_date' => now()->addWeeks(2)->next('Saturday')->toDateString(), 'city' => 'Málaga'];
+
+        $this->actingAs($client, 'client')->post(route('portal.cart.add', $this->chair), ['quantity' => 2]);
+        $this->post(route('portal.checkout'), $base + ['event_start_time' => '', 'event_end_time' => '', 'event_wedding' => '', 'event_catering' => 'Catering Sol'])
+            ->assertSessionHasErrors([
+                'event_start_time' => 'Indica la hora de inicio del evento.',
+                'event_wedding' => 'Escribe el nombre del wedding planner o marca «No hay wedding planner».',
+                'event_florist', 'event_end_time',
+                'referral' => 'Dinos quién te ha recomendado o marca «Nadie me ha recomendado».', // particular: obligatorio
+            ])->assertSessionDoesntHaveErrors('event_catering');
+        $this->assertSame(0, Order::count());
+
+        // Lo escrito se guarda en el carrito y «No hay» sale marcado
+        $this->post(route('portal.cart.update'), $base + ['event_start_time' => '19:30', 'event_florist_none' => 1, 'event_florist' => 'ignorado']);
+        $this->assertSame(['19:30', 'No hay'], [Cart::get()['event_start_time'], Cart::get()['event_florist']]);
+        $this->get(route('portal.cart'))->assertOk()->assertSee('name="event_florist_none" value="1" data-none="f-event_florist" checked', false);
+
+        // Añadir artículos no borra lo que ya había escrito
+        $this->post(route('portal.cart.add', $this->chair), ['quantity' => 1]);
+        $this->assertSame('No hay', Cart::get()['event_florist']);
+
+        $this->post(route('portal.checkout'), $base + ['event_start_time' => '19:30', 'event_end_time' => '23:00', 'event_wedding_none' => 1,
+            'event_catering_none' => 1, 'event_florist_none' => 1, 'referral' => 'Finca Los Olivos'])->assertSessionHasNoErrors();
+        $order = Order::firstOrFail();
+        $this->assertSame('Finca Los Olivos', $order->referral);
+        $this->assertSame('19:30 – 23:00', $order->eventHours());
+        $this->assertSame('', $order->eventPeople());
+        $this->get(route('portal.orders.show', $order->number))->assertSee('19:30 – 23:00')->assertSee('Finca Los Olivos');
+    }
+
+    public function test_professional_sees_own_name_prefilled(): void
+    {
+        $client = Client::create(['type' => 'company', 'profession' => 'catering', 'name' => 'Catering Sol SL', 'trade_name' => 'Catering Sol', 'email' => 'sol@example.com']);
+        $client->forceFill(['password' => 'secreta123', 'email_verified_at' => now(), 'approved_at' => now()])->save();
+
+        $this->actingAs($client, 'client')->post(route('portal.cart.add', $this->chair), ['quantity' => 1]);
+        $this->get(route('portal.cart'))->assertOk()
+            ->assertSee('name="event_catering" value="Catering Sol"', false)
+            ->assertSee('name="event_florist" value=""', false)
+            ->assertSee('(opcional)');
     }
 
     public function test_login_and_password_reset(): void

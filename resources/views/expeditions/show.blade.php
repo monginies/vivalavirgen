@@ -23,7 +23,8 @@
         <h2>Entrega y recogida</h2>
         <dl class="props">
             <dt>Entrega</dt><dd>{{ $order->start_date->isoFormat('dddd D/MM/YYYY') }}@if ($order->delivery_time) · {{ $order->delivery_time }}@endif</dd>
-            @if ($order->event_date)<dt>Evento</dt><dd>{{ $order->event_date->isoFormat('dddd D/MM/YYYY') }}</dd>@endif
+            @if ($order->event_date || $order->eventHours())<dt>Evento</dt><dd>{{ $order->event_date?->isoFormat('dddd D/MM/YYYY') }}@if ($order->event_date && $order->eventHours()) · @endif{{ $order->eventHours() }}</dd>@endif
+            @if ($order->eventPeople())<dt>En el evento</dt><dd>{{ $order->eventPeople() }}</dd>@endif
             <dt>Recogida</dt><dd>{{ $order->end_date->isoFormat('dddd D/MM/YYYY') }}@if ($order->pickup_time) · {{ $order->pickup_time }}@endif</dd>
             <dt>Camiones</dt><dd>{{ $order->trucks }}</dd>
         </dl>

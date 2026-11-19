@@ -39,6 +39,17 @@
     </div>
 
     <div class="card">
+        <h2>Datos del evento</h2>
+        <div class="grid g2">
+            @include('partials.field', ['name' => 'event_start_time', 'label' => 'Hora de inicio del evento', 'value' => $order->event_start_time, 'type' => 'time'])
+            @include('partials.field', ['name' => 'event_end_time', 'label' => 'Hora de fin del evento', 'value' => $order->event_end_time, 'type' => 'time'])
+            @foreach (\App\Models\Order::EVENT_PEOPLE as $field => [$label])
+                @include('partials.field', ['name' => $field, 'label' => $label, 'value' => $order->{$field}, 'attrs' => 'maxlength=150', 'hint' => $loop->first ? 'Si no hay, escribe «No hay».' : null])
+            @endforeach
+        </div>
+    </div>
+
+    <div class="card">
         <h2>Material</h2>
         @foreach (array_merge($errors->get('lines'), collect($errors->get('lines.*'))->flatten()->all()) as $m)
             <div class="flash ko">{{ $m }}</div>

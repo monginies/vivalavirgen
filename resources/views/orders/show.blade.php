@@ -169,7 +169,10 @@
     <div class="card">
         <h2>Fechas y destino</h2>
         <dl class="props">
-            <dt>Evento</dt><dd>{{ $order->event_date?->format('d/m/Y') ?? '—' }}</dd>
+            <dt>Evento</dt><dd>{{ $order->event_date?->format('d/m/Y') ?? '—' }}@if ($order->eventHours()) · {{ $order->eventHours() }}@endif</dd>
+            @foreach (\App\Models\Order::EVENT_PEOPLE as $field => [$label])
+                <dt>{{ $label }}</dt><dd>{{ $order->{$field} ?: '—' }}</dd>
+            @endforeach
             <dt>Entrega</dt><dd>{{ $order->start_date->format('d/m/Y') }}</dd>
             <dt>Recogida</dt><dd>{{ $order->end_date->format('d/m/Y') }}</dd>
             @if ($order->venue)<dt>Finca</dt><dd><a href="{{ route('venues.edit', $order->venue) }}">{{ $order->venue->name }}</a></dd>@endif

@@ -15,6 +15,10 @@
         <h2>Evento</h2>
         <dl class="props">
             @if ($order->event_date)<dt>Fecha</dt><dd>{{ $order->event_date->isoFormat('dddd D [de] MMMM [de] YYYY') }}</dd>@endif
+            @if ($order->eventHours())<dt>Horario</dt><dd>{{ $order->eventHours() }}</dd>@endif
+            @foreach (\App\Models\Order::EVENT_PEOPLE as $field => [$label])
+                @if ($order->{$field})<dt>{{ $label }}</dt><dd>{{ $order->{$field} }}</dd>@endif
+            @endforeach
             <dt>Entrega</dt><dd>{{ $order->start_date->format('d/m/Y') }}</dd>
             <dt>Recogida</dt><dd>{{ $order->end_date->format('d/m/Y') }}</dd>
             <dt>Lugar</dt><dd>{{ $order->destination() ?: '—' }}</dd>

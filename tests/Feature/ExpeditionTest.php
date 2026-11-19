@@ -61,11 +61,12 @@ class ExpeditionTest extends TestCase
             $this->order->lines()->create(['article_id' => $make($name, $loc)->id, 'quantity' => 1, 'unit_price' => 1]);
         }
         Article::where('name', 'Sofá esparto')->update(['location' => '1-A']);
-        $this->order->update(['status' => OrderStatus::Paid]);
+        $this->order->update(['status' => OrderStatus::Paid, 'event_start_time' => '18:00', 'event_end_time' => '23:30', 'event_catering' => 'Catering Sol', 'event_florist' => 'No hay']);
 
         $names = collect(Expedition::rows($this->order->fresh()))->map(fn ($r) => $r['article']->name)->all();
         $this->assertSame(['Sofá esparto', 'Plato', 'Vela', 'Copa', 'Mesa', 'Butaca esparto', 'Butaca esparto', 'Sin balda'], $names);
-        $this->actingAs($this->user)->get(route('expeditions.show', $this->order))->assertOk()->assertSeeInOrder(['1-A', '2-a', '2-B, 3-A', '10-A', 'Sin localizador']);
+        $this->actingAs($this->user)->get(route('expeditions.show', $this->order))->assertOk()->assertSee('18:00 – 23:30')->assertSee('Catering: Catering Sol')->assertDontSee('Florista:')
+            ->assertSeeInOrder(['1-A', '2-a', '2-B, 3-A', '10-A', 'Sin localizador']);
     }
 
     public function test_location_is_saved_and_searchable(): void

@@ -99,6 +99,7 @@ class ExclusiveArticlesTest extends TestCase
         $this->actingAs($this->vip, 'client')->post(route('portal.cart.add', $this->arch), ['quantity' => 1])->assertSessionMissing('error');
         $this->actingAs($this->vip, 'client')->post(route('portal.checkout'), [
             'event_date' => now()->addWeeks(2)->next('Saturday')->toDateString(), 'postal_code' => '29730', 'city' => 'Rincón de la Victoria',
+            'event_start_time' => '18:00', 'event_end_time' => '23:00', 'event_wedding_none' => 1, 'event_catering_none' => 1, 'event_florist_none' => 1, 'referral_none' => 1,
         ])->assertSessionHasNoErrors();
         $this->assertSame(1, Order::where('client_id', $this->vip->id)->count());
     }
