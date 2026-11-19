@@ -64,6 +64,23 @@ class CartController extends Controller
             return back()->with('error', "{$article->name} no está disponible.");
         }
         $qty = $request->validate(['quantity' => ['required', 'integer', 'min:1', 'max:10000']])['quantity'];
+
+        // Sin fecha, el tope es el stock total; con fecha, lo libre ese fin de semana.
+        // La comprobación completa (piezas compartidas entre líneas) se hace al enviar.
+        $period = Cart::period();
+        $free = $period
+            ? max(0, Availability::forArticles([$article->id], ...$period)[$article->id]['available'])
+            : (int) (Availability::capacity([$article->id])[$article->id] ?? 0);
+        $inCart = (int) (Cart::get()['items'][$article->id] ?? 0);
+        if ($inCart + $qty > $free) {
+            $left = max(0, $free - $inCart);
+            $msg = $period
+                ? ($left ? "solo quedan {$left} libres para la fecha de tu evento." : 'no quedan unidades libres para la fecha de tu evento.')
+                : ($left ? "solo tenemos {$left} disponibles." : 'ahora mismo no tenemos unidades disponibles.');
+
+            return back()->with('error', "{$article->name}: {$msg}".($inCart ? " Ya tienes {$inCart} en tu pedido." : ''));
+        }
+
         Cart::add($article->id, $qty);
         Tracker::record('cart_add', ['article_id' => $article->id, 'value' => $qty]);
 

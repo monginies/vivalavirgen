@@ -16,6 +16,7 @@ use App\Support\Expedition;
 use App\Support\Proforma;
 use Illuminate\Database\QueryException;
 use Illuminate\Http\Client\ConnectionException;
+use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Notification;
@@ -238,6 +239,19 @@ class OrderController extends Controller
         $base = $order->expires_at && $order->expires_at->isFuture() ? $order->expires_at : now();
         $previous = $order->expires_at;
         DB::transaction(function () use ($order, $base, $days, $previous) {
+            // Vencida (aunque aún no marcada como caducada): sus unidades ya no estaban
+            // reservadas y otro pedido puede haberlas cogido.
+            if ($order->isOverdue()) {
+                $order->load('lines');
+                try {
+                    $this->assertAvailable(
+                        $order->lines->map->only('article_id', 'quantity')->all(),
+                        $order->start_date, $order->end_date, $order->id, $order->client_id
+                    );
+                } catch (ValidationException $e) {
+                    throw new HttpResponseException(back()->with('error', 'No se puede ampliar: '.implode(' ', $e->validator->errors()->all())));
+                }
+            }
             $order->update(['expires_at' => $base->copy()->addDays($days), 'expiry_alerted_at' => null]);
             $order->extensions()->create([
                 'days' => $days, 'previous_expires_at' => $previous, 'new_expires_at' => $order->expires_at, 'user_id' => auth()->id(),

@@ -25,6 +25,7 @@ class StatsTest extends TestCase
     public function test_counts_page_views_searches_and_cart_without_ip(): void
     {
         $article = $this->article();
+        $article->addUnits(5);
 
         $this->withHeaders(['User-Agent' => self::BROWSER, 'Referer' => 'https://www.instagram.com/'])
             ->get('/')->assertOk();

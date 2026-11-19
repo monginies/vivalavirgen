@@ -143,11 +143,29 @@ class PortalTest extends TestCase
         $other = Client::create(['type' => 'individual', 'name' => 'Otro']);
         $foreign = Order::create(['number' => 'PED-2026-0099', 'client_id' => $other->id, 'status' => OrderStatus::Requested, 'start_date' => '2026-12-04', 'end_date' => '2026-12-06']);
 
-        $this->actingAs($client, 'client')->post(route('portal.cart.add', $this->chair), ['quantity' => 25]);
+        // Al añadir: sin fecha, el tope es el stock total (20)
+        $this->actingAs($client, 'client')->post(route('portal.cart.add', $this->chair), ['quantity' => 25])
+            ->assertSessionHas('error', 'Silla Crossback: solo tenemos 20 disponibles.');
+        $this->assertSame(0, Cart::count());
+        $this->post(route('portal.cart.add', $this->chair), ['quantity' => 15])->assertSessionHas('status');
+        $this->post(route('portal.cart.add', $this->chair), ['quantity' => 10])
+            ->assertSessionHas('error', 'Silla Crossback: solo tenemos 5 disponibles. Ya tienes 15 en tu pedido.');
+        $this->assertSame(15, Cart::count());
+
+        // Con fecha: lo libre ese fin de semana (otro pedido ya tiene 12)
+        $saturday = now()->addWeeks(2)->next('Saturday');
+        $taken = Order::create(['number' => 'PED-2026-0098', 'client_id' => $other->id, 'status' => OrderStatus::Paid,
+            'start_date' => $saturday->copy()->previous('Friday')->toDateString(), 'end_date' => $saturday->copy()->next('Sunday')->toDateString()]);
+        $taken->lines()->create(['article_id' => $this->chair->id, 'quantity' => 12, 'unit_price' => 10]);
+        $this->post(route('portal.cart.date'), ['event_date' => $saturday->toDateString()]);
+        $this->post(route('portal.cart.add', $this->chair), ['quantity' => 1])
+            ->assertSessionHas('error', 'Silla Crossback: no quedan unidades libres para la fecha de tu evento. Ya tienes 15 en tu pedido.');
+
+        // Al enviar se vuelve a comprobar todo
         $this->actingAs($client, 'client')->post(route('portal.checkout'), [
-            'event_date' => now()->addWeeks(2)->next('Saturday')->toDateString(), 'postal_code' => '29730', 'city' => 'Rincón de la Victoria',
+            'event_date' => $saturday->toDateString(), 'postal_code' => '29730', 'city' => 'Rincón de la Victoria',
         ])->assertSessionHasErrors('items');
-        $this->assertSame(1, Order::count());
+        $this->assertSame(2, Order::count());
 
         $this->actingAs($client, 'client')->get(route('portal.orders.show', $foreign->number))->assertNotFound();
     }

@@ -185,6 +185,22 @@ class OrdersTest extends TestCase
         $this->actingAs($this->user)->get(route('orders.show', $o))->assertOk()->assertSee('+2 días')->assertSee('+1 día')->assertSee('por '.$this->user->name);
     }
 
+    public function test_extending_an_overdue_prereservation_checks_stock(): void
+    {
+        $o = $this->order('2026-12-04', '2026-12-06', 6, ['expires_at' => now()->subHour()]);
+        $this->order('2026-12-04', '2026-12-06', 6); // ha cogido las unidades mientras estaba vencida
+
+        $this->actingAs($this->user)->post(route('orders.extend', $o), ['days' => 2])
+            ->assertSessionHas('error', fn ($m) => str_starts_with($m, 'No se puede ampliar: SIL-0001 Silla Tiffany: pides 6 y solo hay 4'));
+        $this->assertTrue($o->fresh()->expires_at->isPast());
+        $this->assertSame(0, $o->extensions()->count());
+
+        // Si hay sitio, se amplía
+        Order::whereKeyNot($o->id)->update(['status' => OrderStatus::Cancelled]);
+        $this->actingAs($this->user)->post(route('orders.extend', $o), ['days' => 2])->assertSessionHas('status');
+        $this->assertTrue($o->fresh()->expires_at->isFuture());
+    }
+
     public function test_transport_minimum_applies(): void
     {
         $this->assertEquals(60, Order::calculateTransport(10, 1));
