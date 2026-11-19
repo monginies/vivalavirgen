@@ -18,7 +18,7 @@ class Article extends Model
     use SoftDeletes;
 
     protected $fillable = [
-        'category_id', 'is_bundle', 'exclusive', 'reference', 'name', 'description', 'dimensions',
+        'category_id', 'is_bundle', 'exclusive', 'reference', 'name', 'description', 'dimensions', 'location',
         'rental_price', 'replacement_price', 'photo_path', 'notes', 'active',
     ];
 

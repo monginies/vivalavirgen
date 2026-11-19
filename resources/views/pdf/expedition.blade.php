@@ -95,30 +95,23 @@
 
 <table class="lines">
     <thead><tr>
-        <th style="width:44px"></th><th style="width:72px">Ref.</th><th>Artículo</th><th class="num" style="width:40px">Cant.</th>
+        <th style="width:44px"></th><th style="width:58px">Localiz.</th><th style="width:72px">Ref.</th><th>Artículo</th><th class="num" style="width:40px">Cant.</th>
         @foreach ($checks as $ch)<th class="c">{{ $ch }}</th>@endforeach
     </tr></thead>
     <tbody>
     @php($pieces = 0)
     @foreach ($rows as $r)
         @php($a = $r['article'])
-        @if ($r['bundle'])
-            <tr class="bundle">
-                <td>@if ($img = \App\Support\Expedition::thumb($a))<img class="thumb" src="{{ $img }}" alt="">@endif</td>
-                <td class="ref">{{ $a->reference }}</td>
-                <td class="name">{{ $a->name }} <span class="muted" style="font-weight:normal">(combinado: se carga por piezas)</span></td>
-                <td class="num">{{ $r['quantity'] }}</td>@foreach ($checks as $ch)<td></td>@endforeach
-            </tr>
-        @else
-            @php($pieces += $r['quantity'])
-            <tr @class(['part' => $r['part']])>
-                <td>@if ($img = \App\Support\Expedition::thumb($a))<img class="thumb" src="{{ $img }}" alt="">@else<div class="noimg"></div>@endif</td>
-                <td class="muted ref">{{ $a->reference }}</td>
-                <td class="name">@if ($r['part'])↳ @endif{{ $a->name }}@if ($a->dimensions)<br><span class="muted" style="font-size:7.5pt">{{ $a->dimensions }}</span>@endif</td>
-                <td class="num"><b>{{ $r['quantity'] }}</b></td>
-                @foreach ($checks as $ch)<td class="c"><span class="box"></span></td>@endforeach
-            </tr>
-        @endif
+        @php($pieces += $r['quantity'])
+        <tr>
+            <td>@if ($img = \App\Support\Expedition::thumb($a))<img class="thumb" src="{{ $img }}" alt="">@else<div class="noimg"></div>@endif</td>
+            <td class="ref"><b>{{ $a->location ?: '—' }}</b></td>
+            <td class="muted ref">{{ $a->reference }}</td>
+            <td class="name">{{ $a->name }}@if ($a->dimensions)<br><span class="muted" style="font-size:7.5pt">{{ $a->dimensions }}</span>@endif
+                @if ($r['from'])<br><span class="muted" style="font-size:7.5pt">Pieza de: {{ $r['from'] }}</span>@endif</td>
+            <td class="num"><b>{{ $r['quantity'] }}</b></td>
+            @foreach ($checks as $ch)<td class="c"><span class="box"></span></td>@endforeach
+        </tr>
     @endforeach
     </tbody>
 </table>

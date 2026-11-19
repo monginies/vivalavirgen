@@ -24,7 +24,8 @@ class ArticleController extends Controller
             ])
             ->when($request->q, fn ($q, $term) => $q->where(fn ($q) => $q
                 ->where('name', 'like', "%{$term}%")
-                ->orWhere('reference', 'like', "%{$term}%")))
+                ->orWhere('reference', 'like', "%{$term}%")
+                ->orWhere('location', 'like', "%{$term}%")))
             ->when($request->category, fn ($q, $id) => $q->where('category_id', $id))
             ->orderBy('reference')
             ->paginate(25)
@@ -155,6 +156,7 @@ class ArticleController extends Controller
             'name' => ['required', 'string', 'max:255'],
             'description' => ['nullable', 'string', 'max:5000'],
             'dimensions' => ['nullable', 'string', 'max:255'],
+            'location' => ['nullable', 'string', 'max:50'],
             'rental_price' => ['required', 'numeric', 'min:0', 'max:99999999'],
             'replacement_price' => ['required', 'numeric', 'min:0', 'max:99999999'],
             'notes' => ['nullable', 'string', 'max:5000'],

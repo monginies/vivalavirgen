@@ -18,6 +18,7 @@
             <dt>Precio alquiler</dt><dd>{{ number_format($article->rental_price, 2, ',', '.') }} € <span class="muted">sin IVA</span></dd>
             <dt>Reposición</dt><dd>{{ number_format($article->replacement_price, 2, ',', '.') }} € / ud.</dd>
             @if ($article->dimensions)<dt>Medidas</dt><dd>{{ $article->dimensions }}</dd>@endif
+            @unless ($article->is_bundle)<dt>Localizador</dt><dd>{{ $article->location ?: '—' }}</dd>@endunless
             @if ($article->description)<dt>Descripción</dt><dd>{!! nl2br(e($article->description)) !!}</dd>@endif
             @if ($article->notes)<dt>Notas</dt><dd>{!! nl2br(e($article->notes)) !!}</dd>@endif
             @if ($article->exclusive)

@@ -20,7 +20,10 @@
     </div>
     @include('partials.field', ['name' => 'name', 'label' => 'Nombre', 'value' => $article->name, 'required' => true])
     @include('partials.field', ['name' => 'description', 'label' => 'Descripción', 'value' => $article->description, 'type' => 'textarea'])
-    @include('partials.field', ['name' => 'dimensions', 'label' => 'Medidas', 'value' => $article->dimensions, 'hint' => 'Ej.: 45 × 50 × 80 cm'])
+    <div class="grid g2">
+        @include('partials.field', ['name' => 'dimensions', 'label' => 'Medidas', 'value' => $article->dimensions, 'hint' => 'Ej.: 45 × 50 × 80 cm'])
+        @include('partials.field', ['name' => 'location', 'label' => 'Localizador', 'value' => $article->location, 'hint' => 'Balda del almacén. Ej.: 1-A, o 1-A, 1-B si ocupa dos'])
+    </div>
     <div class="grid g2">
         @include('partials.field', ['name' => 'rental_price', 'label' => 'Precio de alquiler (€, sin IVA)', 'value' => $article->rental_price ?? 0, 'type' => 'number', 'step' => '0.01', 'min' => 0, 'required' => true])
         @include('partials.field', ['name' => 'replacement_price', 'label' => 'Coste de reposición por unidad (€)', 'value' => $article->replacement_price ?? 0, 'type' => 'number', 'step' => '0.01', 'min' => 0, 'required' => true])

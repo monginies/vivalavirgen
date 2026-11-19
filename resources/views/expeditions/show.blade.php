@@ -44,11 +44,12 @@
         <thead><tr><th></th><th>Artículo</th><th class="num">Cant.</th></tr></thead>
         <tbody>
         @foreach ($rows as $r)
-            <tr @if ($r['bundle']) style="background:var(--sage-soft)" @endif>
+            <tr>
                 <td style="width:44px">@if ($p = $r['article']->photoUrl())<img class="thumb" src="{{ $p }}" alt="">@else<div class="thumb"></div>@endif</td>
-                <td>@if ($r['part'])<span class="muted">↳</span> @endif<span class="mono muted" style="font-size:12px">{{ $r['article']->reference }}</span> {{ $r['article']->name }}
-                    @if ($r['bundle'])<span class="muted">(combinado: se carga por piezas)</span>@endif
-                    @if ($r['article']->dimensions)<br><span class="muted" style="font-size:13px">{{ $r['article']->dimensions }}</span>@endif</td>
+                <td><span class="badge grey mono" title="Localizador">{{ $r['article']->location ?: 'Sin localizador' }}</span>
+                    <span class="mono muted" style="font-size:12px">{{ $r['article']->reference }}</span> {{ $r['article']->name }}
+                    @if ($r['article']->dimensions)<br><span class="muted" style="font-size:13px">{{ $r['article']->dimensions }}</span>@endif
+                    @if ($r['from'])<br><span class="muted" style="font-size:13px">Pieza de: {{ $r['from'] }}</span>@endif</td>
                 <td class="num"><b>{{ $r['quantity'] }}</b></td>
             </tr>
         @endforeach

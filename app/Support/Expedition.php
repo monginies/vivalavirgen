@@ -16,10 +16,11 @@ class Expedition
     }
 
     /**
-     * Filas de material: cada línea del pedido y, si es un combinado, sus piezas
-     * debajo (que son lo que se carga).
+     * Filas de material, lo que se carga: las líneas sueltas y, en lugar de cada
+     * combinado, sus piezas (con `from` = de qué combinado vienen). Ordenadas por
+     * localizador para recorrer el almacén en orden; sin localizador, al final.
      *
-     * @return array<int, array{article: Article, quantity: int, bundle: bool, part: bool}>
+     * @return array<int, array{article: Article, quantity: int, part: bool, from: ?string}>
      */
     public static function rows(Order $order): array
     {
@@ -27,15 +28,32 @@ class Expedition
         $rows = [];
         foreach ($order->lines->sortBy('id') as $line) {
             $a = $line->article;
-            $rows[] = ['article' => $a, 'quantity' => $line->quantity, 'bundle' => $a->is_bundle, 'part' => false];
-            if ($a->is_bundle) {
-                foreach ($a->components as $c) {
-                    $rows[] = ['article' => $c, 'quantity' => $line->quantity * $c->pivot->quantity, 'bundle' => false, 'part' => true];
-                }
+            if (! $a->is_bundle) {
+                $rows[] = ['article' => $a, 'quantity' => $line->quantity, 'part' => false, 'from' => null];
+
+                continue;
+            }
+            foreach ($a->components as $c) {
+                $rows[] = ['article' => $c, 'quantity' => $line->quantity * $c->pivot->quantity, 'part' => true, 'from' => "{$line->quantity} × {$a->name}"];
             }
         }
 
+        // usort es estable: a igual localizador se mantiene el orden del pedido
+        usort($rows, fn ($x, $y) => self::compareLocation($x['article']->location, $y['article']->location));
+
         return $rows;
+    }
+
+    /** Orden natural por la primera balda (1-A, 1-B, 2-A… 10-A); vacíos al final. */
+    public static function compareLocation(?string $a, ?string $b): int
+    {
+        $a = trim(explode(',', (string) $a)[0]);
+        $b = trim(explode(',', (string) $b)[0]);
+        if ($a === '' || $b === '') {
+            return ($a === '') <=> ($b === '');
+        }
+
+        return strnatcasecmp($a, $b);
     }
 
     /** Miniatura en escala de grises (la hoja se imprime en blanco y negro). */

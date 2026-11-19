@@ -3,7 +3,7 @@
 @section('content')
 <div class="head"><h1>Artículos</h1><a class="btn" href="{{ route('articles.create', ['category' => request('category')]) }}">+ Nuevo artículo</a></div>
 <form class="filters" method="get">
-    <input type="search" name="q" value="{{ request('q') }}" placeholder="Buscar por nombre o referencia…">
+    <input type="search" name="q" value="{{ request('q') }}" placeholder="Buscar por nombre, referencia o localizador…">
     <select name="category" onchange="this.form.submit()">
         <option value="">Todas las categorías</option>
         @foreach ($categories as $c)
@@ -14,7 +14,7 @@
 </form>
 <div class="card table-wrap">
     <table>
-        <thead><tr><th></th><th class="hide-sm">Referencia</th><th>Nombre</th><th class="hide-sm">Categoría</th><th class="num">Precio alquiler</th><th class="num">Disponibles / total</th><th></th></tr></thead>
+        <thead><tr><th></th><th class="hide-sm">Referencia</th><th>Nombre</th><th class="hide-sm">Categoría</th><th class="hide-sm">Localizador</th><th class="num">Precio alquiler</th><th class="num">Disponibles / total</th><th></th></tr></thead>
         <tbody>
         @forelse ($articles as $a)
             <tr>
@@ -22,12 +22,13 @@
                 <td class="mono hide-sm">{{ $a->reference }}</td>
                 <td class="grow"><a href="{{ route('articles.show', $a) }}">{{ $a->name }}</a>@if ($a->exclusive) <span class="badge grey">Exclusivo</span>@endif @unless ($a->active) <span class="badge grey">Inactivo</span>@endunless</td>
                 <td class="muted hide-sm">{{ $a->category->name }}</td>
+                <td class="mono hide-sm">{{ $a->location }}</td>
                 <td class="num">{{ number_format($a->rental_price, 2, ',', '.') }} €</td>
                 <td class="num" data-label="Disp.">@if ($a->is_bundle)<span class="badge grey">Combinado</span> {{ $bundleCapacity[$a->id]['capacity'] ?? 0 }} montables @else {{ $a->available_count }} / {{ $a->units_count }} @endif</td>
                 <td class="actions" style="justify-content:flex-end"><a class="btn sec sm" href="{{ route('articles.edit', $a) }}">Editar</a></td>
             </tr>
         @empty
-            <tr><td colspan="7" class="empty">No hay artículos que coincidan.</td></tr>
+            <tr><td colspan="8" class="empty">No hay artículos que coincidan.</td></tr>
         @endforelse
         </tbody>
     </table>

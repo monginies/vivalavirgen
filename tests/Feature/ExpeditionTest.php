@@ -43,14 +43,40 @@ class ExpeditionTest extends TestCase
 
     public function test_rows_break_bundles_into_parts(): void
     {
-        $rows = collect(Expedition::rows($this->order))->map(fn ($r) => [$r['article']->name, $r['quantity'], $r['part']])->all();
+        $rows = collect(Expedition::rows($this->order))->map(fn ($r) => [$r['article']->name, $r['quantity'], $r['part'], $r['from']])->all();
 
         $this->assertSame([
-            ['Salón Jardín', 2, false],
-            ['Sofá esparto', 2, true],
-            ['Butaca esparto', 4, true],
-            ['Butaca esparto', 1, false],
+            ['Sofá esparto', 2, true, '2 × Salón Jardín'],
+            ['Butaca esparto', 4, true, '2 × Salón Jardín'],
+            ['Butaca esparto', 1, false, null],
         ], $rows);
+    }
+
+    public function test_rows_are_sorted_by_location(): void
+    {
+        $cat = Category::first();
+        $make = fn ($name, $loc) => Article::create(['category_id' => $cat->id, 'reference' => Article::nextReference($cat),
+            'name' => $name, 'location' => $loc, 'rental_price' => 1, 'replacement_price' => 0, 'active' => true]);
+        foreach ([['Sin balda', null], ['Mesa', '10-A'], ['Vela', '2-B, 3-A'], ['Plato', '2-a'], ['Copa', '9-C']] as [$name, $loc]) {
+            $this->order->lines()->create(['article_id' => $make($name, $loc)->id, 'quantity' => 1, 'unit_price' => 1]);
+        }
+        Article::where('name', 'Sofá esparto')->update(['location' => '1-A']);
+        $this->order->update(['status' => OrderStatus::Paid]);
+
+        $names = collect(Expedition::rows($this->order->fresh()))->map(fn ($r) => $r['article']->name)->all();
+        $this->assertSame(['Sofá esparto', 'Plato', 'Vela', 'Copa', 'Mesa', 'Butaca esparto', 'Butaca esparto', 'Sin balda'], $names);
+        $this->actingAs($this->user)->get(route('expeditions.show', $this->order))->assertOk()->assertSeeInOrder(['1-A', '2-a', '2-B, 3-A', '10-A', 'Sin localizador']);
+    }
+
+    public function test_location_is_saved_and_searchable(): void
+    {
+        $sofa = Article::where('name', 'Sofá esparto')->first();
+        $this->actingAs($this->user)->put(route('articles.update', $sofa), [
+            'category_id' => $sofa->category_id, 'name' => $sofa->name, 'location' => '4-C', 'rental_price' => 50, 'replacement_price' => 0, 'active' => 1,
+        ])->assertRedirect();
+        $this->assertSame('4-C', $sofa->fresh()->location);
+        $this->actingAs($this->user)->get(route('articles.index', ['q' => '4-C']))->assertSee('Sofá esparto')->assertDontSee('Butaca esparto');
+        $this->actingAs($this->user)->get(route('articles.show', $sofa))->assertSee('4-C');
     }
 
     public function test_logistics_data_is_saved_and_pdf_only_after_payment(): void
