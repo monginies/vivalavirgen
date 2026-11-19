@@ -23,7 +23,7 @@ class Client extends Authenticatable implements MustVerifyEmail
     public const PROFESSIONS = ['wedding' => 'Wedding', 'sitio' => 'Sitio', 'florista' => 'Florista', 'catering' => 'Catering'];
 
     protected $fillable = [
-        'type', 'profession', 'client_category_id', 'name', 'trade_name', 'tax_id', 'contact_name', 'email', 'phone',
+        'type', 'profession', 'client_category_id', 'discount_percent', 'name', 'trade_name', 'tax_id', 'contact_name', 'email', 'phone',
         'address', 'postal_code', 'city', 'province', 'notes',
     ];
 
@@ -36,6 +36,7 @@ class Client extends Authenticatable implements MustVerifyEmail
             'email_verified_at' => 'datetime',
             'approved_at' => 'datetime',
             'privacy_accepted_at' => 'datetime',
+            'discount_percent' => 'decimal:2',
         ];
     }
 
@@ -61,9 +62,15 @@ class Client extends Authenticatable implements MustVerifyEmail
         return $this->type === 'company' ? (self::PROFESSIONS[$this->profession] ?? null) : null;
     }
 
+    /** Descuento / comisión: el propio del cliente si lo tiene; si no, el de su tipo. */
     public function discountPercent(): float
     {
-        return (float) ($this->category?->discount_percent ?? 0);
+        return (float) ($this->discount_percent ?? $this->category?->discount_percent ?? 0);
+    }
+
+    public function hasOwnDiscount(): bool
+    {
+        return $this->discount_percent !== null;
     }
 
     public function hasPortalAccess(): bool

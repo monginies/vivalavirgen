@@ -28,14 +28,19 @@
             document.getElementById('profession-field').hidden = document.querySelector('input[name=type]:checked').value !== 'company';
         }));
     </script>
-    <div class="field" style="max-width:360px">
-        <label for="f-client_category_id">Tipo de cliente (descuento)</label>
-        <select id="f-client_category_id" name="client_category_id">
-            <option value="">Sin tipo (precio base)</option>
-            @foreach ($categories as $cat)
-                <option value="{{ $cat->id }}" @selected(old('client_category_id', $client->client_category_id) == $cat->id)>{{ $cat->name }} · {{ rtrim(rtrim(number_format($cat->discount_percent, 2, ',', ''), '0'), ',') }} %</option>
-            @endforeach
-        </select>
+    <div class="grid g2">
+        <div class="field">
+            <label for="f-client_category_id">Tipo de cliente (descuento / comisión)</label>
+            <select id="f-client_category_id" name="client_category_id">
+                <option value="">Sin tipo (precio base)</option>
+                @foreach ($categories as $cat)
+                    <option value="{{ $cat->id }}" @selected(old('client_category_id', $client->client_category_id) == $cat->id)>{{ $cat->name }} · {{ rtrim(rtrim(number_format($cat->discount_percent, 2, ',', ''), '0'), ',') }} %</option>
+                @endforeach
+            </select>
+        </div>
+        @include('partials.field', ['name' => 'discount_percent', 'label' => 'Descuento / comisión propio (%)', 'value' => $client->discount_percent !== null ? (float) $client->discount_percent : null,
+            'type' => 'number', 'step' => '0.01', 'min' => 0, 'attrs' => 'max=100',
+            'hint' => 'Vacío: se aplica el de su tipo. Si lo rellenas, manda este (también puede ser 0).'])
     </div>
     <div class="grid g2">
         @include('partials.field', ['name' => 'name', 'label' => 'Nombre / razón social', 'value' => $client->name, 'required' => true])

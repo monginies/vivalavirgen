@@ -93,6 +93,7 @@ class ClientController extends Controller
             'type' => ['required', Rule::in(array_keys(Client::TYPES))],
             'profession' => ['nullable', Rule::in(array_keys(Client::PROFESSIONS))],
             'client_category_id' => ['nullable', Rule::exists('client_categories', 'id')],
+            'discount_percent' => ['nullable', 'numeric', 'min:0', 'max:100'],
             'name' => ['required', 'string', 'max:255'],
             'trade_name' => ['nullable', 'string', 'max:255'],
             'tax_id' => ['nullable', 'string', 'max:20', Rule::unique('clients')->ignore($client)->whereNull('deleted_at')],

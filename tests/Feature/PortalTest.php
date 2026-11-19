@@ -210,6 +210,31 @@ class PortalTest extends TestCase
         $this->get(route('portal.orders.show', $order->number))->assertSee('19:30 – 23:00')->assertSee('Finca Los Olivos');
     }
 
+    public function test_own_discount_overrides_client_type(): void
+    {
+        $staff = User::factory()->create();
+        $esparto = ClientCategory::where('name', 'Esparto')->first(); // 10 %
+        $client = Client::create(['type' => 'company', 'profession' => 'wedding', 'name' => 'Bodas Bonitas SL', 'email' => 'b@example.com', 'client_category_id' => $esparto->id]);
+        $client->forceFill(['password' => 'secreta123', 'email_verified_at' => now(), 'approved_at' => now()])->save();
+        $this->assertEquals(10, $client->discountPercent());
+        $this->assertFalse($client->hasOwnDiscount());
+
+        $data = ['type' => 'company', 'profession' => 'wedding', 'name' => 'Bodas Bonitas SL', 'email' => 'b@example.com', 'client_category_id' => $esparto->id];
+        $this->actingAs($staff)->put(route('clients.update', $client), $data + ['discount_percent' => '15'])->assertSessionHasNoErrors();
+        $client->refresh();
+        $this->assertEquals(15, $client->discountPercent());
+        $this->actingAs($staff)->get(route('clients.show', $client))->assertSee('Propio 15 %');
+        $this->actingAs($staff)->get(route('orders.create', ['client' => $client->id]))->assertSee('data-discount="15"', false);
+        $this->actingAs($client, 'client')->get(route('portal.collection', 'sillas'))->assertSee('8,50 €'); // 10 € − 15 %
+
+        // 0 también es un descuento propio (anula el del tipo); vacío vuelve al del tipo
+        $this->actingAs($staff)->put(route('clients.update', $client), $data + ['discount_percent' => '0']);
+        $this->assertSame(0.0, $client->fresh()->discountPercent());
+        $this->actingAs($staff)->put(route('clients.update', $client), $data + ['discount_percent' => '']);
+        $this->assertEquals(10, $client->fresh()->discountPercent());
+        $this->actingAs($staff)->put(route('clients.update', $client), $data + ['discount_percent' => '120'])->assertSessionHasErrors('discount_percent');
+    }
+
     public function test_professional_sees_own_name_prefilled(): void
     {
         $client = Client::create(['type' => 'company', 'profession' => 'catering', 'name' => 'Catering Sol SL', 'trade_name' => 'Catering Sol', 'email' => 'sol@example.com']);

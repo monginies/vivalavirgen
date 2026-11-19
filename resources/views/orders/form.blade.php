@@ -24,7 +24,7 @@
                 <select id="f-client_id" name="client_id" required>
                     <option value="">Elige un cliente…</option>
                     @foreach ($clients as $c)
-                        <option value="{{ $c->id }}" data-discount="{{ $c->category?->discount_percent ?? 0 }}" @selected(old('client_id', $order->client_id) == $c->id)>{{ $c->name }}{{ $c->trade_name ? ' ('.$c->trade_name.')' : '' }}</option>
+                        <option value="{{ $c->id }}" data-discount="{{ $c->discountPercent() }}" @selected(old('client_id', $order->client_id) == $c->id)>{{ $c->name }}{{ $c->trade_name ? ' ('.$c->trade_name.')' : '' }}</option>
                     @endforeach
                 </select>
                 @error('client_id')<div class="err">{{ $message }}</div>@enderror
@@ -138,7 +138,7 @@
     <div class="card">
         <h2>Condiciones</h2>
         <div class="grid g2">
-            @include('partials.field', ['name' => 'discount_percent', 'label' => 'Descuento sobre el material (%)', 'value' => $order->discount_percent, 'type' => 'number', 'step' => '0.01', 'min' => 0])
+            @include('partials.field', ['name' => 'discount_percent', 'label' => 'Descuento / comisión sobre el material (%)', 'value' => $order->discount_percent, 'type' => 'number', 'step' => '0.01', 'min' => 0])
             @include('partials.field', ['name' => 'deposit_amount', 'label' => 'Fianza (€)', 'value' => $order->deposit_amount, 'type' => 'number', 'step' => '0.01', 'min' => 0])
         </div>
         @include('partials.field', ['name' => 'notes', 'label' => 'Notas', 'value' => $order->notes, 'type' => 'textarea'])
@@ -241,7 +241,7 @@
         });
     })();
 
-    // Al elegir cliente se propone el descuento de su tipo
+    // Al elegir cliente se propone su descuento (el propio o el de su tipo)
     document.getElementById('f-client_id').addEventListener('change', e => {
         const d = e.target.selectedOptions[0]?.dataset.discount;
         if (d !== undefined) { document.getElementById('f-discount_percent').value = parseFloat(d); recalc(); }

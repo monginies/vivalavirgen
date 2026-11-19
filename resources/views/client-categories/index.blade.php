@@ -1,11 +1,11 @@
 @extends('layouts.app')
 @section('title', 'Tipos de cliente')
 @section('content')
-<div class="head"><div><h1>Tipos de cliente</h1><div class="sub">Cada tipo tiene un descuento sobre el precio de alquiler. Se aplica en la web y al crear pedidos.</div></div>
+<div class="head"><div><h1>Tipos de cliente</h1><div class="sub">Cada tipo tiene un descuento / comisión sobre el precio de alquiler. Se aplica en la web y al crear pedidos, salvo a los clientes con uno propio.</div></div>
     <a class="btn" href="{{ route('client-categories.create') }}">+ Nuevo tipo</a></div>
 <div class="card table-wrap">
     <table>
-        <thead><tr><th>Tipo</th><th class="num">Descuento</th><th class="num">Clientes</th></tr></thead>
+        <thead><tr><th>Tipo</th><th class="num">Descuento / comisión</th><th class="num">Clientes</th></tr></thead>
         <tbody>
         @forelse ($categories as $c)
             <tr>

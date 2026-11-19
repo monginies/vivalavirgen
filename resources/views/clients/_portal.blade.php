@@ -15,7 +15,7 @@
             <form method="post" action="{{ route('clients.approve', $client) }}" class="actions" style="align-items:flex-end">
                 @csrf
                 <div style="flex:1;min-width:200px">
-                    <label for="f-approve-cat">Tipo de cliente (descuento)</label>
+                    <label for="f-approve-cat">Tipo de cliente (descuento / comisión)</label>
                     <select id="f-approve-cat" name="client_category_id">
                         <option value="">Sin tipo (precio base)</option>
                         @foreach (\App\Models\ClientCategory::orderBy('sort')->get() as $cat)

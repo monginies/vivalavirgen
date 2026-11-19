@@ -14,7 +14,7 @@
             @endforeach
         </div>
     </div>
-    @include('partials.field', ['name' => 'discount_percent', 'label' => 'Descuento (%)', 'value' => $category->discount_percent, 'type' => 'number', 'step' => '0.01', 'min' => 0, 'required' => true])
+    @include('partials.field', ['name' => 'discount_percent', 'label' => 'Descuento / comisión (%)', 'value' => $category->discount_percent, 'type' => 'number', 'step' => '0.01', 'min' => 0, 'required' => true])
     @include('partials.field', ['name' => 'sort', 'label' => 'Orden', 'value' => $category->sort, 'type' => 'number', 'step' => 1, 'min' => 0])
     <div class="actions"><button class="btn">Guardar</button><a class="btn sec" href="{{ route('client-categories.index') }}">Cancelar</a></div>
 </form>

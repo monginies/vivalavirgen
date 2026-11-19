@@ -299,7 +299,7 @@ class OrderController extends Controller
 
         return [
             'order' => $order,
-            'clients' => Client::with('category')->orderBy('name')->get(['id', 'name', 'trade_name', 'client_category_id']),
+            'clients' => Client::with('category')->orderBy('name')->get(['id', 'name', 'trade_name', 'client_category_id', 'discount_percent']),
             'venues' => Venue::where('active', true)->orWhere('id', $order->venue_id)->orderBy('name')->get(),
             'articles' => $articles,
             'mapsEnabled' => Distance::configured(),
