@@ -10,7 +10,7 @@
         $seoDesc = trim($__env->yieldContent('description')) ?: e('Alquiler de mobiliario y decoración mediterránea para bodas y eventos en Málaga y provincia: atriles, alfombras, bancos, salones, faroles y mucho más.');
         $heroSeo = \App\Models\Setting::get('hero_image');
         $seoImg = trim($__env->yieldContent('og_image')) ?: e($heroSeo ? asset('storage/'.$heroSeo) : asset('img/logo-320.png'));
-        $seoUrl = e(url()->current());
+        $seoUrl = e(rtrim(config('app.url'), '/').(request()->path() === '/' ? '' : '/'.request()->path()).((int) request()->query('page') > 1 ? '?page='.(int) request()->query('page') : ''));
     @endphp
     <title>{!! $seoTitle !!}</title>
     <meta name="description" content="{!! $seoDesc !!}">

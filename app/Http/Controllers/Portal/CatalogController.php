@@ -41,6 +41,10 @@ class CatalogController extends Controller
         $article = Article::where('active', true)->where('reference', $reference)
             ->with('photos', 'category')->firstOrFail();
 
+        if ($article->reference !== $reference) {
+            return redirect()->route('portal.article', $article->reference, 301);
+        }
+
         return view('portal.article', [
             'article' => $article,
             'inCart' => Cart::get()['items'][$article->id] ?? 0,
